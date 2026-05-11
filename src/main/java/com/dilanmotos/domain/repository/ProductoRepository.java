@@ -10,4 +10,8 @@ public interface ProductoRepository {
     List<Producto> obtenerTodos();
 
     Optional<Producto> buscarPorId(Integer id);
+
+    Producto actualizar(Integer id, Producto producto);
+
+    void eliminar(Integer id);
 }

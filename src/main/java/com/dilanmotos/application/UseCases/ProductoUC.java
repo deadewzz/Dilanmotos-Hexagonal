@@ -20,22 +20,36 @@ public class ProductoUC {
     }
 
     public ProductoResponseDTO crear(ProductoRequestDTO request) {
-        Producto producto = new Producto();
-        producto.setIdCategoria(request.getIdCategoria());
-        producto.setIdMarca(request.getIdMarca());
-        producto.setNombre(request.getNombre());
-        producto.setDescripcion(request.getDescripcion());
-        producto.setPrecio(request.getPrecio());
-
-        Producto guardado = productoRepository.guardar(producto);
-        return mapToDTO(guardado);
+        Producto producto = mapToModel(request);
+        return mapToDTO(productoRepository.guardar(producto));
     }
 
     public List<ProductoResponseDTO> listarTodos() {
-        return productoRepository.obtenerTodos()
-                .stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
+        return productoRepository.obtenerTodos().stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+
+    public ProductoResponseDTO actualizar(Integer id, ProductoRequestDTO request) {
+        productoRepository.buscarPorId(id)
+                .orElseThrow(() -> new ProductoNotFoundException("No existe el producto con ID: " + id));
+
+        Producto producto = mapToModel(request);
+        return mapToDTO(productoRepository.actualizar(id, producto));
+    }
+
+    public void eliminar(Integer id) {
+        productoRepository.buscarPorId(id)
+                .orElseThrow(() -> new ProductoNotFoundException("No se puede eliminar, ID no encontrado: " + id));
+        productoRepository.eliminar(id);
+    }
+
+    private Producto mapToModel(ProductoRequestDTO dto) {
+        Producto p = new Producto();
+        p.setIdCategoria(dto.getIdCategoria());
+        p.setIdMarca(dto.getIdMarca());
+        p.setNombre(dto.getNombre());
+        p.setDescripcion(dto.getDescripcion());
+        p.setPrecio(dto.getPrecio());
+        return p;
     }
 
     private ProductoResponseDTO mapToDTO(Producto p) {
