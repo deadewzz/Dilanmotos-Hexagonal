@@ -6,11 +6,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-@Repository // <--- CRITICO: Sin esto, Spring no la encuentra
+@Repository
 public class PqrsJpaAdapter implements PqrsRepository {
-
-    // Aquí inyectarías tu JpaRepository real (el de Spring Data)
-    // private final PqrsJpaRepository jpaRepository;
 
     @Override
     public PQRS guardar(PQRS pqrs) {
@@ -30,6 +27,5 @@ public class PqrsJpaAdapter implements PqrsRepository {
 
     @Override
     public void eliminarPorId(int id) {
-        // lógica para eliminar
     }
 }
