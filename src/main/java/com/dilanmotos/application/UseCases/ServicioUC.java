@@ -67,6 +67,7 @@ public class ServicioUC {
     private ServicioResponseDTO mapToDTO(Servicio s) {
         ServicioResponseDTO dto = new ServicioResponseDTO();
         dto.setIdServicio(s.getIdServicio());
+        dto.setIdUsuario(s.getIdUsuario());
         dto.setIdMecanico(s.getIdMecanico());
         dto.setIdTipoDeServicio(s.getIdTipoDeServicio());
         dto.setFechaServicio(s.getFechaServicio());
