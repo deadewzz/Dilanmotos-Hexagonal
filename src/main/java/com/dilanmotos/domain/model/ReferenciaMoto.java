@@ -9,4 +9,6 @@ import lombok.*;
 public class ReferenciaMoto {
     private Integer idReferencia;
     private String nombre;
+    private Integer idMarca;
 }
+

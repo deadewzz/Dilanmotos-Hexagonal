@@ -2,7 +2,6 @@ package com.dilanmotos.application.UseCases;
 
 import com.dilanmotos.domain.model.ReferenciaMoto;
 import com.dilanmotos.domain.repository.ReferenciaMotoRepository;
-import com.dilanmotos.domain.exception.PqrsNotFoundException; 
 import com.dilanmotos.infrastructure.dto.ReferenciaMotoRequestDTO;
 import com.dilanmotos.infrastructure.dto.ReferenciaMotoResponseDTO;
 import org.springframework.stereotype.Service;
