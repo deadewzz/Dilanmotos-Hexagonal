@@ -49,6 +49,7 @@ public class MecanicoRepositoryImpl implements MecanicoRepository {
         return jpa.findById(id).map(entity -> {
             entity.setNombre(mecanico.getNombre());
             entity.setEspecialidad(mecanico.getEspecialidad());
+            entity.setTelefono(mecanico.getTelefono());
             return toModel(jpa.save(entity));
         }).orElseThrow(() -> new RuntimeException("Error al actualizar: Mecanico no encontrado"));
     }
@@ -64,6 +65,7 @@ public class MecanicoRepositoryImpl implements MecanicoRepository {
         m.setIdMecanico(e.getIdMecanico());
         m.setNombre(e.getNombre());
         m.setEspecialidad(e.getEspecialidad());
+        m.setTelefono(e.getTelefono());
         return m;
     }
 
@@ -74,6 +76,7 @@ public class MecanicoRepositoryImpl implements MecanicoRepository {
         }
         e.setNombre(m.getNombre());
         e.setEspecialidad(m.getEspecialidad());
+        e.setTelefono(m.getTelefono());
         return e;
     }
 }
