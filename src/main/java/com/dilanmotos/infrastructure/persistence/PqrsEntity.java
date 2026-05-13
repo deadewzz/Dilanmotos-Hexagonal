@@ -3,7 +3,6 @@ package com.dilanmotos.infrastructure.persistence;
 import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
 
