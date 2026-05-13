@@ -9,10 +9,10 @@ public class ServicioResponseDTO {
     private Integer idServicio;
     private Integer idUsuario;
     private Integer idMecanico;
-    private Integer idTipoDeServicio;
-    private Date FechaServicio;
-    private String EstadoServicio;
-    private String Comentario;
-    private Integer Puntuacion;
-    private Boolean VisibleEnHistorial; 
+    private Integer idTipoServicio;
+    private Date fechaServicio;
+    private String estadoServicio;
+    private String comentario;
+    private Integer puntuacion;
+    private Boolean visibleEnHistorial; 
 }

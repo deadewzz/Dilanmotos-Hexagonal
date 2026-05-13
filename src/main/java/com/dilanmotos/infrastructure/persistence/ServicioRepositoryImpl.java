@@ -41,7 +41,7 @@ public class ServicioRepositoryImpl implements ServicioRepository {
         return jpa.findById(id).map(entity -> {
             entity.setIdUsuario(servicio.getIdUsuario());
             entity.setIdMecanico(servicio.getIdMecanico());
-            entity.setIdTipoDeServicio(servicio.getIdTipoDeServicio());
+            entity.setIdTipoServicio(servicio.getIdTipoServicio());
             entity.setFechaServicio(servicio.getFechaServicio());
             entity.setEstadoServicio(servicio.getEstadoServicio());
             entity.setComentario(servicio.getComentario());
@@ -61,7 +61,7 @@ public class ServicioRepositoryImpl implements ServicioRepository {
         Servicio s = new Servicio();
         s.setIdUsuario(e.getIdUsuario());
         s.setIdMecanico(e.getIdMecanico());
-        s.setIdTipoDeServicio(e.getIdTipoDeServicio());
+        s.setIdTipoServicio(e.getIdTipoServicio());
         s.setFechaServicio(e.getFechaServicio());
         s.setEstadoServicio(e.getEstadoServicio());
         s.setComentario(e.getComentario());
@@ -76,7 +76,7 @@ public class ServicioRepositoryImpl implements ServicioRepository {
             e.setIdServicio(s.getIdServicio());
         e.setIdUsuario(s.getIdUsuario());
         e.setIdMecanico(s.getIdMecanico());
-        e.setIdTipoDeServicio(s.getIdTipoDeServicio());
+        e.setIdTipoServicio(s.getIdTipoServicio());
         e.setFechaServicio(s.getFechaServicio());
         e.setEstadoServicio(s.getEstadoServicio());
         e.setComentario(s.getComentario());

@@ -55,7 +55,7 @@ public class ServicioUC {
         Servicio s = new Servicio();
         s.setIdUsuario(dto.getIdUsuario());
         s.setIdMecanico(dto.getIdMecanico());
-        s.setIdTipoDeServicio(dto.getIdTipoDeServicio());
+        s.setIdTipoServicio(dto.getIdTipoServicio());
         s.setFechaServicio(dto.getFechaServicio());
         s.setEstadoServicio(dto.getEstadoServicio());
         s.setComentario(dto.getComentario());
@@ -69,7 +69,7 @@ public class ServicioUC {
         dto.setIdServicio(s.getIdServicio());
         dto.setIdUsuario(s.getIdUsuario());
         dto.setIdMecanico(s.getIdMecanico());
-        dto.setIdTipoDeServicio(s.getIdTipoDeServicio());
+        dto.setIdTipoServicio(s.getIdTipoServicio());
         dto.setFechaServicio(s.getFechaServicio());
         dto.setEstadoServicio(s.getEstadoServicio());
         dto.setComentario(s.getComentario());

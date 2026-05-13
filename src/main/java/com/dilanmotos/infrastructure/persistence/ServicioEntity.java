@@ -22,20 +22,20 @@ public class ServicioEntity {
     private Integer idMecanico;
 
     @Column(name = "id_tipo_servicio")
-    private Integer IdTipoDeServicio;
+    private Integer idTipoServicio;
 
     @Column(name = "fecha_servicio")
-    private Date FechaServicio;
+    private Date fechaServicio;
 
     @Column(name = "estado_servicio")
-    private String EstadoServicio;
+    private String estadoServicio;
     
     @Column(name = "comentario")
-    private String Comentario;
+    private String comentario;
 
     @Column(name = "puntuacion")
-    private Integer Puntuacion;
+    private Integer puntuacion;
 
-    @Column(name = "visible_en_hiatorial")
-    private Boolean VisibleEnHistorial;
+    @Column(name = "visible_en_historial")
+    private Boolean visibleEnHistorial;
 }
