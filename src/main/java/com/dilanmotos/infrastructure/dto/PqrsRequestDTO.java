@@ -19,5 +19,5 @@ public class PqrsRequestDTO {
 
     @NotBlank(message = "La descripción es obligatoria")
     private String descripcion;
-
+    
 }

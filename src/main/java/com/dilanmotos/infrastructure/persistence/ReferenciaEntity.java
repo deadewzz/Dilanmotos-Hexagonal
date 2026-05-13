@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "referencia_moto")
+@Table(name = "referencia_motos")
 @Getter @Setter              
 @NoArgsConstructor
 @AllArgsConstructor
@@ -16,7 +16,7 @@ public class ReferenciaEntity {
     @Column(name = "id_referencia")
     private Integer idReferencia;
 
-    @Column(name = "nombre_referencia") 
+    @Column(name = "nombre") 
         private String nombre;
 
     @ManyToOne(fetch = FetchType.LAZY)
