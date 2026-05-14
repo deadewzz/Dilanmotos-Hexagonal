@@ -49,11 +49,20 @@ public class UsuarioRepositoryAdapter implements UsuarioRepository {
     }
 
     // ESTE ES EL MÉTODO QUE NECESITA SECURITY
-    @Override
-    public Optional<Usuario> buscarPorCorreo(String correo) {
-        return jpaRepository.findByCorreo(correo)
-                .map(this::mapToDomain);
-    }
+   @Override
+public Optional<Usuario> buscarPorCorreo(String correo) {
+    // findByCorreo ahora existe en jpaRepository
+    return jpaRepository.findByCorreo(correo)
+            .map(entity -> {
+                Usuario user = new Usuario();
+                user.setIdUsuario(entity.getIdUsuario());
+                user.setNombre(entity.getNombre());
+                user.setCorreo(entity.getCorreo());
+                user.setContrasena(entity.getContrasena());
+                user.setRol(entity.getRol());
+                return user;
+            });
+}
 
     @Override
     public void eliminarPorId(int id) {

@@ -2,6 +2,7 @@ package com.dilanmotos.application.UseCases;
 
 import com.dilanmotos.domain.model.Usuario;
 import com.dilanmotos.domain.repository.UsuarioRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -9,15 +10,22 @@ import java.util.List;
 public class UsuarioUC implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    // Constructor limpio sin PasswordEncoder
-    public UsuarioUC(UsuarioRepository usuarioRepository) {
+    public UsuarioUC(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public Usuario registrar(Usuario usuario) {
-        // Guardamos directamente sin encriptar por ahora
+        // Encriptamos la contraseña antes de mandarla al adaptador de persistencia
+        usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
+        
+        if (usuario.getRol() == null || usuario.getRol().isEmpty()) {
+            usuario.setRol("USER");
+        }
+        
         return usuarioRepository.guardar(usuario);
     }
 
@@ -36,4 +44,9 @@ public class UsuarioUC implements UsuarioService {
     public void eliminar(int id) {
         usuarioRepository.eliminarPorId(id);
     }
+    
+    public Usuario obtenerPorCorreo(String correo) {
+    return usuarioRepository.buscarPorCorreo(correo)
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+}
 }
