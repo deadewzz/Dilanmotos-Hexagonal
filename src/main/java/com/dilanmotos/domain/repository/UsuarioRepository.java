@@ -14,5 +14,6 @@ public interface UsuarioRepository {
     void eliminarPorId(int id);
 
     Optional<Usuario> buscarPorCorreo(String correo); 
+    
 
 }

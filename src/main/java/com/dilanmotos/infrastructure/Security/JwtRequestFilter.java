@@ -25,17 +25,26 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        // 1. CAPTURAR EL HEADER PARA DEBUG
+        // 1. CAPTURAR DATOS PARA DEBUG
         final String authorizationHeader = request.getHeader("Authorization");
+        final String path = request.getRequestURI();
+        final String method = request.getMethod();
         
         System.out.println("DEBUG: -----------------------------------------");
-        System.out.println("DEBUG: Ruta solicitada: " + request.getRequestURI());
-        System.out.println("DEBUG: Header Authorization recibido: " + authorizationHeader);
+        System.out.println("DEBUG: Ruta solicitada: " + path + " [" + method + "]");
+
+        // 2. EXCEPCIÓN PARA REGISTRO Y LOGIN (Permitir sin validar token)
+        // Se permite el registro (POST /api/usuarios) y el login
+        if (("/api/usuarios".equals(path) && "POST".equalsIgnoreCase(method)) || "/api/usuarios/login".equals(path)) {
+            System.out.println("DEBUG: Ruta pública detectada, saltando validación de token.");
+            chain.doFilter(request, response);
+            return;
+        }
 
         String username = null;
         String jwt = null;
 
-        // 2. VALIDAR FORMATO
+        // 3. VALIDAR FORMATO DEL HEADER
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             jwt = authorizationHeader.substring(7);
             try {
@@ -44,10 +53,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 System.out.println("DEBUG: Error al extraer usuario del token: " + e.getMessage());
             }
         } else {
-            System.out.println("DEBUG: El header no contiene un token válido (Bearer)");
+            System.out.println("DEBUG: Header Authorization ausente o inválido para ruta protegida.");
         }
 
-        // 3. ESTABLECER AUTENTICACIÓN
+        // 4. ESTABLECER AUTENTICACIÓN SI EL TOKEN ES VÁLIDO
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             if (jwtUtil.validateToken(jwt, username)) {
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
@@ -61,7 +70,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             }
         }
 
-        // 4. PASAR AL SIGUIENTE FILTRO
+        // 5. PASAR AL SIGUIENTE FILTRO
         chain.doFilter(request, response);
     }
 }
