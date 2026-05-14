@@ -25,6 +25,8 @@ import TipoServicio from './components/tipoServicio';
 import PqrsManager from './components/pqrs';
 import Historial from './components/Historial';
 import Mecanico from './components/mecanico';
+import Cotizacion from './components/cotizacion';
+import Categoria from './components/categoria';
 
 import './global.css';
 
@@ -113,6 +115,14 @@ const AdminLayout = ({ children }) => {
                     <Link to="/pqrs" className={`nav-link ${activeClass('/pqrs')}`} onClick={handleNavClick}>
                         <i className="fa-solid fa-comments me-2"></i> PQRS
                     </Link>
+
+                    <Link to="/cotizacion" className={`nav-link ${activeClass('/cotizacion')}`} onClick={handleNavClick}>
+                        <i className="fa-solid fa-comments me-2"></i> Cotización
+                    </Link>
+
+                    <Link to="/categoria" className={`nav-link ${activeClass('/categoria')}`} onClick={handleNavClick}>
+                        <i className="fa-solid fa-tags me-2"></i> Categorías
+                    </Link>
                 </nav>
                 <div className="sidebar-footer">
                     <button onClick={handleLogout} className="btn-bs btn-danger w-100">
@@ -180,6 +190,14 @@ function App() {
                 } />
                 <Route path="/mecanico" element={
                     <PrivateRoute requireAdmin><AdminLayout><Mecanico /></AdminLayout></PrivateRoute>
+                } />
+
+                <Route path="/cotizacion" element={
+                    <PrivateRoute requireAdmin><AdminLayout><Cotizacion /></AdminLayout></PrivateRoute>
+                } />
+
+                <Route path="/categoria" element={
+                    <PrivateRoute requireAdmin><AdminLayout><Categoria /></AdminLayout></PrivateRoute>
                 } />
 
                 {/* REDIRECCIÓN POR DEFECTO */}
