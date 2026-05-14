@@ -3,11 +3,15 @@ package com.dilanmotos.infrastructure.controller;
 import com.dilanmotos.domain.model.Usuario;
 import com.dilanmotos.application.UseCases.UsuarioService;
 import com.dilanmotos.infrastructure.Security.JwtUtil;
+
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,5 +54,10 @@ public Map<String, Object> login(@RequestBody Map<String, String> request) {
     response.put("correo", usuario.getCorreo());
     
     return response;
+}
+
+@Bean
+public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    return config.getAuthenticationManager();
 }
 }

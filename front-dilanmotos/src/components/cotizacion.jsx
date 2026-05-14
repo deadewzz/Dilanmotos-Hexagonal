@@ -7,18 +7,8 @@ const API_URL = 'http://localhost:8080/cotizacion';
 const Cotizacion = () => {
 
     const navigate = useNavigate();
-
-    const [cotizacion, setCotizacion] = useState({
-        idUsuario: '',
-        producto: '',
-        cantidad: '',
-        precioUnitario: '',
-        fecha: '',
-        productoAgregado: true
-    });
-
+    const [cotizacion, setCotizacion] = useState({ idUsuario: '', producto: '',cantidad: '',precioUnitario: '',fecha: '',productoAgregado: true});
     const [cotizaciones, setCotizaciones] = useState([]);
-
     const [mensaje, setMensaje] = useState('');
 
     useEffect(() => {

@@ -7,15 +7,9 @@ const API_URL = 'http://localhost:8080/categoria';
 const Categoria = () => {
 
     const [categorias, setCategorias] = useState([]);
-
-    const [nueva, setNueva] = useState({
-        nombre: ''
-    });
-
+    const [nueva, setNueva] = useState({  nombre: ''});
     const [editMode, setEditMode] = useState(false);
-
     const [mensaje, setMensaje] = useState('');
-
     useEffect(() => {
         cargarCategorias();
     }, []);
