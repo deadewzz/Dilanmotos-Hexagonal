@@ -2,6 +2,7 @@ package com.dilanmotos.infrastructure.persistence;
 
 import com.dilanmotos.domain.model.Usuario;
 import com.dilanmotos.domain.repository.UsuarioRepository;
+import com.dilanmotos.infrastructure.persistence.UsuarioEntity; // Asegúrate de que el import sea correcto
 import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Optional;
@@ -18,30 +19,55 @@ public class UsuarioRepositoryAdapter implements UsuarioRepository {
 
     @Override
     public Usuario guardar(Usuario usuario) {
-        UsuarioEntity entity = new UsuarioEntity();
+        // 1. Buscamos si ya existe por correo para mantener el ID en caso de actualización
+        UsuarioEntity entity = jpaRepository.findByCorreo(usuario.getCorreo())
+                .orElse(new UsuarioEntity());
+
+        // 2. Mapeamos los datos del dominio a la entidad
         entity.setNombre(usuario.getNombre());
         entity.setCorreo(usuario.getCorreo());
         entity.setContrasena(usuario.getContrasena());
+        entity.setRol(usuario.getRol());
 
         UsuarioEntity saved = jpaRepository.save(entity);
-        return new Usuario(saved.getIdUsuario(), saved.getNombre(), saved.getCorreo(), saved.getContrasena());
+        
+        // 3. Devolvemos el modelo de dominio
+        return mapToDomain(saved);
     }
 
     @Override
     public List<Usuario> obtenerTodos() {
         return jpaRepository.findAll().stream()
-                .map(e -> new Usuario(e.getIdUsuario(), e.getNombre(), e.getCorreo(), e.getContrasena()))
+                .map(this::mapToDomain)
                 .collect(Collectors.toList());
     }
 
     @Override
     public Optional<Usuario> buscarPorId(int id) {
         return jpaRepository.findById(id)
-                .map(e -> new Usuario(e.getIdUsuario(), e.getNombre(), e.getCorreo(), e.getContrasena()));
+                .map(this::mapToDomain);
+    }
+
+    // ESTE ES EL MÉTODO QUE NECESITA SECURITY
+    @Override
+    public Optional<Usuario> buscarPorCorreo(String correo) {
+        return jpaRepository.findByCorreo(correo)
+                .map(this::mapToDomain);
     }
 
     @Override
     public void eliminarPorId(int id) {
         jpaRepository.deleteById(id);
+    }
+
+    // Método privado para no repetir código de mapeo
+    private Usuario mapToDomain(UsuarioEntity entity) {
+        return new Usuario(
+            entity.getIdUsuario(), 
+            entity.getNombre(), 
+            entity.getCorreo(), 
+            entity.getContrasena(), 
+            entity.getRol()
+        );
     }
 }

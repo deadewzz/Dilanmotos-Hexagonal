@@ -16,5 +16,6 @@ public class UsuarioEntity {
     private String nombre;
     private String correo;
     private String contrasena;
+    private String rol; // Agregado para manejar roles de usuario (e.g., "USER", "ADMIN")
 
 }
