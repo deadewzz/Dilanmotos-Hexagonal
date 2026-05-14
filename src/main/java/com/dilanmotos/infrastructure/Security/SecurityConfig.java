@@ -3,6 +3,7 @@ package com.dilanmotos.infrastructure.Security;
 // Imports de Spring Security (Ahora funcionarán por el pom.xml)
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod; // IMPORT AGREGADO PARA CONTROLAR MÉTODOS HTTP
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -34,6 +35,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        // REGLA AGREGADA: Permite explícitamente peticiones de tipo OPTIONS (Preflight) a cualquier endpoint
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() 
                         .requestMatchers(
                                 "/api/usuarios/login",
                                 "/api/marcas",
