@@ -1,0 +1,280 @@
+/* Contenedor principal */
+.chat-container {
+    max-width: 600px;
+    margin: 20px auto;
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Cabecera */
+.chat-header {
+    background: linear-gradient(135deg, #9b20ec, #9b20ec);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-shrink: 0;
+}
+
+.avatar {
+    width: 45px;
+    height: 45px;
+    background-color: white;
+    color: #9b20ec;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+
+.header-info h2 { margin: 0; font-size: 1.1rem; }
+.header-info p { margin: 0; font-size: 0.8rem; opacity: 0.9; }
+
+/* Selector de Moto */
+.vehicle-selector {
+    background-color: #f8f9fa;
+    padding: 10px 20px;
+    border-bottom: 1px solid #eee;
+    font-size: 0.9rem;
+    color: #555;
+    flex-shrink: 0;
+}
+
+/* Área de Mensajes */
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background-color: #fdfdfd;
+}
+
+.message-row {
+    display: flex;
+    width: 100%;
+}
+
+.message-row.user { justify-content: flex-end; }
+.message-row.ia { justify-content: flex-start; }
+
+.bubble {
+    max-width: 85%;
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.bubble.user {
+    background-color: #9b20ec;
+    color: white;
+    border-radius: 18px 18px 2px 18px;
+}
+
+.bubble.ia {
+    background-color: #f1f0f0;
+    color: #333;
+    border-radius: 18px 18px 18px 2px;
+    border: 1px solid #e0e0e0;
+}
+
+/* --- ESTILOS PARA EL CONTENIDO DE LA IA (Markdown) --- */
+
+.bubble.ia p { margin-bottom: 10px; }
+
+/* Listas convertidas en Tarjetas */
+.bubble.ia ul {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0;
+}
+
+.bubble.ia li {
+    background: rgba(255, 255, 255, 0.7);
+    border-left: 4px solid #9b20ec;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.bubble.ia li strong {
+    color: #9b20ec;
+    display: block;
+    margin-bottom: 2px;
+}
+
+/* Tablas de Markdown */
+.bubble.ia table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+    font-size: 0.85rem;
+}
+
+.bubble.ia th, .bubble.ia td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.bubble.ia th { background-color: #eee; }
+
+/* Input Area */
+.chat-input-area {
+    padding: 15px;
+    background: white;
+    border-top: 1px solid #eee;
+    flex-shrink: 0;
+}
+
+.chat-input-area form {
+    display: flex;
+    gap: 10px;
+}
+
+.chat-input-area input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 25px;
+    outline: none;
+    font-size: 0.95rem;
+}
+
+.chat-input-area button {
+    background-color: #9b20ec;
+    color: white;
+    border: none;
+    padding: 0 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+    flex-shrink: 0;
+}
+
+.chat-input-area button:disabled { background-color: #ccc; }
+
+/* ============================================= */
+/* --- RESPONSIVE: TABLET (max-width: 768px) --- */
+/* ============================================= */
+@media (max-width: 768px) {
+    .chat-container {
+        max-width: 100%;
+        margin: 0;
+        height: 100vh;
+        border-radius: 0;
+        box-shadow: none;
+    }
+
+    .chat-header {
+        padding: 12px 15px;
+        gap: 10px;
+    }
+
+    .avatar {
+        width: 38px;
+        height: 38px;
+        font-size: 1rem;
+    }
+
+    .header-info h2 {
+        font-size: 1rem;
+    }
+
+    .chat-messages {
+        padding: 15px;
+        gap: 12px;
+    }
+
+    .bubble {
+        max-width: 90%;
+        padding: 10px 14px;
+        font-size: 0.9rem;
+    }
+
+    .chat-input-area {
+        padding: 10px;
+    }
+
+    .chat-input-area input {
+        padding: 10px 14px;
+        font-size: 0.9rem;
+    }
+
+    .chat-input-area button {
+        padding: 0 16px;
+        font-size: 0.9rem;
+    }
+
+    /* Tablas responsivas dentro del chat */
+    .bubble.ia table {
+        font-size: 0.75rem;
+    }
+
+    .bubble.ia th, .bubble.ia td {
+        padding: 5px;
+    }
+}
+
+/* ============================================= */
+/* --- RESPONSIVE: SMALL (max-width: 480px) --- */
+/* ============================================= */
+@media (max-width: 480px) {
+    .chat-header {
+        padding: 10px 12px;
+    }
+
+    .header-info h2 {
+        font-size: 0.9rem;
+    }
+
+    .header-info p {
+        font-size: 0.7rem;
+    }
+
+    .vehicle-selector {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+
+    .chat-messages {
+        padding: 10px;
+    }
+
+    .bubble {
+        max-width: 92%;
+        font-size: 0.85rem;
+    }
+
+    .bubble.ia li {
+        padding: 8px;
+        font-size: 0.8rem;
+    }
+
+    .chat-input-area form {
+        gap: 8px;
+    }
+
+    .chat-input-area input {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+    }
+
+    .chat-input-area button {
+        padding: 0 14px;
+        font-size: 0.85rem;
+    }
+}

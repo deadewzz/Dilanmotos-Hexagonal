@@ -1,0 +1,271 @@
+.perfil-wrapper {
+    min-height: 100vh;
+    background-color: #f7f9fc;
+    font-family: 'Inter', sans-serif;
+    position: relative;
+}
+
+.perfil-header-bg {
+    height: 200px;
+    background: linear-gradient(135deg, #4e54c8 0%, #6772e5 100%);
+    padding: 20px;
+}
+
+.btn-volver {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn-volver:hover { background: rgba(255, 255, 255, 0.3); }
+
+.perfil-content {
+    max-width: 850px;
+    margin: -80px auto 0;
+    padding: 0 20px 50px;
+}
+
+/* Tarjeta Principal */
+.perfil-card.main-info {
+    background: white;
+    border-radius: 24px;
+    padding: 30px;
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+}
+
+.avatar-section {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.avatar-img {
+    width: 120px;
+    height: 120px;
+    border-radius: 20px;
+    object-fit: cover;
+    border: 4px solid #fff;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.badge-rol {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #4e54c8;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.7rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.info-section h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    color: #1a1f36;
+}
+
+.email-text {
+    color: #697386;
+    margin-top: 5px;
+    word-break: break-all;
+}
+
+/* Sección Motos */
+.motos-section { margin-top: 40px; }
+
+.section-title {
+    font-size: 1.2rem;
+    color: #4f566b;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.motos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.moto-card-premium {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    border-left: 6px solid #4e54c8;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    transition: 0.3s;
+}
+
+.moto-card-premium:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
+
+.moto-card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.marca-tag {
+    font-weight: 800;
+    color: #4e54c8;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+.cilindraje-tag {
+    background: #f0f2f5;
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.modelo-text {
+    margin: 10px 0;
+    font-size: 1.4rem;
+    color: #1a1f36;
+}
+
+.estado-ok {
+    color: #24b47e;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* Botones */
+.perfil-footer { margin-top: 50px; text-align: center; }
+
+.btn-logout {
+    background: #fff;
+    border: 2px solid #ff4d4f;
+    color: #ff4d4f;
+    padding: 10px 25px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-logout:hover { background: #ff4d4f; color: white; }
+
+/* Loader */
+.perfil-loader {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #4e54c8;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* ============================================= */
+/* --- RESPONSIVE: TABLET (max-width: 768px) --- */
+/* ============================================= */
+@media (max-width: 768px) {
+    .perfil-header-bg {
+        height: 160px;
+        padding: 15px;
+    }
+
+    .perfil-content {
+        margin-top: -60px;
+        padding: 0 15px 40px;
+    }
+
+    .perfil-card.main-info {
+        flex-direction: column;
+        text-align: center;
+        padding: 25px 20px;
+        gap: 20px;
+        border-radius: 18px;
+    }
+
+    .info-section h1 {
+        font-size: 1.5rem;
+    }
+
+    .avatar-img {
+        width: 100px;
+        height: 100px;
+    }
+
+    .motos-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .moto-card-premium {
+        padding: 20px;
+        border-radius: 15px;
+    }
+
+    .modelo-text {
+        font-size: 1.2rem;
+    }
+
+    .motos-section {
+        margin-top: 30px;
+    }
+}
+
+/* ============================================= */
+/* --- RESPONSIVE: SMALL (max-width: 480px) --- */
+/* ============================================= */
+@media (max-width: 480px) {
+    .perfil-header-bg {
+        height: 140px;
+        padding: 12px;
+    }
+
+    .perfil-content {
+        margin-top: -50px;
+        padding: 0 10px 30px;
+    }
+
+    .perfil-card.main-info {
+        padding: 20px 15px;
+        border-radius: 14px;
+    }
+
+    .info-section h1 {
+        font-size: 1.3rem;
+    }
+
+    .avatar-img {
+        width: 85px;
+        height: 85px;
+        border-radius: 16px;
+    }
+
+    .moto-card-premium {
+        padding: 16px;
+    }
+
+    .section-title {
+        font-size: 1rem;
+    }
+
+    .perfil-footer {
+        margin-top: 30px;
+    }
+}

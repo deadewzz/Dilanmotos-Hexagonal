@@ -1,7 +1,6 @@
 package com.dilanmotos.infrastructure.persistence;
 
 import com.dilanmotos.domain.model.ChatResponse;
-import com.dilanmotos.application.UseCases.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
