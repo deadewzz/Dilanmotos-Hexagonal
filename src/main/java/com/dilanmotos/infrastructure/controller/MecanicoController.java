@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/mecanicos")
+@CrossOrigin(origins = "*")
 public class MecanicoController {
 
     private final MecanicoUC uc;

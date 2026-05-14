@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/historiales")
+@CrossOrigin(origins = "*")
 public class HistorialController {
 
     private final HistorialUC uc;

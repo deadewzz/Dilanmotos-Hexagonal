@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/cotizaciones")
+@CrossOrigin(origins = "*")
 public class CotizacionController {
     
     private final CotizacionUC uc;

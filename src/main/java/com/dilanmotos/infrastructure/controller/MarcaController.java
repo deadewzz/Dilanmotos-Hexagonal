@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/marcas")
+@CrossOrigin(origins = "*")
 public class MarcaController {
     
     private final MarcaUC uc;

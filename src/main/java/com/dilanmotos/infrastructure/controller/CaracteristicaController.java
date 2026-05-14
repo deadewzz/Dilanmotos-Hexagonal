@@ -10,6 +10,8 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/caracteristicas")
+@CrossOrigin(origins = "*")
+
 public class CaracteristicaController {
 
     private final CaracteristicaUC uc;

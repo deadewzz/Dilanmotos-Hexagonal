@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/referencias")
+@CrossOrigin(origins = "*")
 public class ReferenciaMotoController {
     
     public final ReferenciaMotoUC referenciaMotoUC;
