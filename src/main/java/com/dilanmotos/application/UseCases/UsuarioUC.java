@@ -26,15 +26,15 @@ public class UsuarioUC implements UsuarioService {
         return usuarioRepository.guardar(usuario);
     }
 
-    @Override // Añade esto para que el IDE te confirme si el nombre es correcto
-    public Usuario buscarPorCorreo(String correo) { // Asegúrate que el nombre coincida con la interfaz
-    return usuarioRepository.buscarPorCorreo(correo)
-        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    @Override // se añade esto para que el IDE te confirme si el nombre es correcto
+    public Usuario buscarPorCorreo(String correo) {
+        return usuarioRepository.buscarPorCorreo(correo)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
 
     @Override
-    public List<Usuario> listar() { 
-        return usuarioRepository.obtenerTodos(); 
+    public List<Usuario> listar() {
+        return usuarioRepository.obtenerTodos();
     }
 
     @Override
@@ -44,7 +44,28 @@ public class UsuarioUC implements UsuarioService {
     }
 
     @Override
-    public void eliminar(int id) { 
-        usuarioRepository.eliminarPorId(id); 
+    public void eliminar(int id) {
+        usuarioRepository.eliminarPorId(id);
+    }
+
+    @Override
+    public Usuario actualizar(int id, Usuario datosNuevos) {
+        // 1. Buscamos el usuario REAL que ya existe en la BD
+        Usuario usuarioExistente = usuarioRepository.buscarPorId(id)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+
+        // 2. IMPORTANTE: Solo modificamos los campos permitidos
+        // sobre el objeto que ya tiene el ID correcto de la BD
+        usuarioExistente.setNombre(datosNuevos.getNombre());
+        usuarioExistente.setCorreo(datosNuevos.getCorreo());
+
+        // 3. Manejo de contraseña
+        if (datosNuevos.getContrasena() != null && !datosNuevos.getContrasena().isEmpty()) {
+            usuarioExistente.setContrasena(passwordEncoder.encode(datosNuevos.getContrasena()));
+        }
+
+        // 4. Al guardar 'usuarioExistente', JPA reconoce que el ID ya existe y hace un
+        // UPDATE
+        return usuarioRepository.guardar(usuarioExistente);
     }
 }

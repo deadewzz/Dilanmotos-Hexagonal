@@ -35,6 +35,12 @@ public class UsuarioController {
 
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Usuario> actualizar(@PathVariable int id, @RequestBody Usuario usuario) {
+        // Esto asegura que el ID de la URL sea el que mande
+        return ResponseEntity.ok(usuarioService.actualizar(id, usuario));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable int id) {
         usuarioService.eliminar(id);
