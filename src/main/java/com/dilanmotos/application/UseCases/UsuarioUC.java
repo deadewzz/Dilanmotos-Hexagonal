@@ -19,34 +19,32 @@ public class UsuarioUC implements UsuarioService {
 
     @Override
     public Usuario registrar(Usuario usuario) {
-        // Encriptamos la contraseña antes de mandarla al adaptador de persistencia
         usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
-        
         if (usuario.getRol() == null || usuario.getRol().isEmpty()) {
             usuario.setRol("USER");
         }
-        
         return usuarioRepository.guardar(usuario);
     }
 
     @Override
-    public List<Usuario> listar() {
-        return usuarioRepository.obtenerTodos();
+    public Usuario findByCorreo(String correo) { // Nombre corregido según la interfaz
+        return usuarioRepository.buscarPorCorreo(correo)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    }
+
+    @Override
+    public List<Usuario> listar() { 
+        return usuarioRepository.obtenerTodos(); 
     }
 
     @Override
     public Usuario obtenerPorId(int id) {
         return usuarioRepository.buscarPorId(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
+                .orElseThrow(() -> new RuntimeException("ID no encontrado"));
     }
 
     @Override
-    public void eliminar(int id) {
-        usuarioRepository.eliminarPorId(id);
+    public void eliminar(int id) { 
+        usuarioRepository.eliminarPorId(id); 
     }
-    
-    public Usuario obtenerPorCorreo(String correo) {
-    return usuarioRepository.buscarPorCorreo(correo)
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-}
 }
