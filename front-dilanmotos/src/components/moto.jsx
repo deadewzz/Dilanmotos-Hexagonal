@@ -16,7 +16,7 @@ export default function Motos() {
     const token = localStorage.getItem('token');
     const API_URL = 'http://localhost:8080/api/motos';
     const MARCAS_URL = 'http://localhost:8080/api/marcas';
-    const TIPOS_SERVICIO_URL = 'http://localhost:8080/api/tipos-servicio';
+    const TIPOS_SERVICIO_URL = 'http://localhost:8080/api/tipoServicio';
 
     const cargarDatos = async () => {
         try {

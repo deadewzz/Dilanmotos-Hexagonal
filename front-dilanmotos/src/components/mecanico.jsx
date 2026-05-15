@@ -1,152 +1,151 @@
-import { useEffect, useState } from "react";
-import { authFetch } from "../api";
+import React, { useState, useEffect } from 'react';
+import '../global.css';
 
-export default function Servicio() {
-    const [clientes, setClientes] = useState([]);
-    const [motos, setMotos] = useState([]);
-    const [tiposServicio, setTiposServicio] = useState([]);
-    const [historial, setHistorial] = useState([]);
-    
-    const [nuevo, setNuevo] = useState({
-        idUsuario: '',
-        idMoto: '',
-        idTipoServicio: '',
-        reporte: ''
-    });
+const Mecanico = () => {
+    const [mecanicos, setMecanicos] = useState([]); 
+    const [busqueda, setBusqueda] = useState(""); 
+    // Inicializamos con strings vacíos para evitar el error de "controlled input" de tu imagen
+    const [nuevoMecanico, setNuevoMecanico] = useState({ 
+        nombre: "", 
+        especialidad: "", 
+        telefono: "" 
+    }); 
+    const [editMode, setEditMode] = useState(false); 
 
-    // Recuperamos el token del localStorage
-    const token = localStorage.getItem('token');
+    const API_URL = "http://localhost:8080/api/mecanicos";
 
-    const cargarBase = async () => {
-        if (!token) {
-            console.error("No hay token disponible. Inicia sesión de nuevo.");
-            return;
-        }
+    useEffect(() => {
+        cargarMecanicos();
+    }, []);
 
+    const cargarMecanicos = async () => {
+        const token = localStorage.getItem('token'); // Recuperar token actualizado
         try {
-            const opciones = {
-                method: 'GET',
+            const url = busqueda ? `${API_URL}?search=${busqueda}` : API_URL;
+            const response = await fetch(url, {
                 headers: { 
-                    'Authorization': `Bearer ${token}`, // Espacio vital después de Bearer
+                    'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 }
-            };
-
-            // Ejecutamos las peticiones en paralelo para mayor velocidad
-            const [resU, resM, resT] = await Promise.all([
-                fetch('http://localhost:8080/api/usuarios', opciones),
-                fetch('http://localhost:8080/api/motos', opciones),
-                fetch('http://localhost:8080/api/tiposervicio', opciones)
-            ]);
-
-            // Solo ejecutamos .json() si el status es 200 (ok)
-            if (resU.ok && resM.ok && resT.ok) {
-                const dataU = await resU.json();
-                const dataM = await resM.json();
-                const dataT = await resT.json();
-                
-                setClientes(dataU);
-                setMotos(dataM);
-                setTiposServicio(dataT);
-            } else {
-                console.error("Error de autenticación o ruta no encontrada (401/404)");
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setMecanicos(data);
+            } else if (response.status === 401) {
+                console.error("Sesión expirada o token inválido");
             }
         } catch (error) {
-            console.error("Error cargando base de datos:", error);
+            console.log("Error al conectar con la API:", error);
         }
     };
 
-    useEffect(() => {
-        cargarBase();
-    }, []);
-
-    const registrarServicio = async (e) => {
+    const handleGuardar = async (e) => {
         e.preventDefault();
+        const token = localStorage.getItem('token');
+        const metodo = editMode ? 'PUT' : 'POST';
         
-        const payload = {
-            usuario: { idUsuario: parseInt(nuevo.idUsuario) },
-            moto: { idMoto: parseInt(nuevo.idMoto) },
-            tipoServicio: { idTipoServicio: parseInt(nuevo.idTipoServicio) },
-            reporte: nuevo.reporte,
-            fecha: new Date().toISOString()
-        };
+        // IMPORTANTE: Asegurar que tomamos id_mecanico
+        const idActual = nuevoMecanico.id_mecanico;
+        const url = editMode ? `${API_URL}/${idActual}` : API_URL;
 
         try {
-            const res = await fetch('http://localhost:8080/api/servicios', {
-                method: 'POST',
+            const response = await fetch(url, {
+                method: metodo,
                 headers: { 
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
+                    'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(nuevoMecanico)
             });
 
-            if (res.ok) {
-                alert("Servicio registrado correctamente");
-                setNuevo({ idUsuario: '', idMoto: '', idTipoServicio: '', reporte: '' });
-                // Opcional: cargarHistorial(nuevo.idUsuario);
-            } else {
-                alert("Error al registrar: " + res.status);
+            if (response.ok) {
+                alert(editMode ? "¡Mecánico actualizado!" : "¡Mecánico guardado!");
+                setNuevoMecanico({ nombre: "", especialidad: "", telefono: "" });
+                setEditMode(false);
+                cargarMecanicos();
             }
         } catch (error) {
-            alert("Error de conexión");
+            console.log("Error en la solicitud:", error);
+        }
+    };
+
+    const handleEliminar = async (id) => {
+        if (!id) return;
+        const token = localStorage.getItem('token');
+
+        if (window.confirm("¿Eliminar este mecánico?")) {
+            try {
+                const response = await fetch(`${API_URL}/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    setMecanicos(mecanicos.filter(m => m.id_mecanico !== id));
+                    alert("Eliminado con éxito");
+                }
+            } catch (error) {
+                console.log("Error al eliminar", error);
+            }
         }
     };
 
     return (
-        <div className="main-content-inner">
+        <div className="container mt-4">
+            <h2 className="text-primary">Gestión de Mecánicos</h2>
             <div className="card-panel">
-                <h3 className="text-primary text-center">🛠️ Nuevo Servicio</h3>
-                <form onSubmit={registrarServicio}>
-                    <div className="mb-3">
-                        <label className="form-label text-muted">Cliente</label>
-                        <select className="input-bs" value={nuevo.idUsuario} onChange={e => setNuevo({...nuevo, idUsuario: e.target.value})} required>
-                            <option value="">Seleccione Cliente...</option>
-                            {clientes.map(u => <option key={u.idUsuario} value={u.idUsuario}>{u.nombre}</option>)}
-                        </select>
-                    </div>
-
-                    <div className="mb-3">
-                        <label className="form-label text-muted">Moto</label>
-                        <select className="input-bs" value={nuevo.idMoto} onChange={e => setNuevo({...nuevo, idMoto: e.target.value})} required>
-                            <option value="">Seleccione Moto...</option>
-                            {motos.map(m => <option key={m.idMoto} value={m.idMoto}>{m.modelo} - {m.placa || 'Sin Placa'}</option>)}
-                        </select>
-                    </div>
-
-                    <div className="mb-3">
-                        <label className="form-label text-muted">Tipo de Servicio</label>
-                        <select className="input-bs" value={nuevo.idTipoServicio} onChange={e => setNuevo({...nuevo, idTipoServicio: e.target.value})} required>
-                            <option value="">Seleccione Servicio...</option>
-                            {tiposServicio.map(t => <option key={t.idTipoServicio} value={t.idTipoServicio}>{t.nombre}</option>)}
-                        </select>
-                    </div>
-
-                    <div className="mb-3">
-                        <textarea 
-                            className="input-bs" 
-                            placeholder="Reporte o comentario del cliente..." 
-                            value={nuevo.reporte}
-                            onChange={e => setNuevo({...nuevo, reporte: e.target.value})}
-                            required
-                        />
-                    </div>
-
-                    <button type="submit" className="btn-bs btn-primary w-100">Registrar Servicio</button>
+                <form onSubmit={handleGuardar}>
+                    <input
+                        className="input-bs"
+                        placeholder="Nombre"
+                        value={nuevoMecanico.nombre || ""} 
+                        onChange={e => setNuevoMecanico({ ...nuevoMecanico, nombre: e.target.value })}
+                        required
+                    />
+                    <input
+                        className="input-bs"
+                        placeholder="Especialidad"
+                        value={nuevoMecanico.especialidad || ""}
+                        onChange={e => setNuevoMecanico({ ...nuevoMecanico, especialidad: e.target.value })}
+                        required
+                    />
+                    <input
+                        className="input-bs"
+                        placeholder="Teléfono"
+                        value={nuevoMecanico.telefono || ""}
+                        onChange={e => setNuevoMecanico({ ...nuevoMecanico, telefono: e.target.value })}
+                    />
+                    <button type="submit" className="btn-bs btn-primary w-100 mt-2">
+                        {editMode ? 'Actualizar' : 'Registrar'}
+                    </button>
                 </form>
+            </div>
 
-                <hr />
-                <div className="mt-4 text-center">
-                    <h5>Historial de Mantenimientos</h5>
-                    {historial.length === 0 ? (
-                        <p className="text-muted italic">No hay historial para mostrar.</p>
-                    ) : (
-                        <div className="list-group">
-                            {/* Mapeo de historial aquí */}
+            <div className="card-panel mt-4">
+                <div className="custom-table-container">
+                    <div className="custom-table-header">
+                        <div>Nombre</div>
+                        <div>Especialidad</div>
+                        <div className="text-center">Acciones</div>
+                    </div>
+                    {mecanicos.map(m => (
+                        <div className="custom-table-row" key={m.id_mecanico}>
+                            <div>{m.nombre}</div>
+                            <div>{m.especialidad}</div>
+                            <div className="text-center">
+                                <button className="btn-bs btn-success btn-sm" onClick={() => { setEditMode(true); setNuevoMecanico(m); }}>
+                                    <i className="fa-solid fa-pen"></i>
+                                </button>
+                                <button className="btn-bs btn-danger btn-sm" onClick={() => handleEliminar(m.id_mecanico)}>
+                                    <i className="fa-solid fa-trash"></i>
+                                </button>
+                            </div>
                         </div>
-                    )}
+                    ))}
                 </div>
             </div>
         </div>
     );
-}
+};
+
+export default Mecanico;

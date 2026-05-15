@@ -8,7 +8,7 @@ const TipoServicio = () => {
     const [nuevoTipo, setNuevoTipo] = useState({ nombre: "", descripcion: "" }); 
     const [editMode, setEditMode] = useState(false); 
 
-    const API_URL = "http://localhost:8080/api/tiposervicio";
+    const API_URL = "http://localhost:8080/api/tipoServicio";
     const token = localStorage.getItem('token');
 
     useEffect(() => {
