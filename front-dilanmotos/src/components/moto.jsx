@@ -3,11 +3,12 @@ import { useEffect, useState } from "react";
 export default function Motos() {
     const [motos, setMotos] = useState([]);
     const [marcas, setMarcas] = useState([]);
+    const [tiposServicio, setTiposServicio] = useState([]); 
     const [nuevo, setNuevo] = useState({ 
         modelo: '', 
         cilindraje: '', 
         idMarca: '', 
-        tipoServicio: '' 
+        idTipoServicio: ''  
     });
     const [editMode, setEditMode] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
@@ -15,23 +16,29 @@ export default function Motos() {
     const token = localStorage.getItem('token');
     const API_URL = 'http://localhost:8080/api/motos';
     const MARCAS_URL = 'http://localhost:8080/api/marcas';
+    const TIPOS_SERVICIO_URL = 'http://localhost:8080/api/tipos-servicio';
 
     const cargarDatos = async () => {
         try {
-            const [resM, resMa] = await Promise.all([
+            const [resM, resMa, resTs] = await Promise.all([  // ✅ Agregamos resTs
                 fetch(API_URL, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }),
                 fetch(MARCAS_URL, {
                     headers: { 'Authorization': `Bearer ${token}` }
+                }),
+                fetch(TIPOS_SERVICIO_URL, {  // ✅ Cargar tipos de servicio
+                    headers: { 'Authorization': `Bearer ${token}` }
                 })
             ]);
 
-            if (resM.ok && resMa.ok) {
+            if (resM.ok && resMa.ok && resTs.ok) {
                 const dataMotos = await resM.json();
                 const dataMarcas = await resMa.json();
+                const dataTiposServicio = await resTs.json();
                 setMotos(Array.isArray(dataMotos) ? dataMotos : []);
                 setMarcas(Array.isArray(dataMarcas) ? dataMarcas : []);
+                setTiposServicio(Array.isArray(dataTiposServicio) ? dataTiposServicio : []);
             }
         } catch (error) {
             console.error("Error cargando datos:", error);
@@ -49,10 +56,9 @@ export default function Motos() {
             modelo: moto.modelo,
             cilindraje: moto.cilindraje,
             idMarca: moto.idMarca || '',
-            tipoServicio: moto.tipoServicio || ''
+            idTipoServicio: moto.idTipoServicio || '' 
         });
-        // Scroll hacia arriba para editar
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: 'smooth' }); 
     };
 
     const guardar = async (e) => {
@@ -60,12 +66,13 @@ export default function Motos() {
         
         const url = editMode ? `${API_URL}/${selectedId}` : API_URL;
         
-        // Payload limpio según tu MotoRequestDTO
+     
         const payload = {
-            idUsuario: 1, // Ajustar según el usuario logueado
+            idUsuario: 1,
             idMarca: parseInt(nuevo.idMarca),
             modelo: nuevo.modelo,
-            cilindraje: parseFloat(nuevo.cilindraje)
+            cilindraje: parseFloat(nuevo.cilindraje),
+            idTipoServicio: parseInt(nuevo.idTipoServicio)  
         };
 
         try {
@@ -79,14 +86,14 @@ export default function Motos() {
             });
 
             if (res.ok) {
-                alert(editMode ? "✅ Moto actualizada" : "✅ Moto guardada");
+                alert(editMode ? " Moto actualizada!" : " Moto guardada!");
                 cancelarEdicion();
                 await cargarDatos();
             } else {
-                alert("❌ Error al procesar la solicitud");
+                alert("Error al procesar la solicitud");
             }
         } catch (error) {
-            alert("❌ Error de conexión");
+            alert("Error de conexión");
         }
     };
 
@@ -110,14 +117,14 @@ export default function Motos() {
     const cancelarEdicion = () => {
         setEditMode(false);
         setSelectedId(null);
-        setNuevo({ modelo: '', cilindraje: '', idMarca: '', tipoServicio: '' });
+        setNuevo({ modelo: '', cilindraje: '', idMarca: '', idTipoServicio: '' });
     };
 
     return (
         <div className="main-content-inner">
             <div className="card-panel">
                 <h3 className="text-primary">
-                    {editMode ? '📝 Editar Moto' : '🏍️ Registro de Motos'}
+                    {editMode ? ' Editar Moto' : ' Registro de Motos'}
                 </h3>
                 <form onSubmit={guardar}>
                     <div className="row">
@@ -161,12 +168,20 @@ export default function Motos() {
                             />
                         </div>
                         <div className="col-md-6 mb-3">
-                            <label className="form-label">Estado / Reparación</label>
-                            <input 
-                                className="input-bs" 
-                                value={nuevo.tipoServicio} 
-                                onChange={e => setNuevo({...nuevo, tipoServicio: e.target.value})} 
-                            />
+                            <label className="form-label">Tipo de Servicio</label>
+                            <select
+                                className="input-bs"
+                                value={nuevo.idTipoServicio}
+                                onChange={e => setNuevo({...nuevo, idTipoServicio: e.target.value})}
+                                required
+                            >
+                                <option value="">Seleccione un tipo de servicio</option>
+                                {tiposServicio.map(t => (
+                                    <option key={t.idTipoServicio} value={t.idTipoServicio}>
+                                        {t.nombre}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
 
@@ -189,17 +204,18 @@ export default function Motos() {
                         <div>Marca</div>
                         <div>Modelo</div>
                         <div>Cilindraje</div>
+                        <div>Tipo Servicio</div>  {/*  Nueva columna */}
                         <div className="text-center">Acciones</div>
                     </div>
                     {motos.length > 0 ? (
                         motos.map(m => (
                             <div className="custom-table-row" key={m.idMoto}>
-                                {/* Mostramos el nombre de la marca que viene del DTO */}
                                 <div className="fw-bold">
                                     {m.marca?.nombre || 'S/M'}
                                 </div>
                                 <div>{m.modelo}</div>
                                 <div>{m.cilindraje}cc</div>
+                                <div>{m.tipoServicio?.nombre || 'No especificado'}</div>  {/*  Mostrar nombre del servicio */}
                                 <div className="text-center d-flex justify-content-center gap-2">
                                     <button 
                                         className="btn-bs btn-warning btn-sm" 
