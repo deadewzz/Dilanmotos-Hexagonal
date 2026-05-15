@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../global.css';
 
-
 const CrearPqrs = () => {
     const navigate = useNavigate();
     const [enviando, setEnviando] = useState(false);
@@ -12,34 +11,33 @@ const CrearPqrs = () => {
         tipo: 'Peticion'
     });
 
-    const idLogueado = localStorage.getItem('idUsuario');
-    const token = localStorage.getItem('token'); // Importante para autenticación
     const handleEnviar = async (e) => {
         e.preventDefault();
         
-        if (!idLogueado || !token) {
-            alert("Sesion expirada. Inicia sesion de nuevo.");
+        // 1. Recuperar datos de sesión
+        const idAlmacenado = localStorage.getItem('idUsuario');
+        const token = localStorage.getItem('token');
+        
+        // 2. Convertir y Validar el ID (Evita el envío de NaN)
+        const idNumerico = parseInt(idAlmacenado);
+
+        if (isNaN(idNumerico) || !token) {
+            alert("Sesión no válida o expirada. Por favor, inicia sesión nuevamente.");
+            navigate('/login'); // Redirigir si no hay sesión válida
             return;
         }
         
         setEnviando(true);
 
-        // PAYLOAD SINCRONIZADO CON TU MODELO JAVA
+        // 3. Payload sincronizado exactamente con PqrsRequestDTO.java
         const nuevaPqrs = {
-            idUsuario: parseInt(idLogueado), 
+            idUsuario: idNumerico, 
             tipo: formulario.tipo,
             asunto: formulario.asunto,
-            descripcion: formulario.descripcion,
-            estado: 'PENDIENTE',
-            
-            comentario_usuario: formulario.descripcion, 
-            // Inicializamos estos para evitar errores de nulos si la DB los pide
-            respuesta_admin: "Sin respuesta",
-            calificacion_servicio: "-",
-            comentario_servicio: "-"
+            descripcion: formulario.descripcion
         };
 
-        console.log("Enviando datos:", nuevaPqrs);
+        console.log("Enviando datos al servidor:", nuevaPqrs);
 
         try {
             const res = await fetch('http://localhost:8080/api/pqrs', {
@@ -52,16 +50,17 @@ const CrearPqrs = () => {
             });
 
             if (res.ok) {
-                alert("Solicitud radicada con exito.");
+                alert("Solicitud radicada con éxito.");
                 navigate('/dashboard'); 
             } else {
-                const errorTxt = await res.text();
-                console.error("Error 500 detallado:", errorTxt);
-                alert("Error en el servidor. Revisa que comentario_usuario no este vacio.");
+                const errorData = await res.json();
+                console.error("Error del servidor:", errorData);
+                // Mostrar el mensaje de error específico que viene de las validaciones de Java
+                alert(errorData.message || "Error al radicar la solicitud. Revisa los campos.");
             }
         } catch (error) {
-            console.error("Error de conexion:", error);
-            alert("No hay conexion con el servidor.");
+            console.error("Error de conexión:", error);
+            alert("No hay conexión con el servidor. Verifica que XAMPP y el Backend estén corriendo.");
         } finally {
             setEnviando(false);
         }
@@ -84,7 +83,7 @@ const CrearPqrs = () => {
                     <h2 className="text-primary mb-4">Radicar PQRS</h2>
                     <form onSubmit={handleEnviar}>
                         <div className="mb-3">
-                            <label className="fw-bold d-block mb-2">Tipo de Tramite</label>
+                            <label className="fw-bold d-block mb-2">Tipo de Trámite</label>
                             <select 
                                 className="input-bs"
                                 value={formulario.tipo}
@@ -104,18 +103,20 @@ const CrearPqrs = () => {
                                 className="input-bs" 
                                 value={formulario.asunto}
                                 onChange={(e) => setFormulario({...formulario, asunto: e.target.value})}
+                                placeholder="Ej: Problema con repuesto"
                                 required
                             />
                         </div>
 
                         <div className="mb-3">
-                            <label className="fw-bold d-block mb-2">Mensaje / Descripcion</label>
+                            <label className="fw-bold d-block mb-2">Mensaje / Descripción</label>
                             <textarea 
                                 className="input-bs" 
                                 rows="6"
                                 style={{resize: 'none'}}
                                 value={formulario.descripcion}
                                 onChange={(e) => setFormulario({...formulario, descripcion: e.target.value})}
+                                placeholder="Detalla tu solicitud aquí..."
                                 required
                             ></textarea>
                         </div>

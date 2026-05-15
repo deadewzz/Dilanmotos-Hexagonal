@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface UsuarioService {
     Usuario registrar(Usuario usuario);
-    Usuario obtenerPorCorreo(String correo); // Añadir esta línea
+    Usuario buscarPorCorreo(String correo); // Añadir esta línea
     List<Usuario> listar();
     Usuario obtenerPorId(int id);
     void eliminar(int id);

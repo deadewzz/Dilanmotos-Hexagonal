@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../auth.css';
 
-
 const Login = () => {
     const navigate = useNavigate();
     const [credenciales, setCredenciales] = useState({
@@ -27,14 +26,24 @@ const Login = () => {
             if (response.ok) {
                 const usuario = await response.json();
                 
-                // Guardamos los datos de sesión y el TOKEN
+                // --- DEPURACIÓN CRÍTICA ---
+                console.log("Respuesta completa del servidor:", usuario);
+                
+                // Intentamos capturar el ID sin importar cómo se llame en el JSON
+                const idFinal = usuario.idUsuario || usuario.id || usuario.id_usuario;
+
+                if (!idFinal) {
+                    console.error("ERROR: El backend no envió un ID de usuario válido.");
+                }
+
+                // Guardamos los datos de sesión
                 localStorage.setItem('isAuthenticated', 'true'); 
-                localStorage.setItem("idUsuario", usuario.idUsuario);
+                localStorage.setItem("idUsuario", idFinal); // Aquí se guarda el número real
                 localStorage.setItem("nombreUsuario", usuario.nombre);
-                localStorage.setItem('token', usuario.token); // Esta es la llave para el CRUD
+                localStorage.setItem('token', usuario.token); 
                 localStorage.setItem("rolUsuario", usuario.rol || 'USER'); 
                 
-                // Recarga limpia al dashboard
+                // Redirección
                 window.location.href = "/dashboard"; 
 
             } else {

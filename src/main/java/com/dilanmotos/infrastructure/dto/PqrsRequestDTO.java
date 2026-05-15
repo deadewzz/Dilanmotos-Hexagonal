@@ -1,23 +1,27 @@
 package com.dilanmotos.infrastructure.dto;
 
-import jakarta.validation.constraints.*;
 import lombok.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PqrsRequestDTO {
-
-    @NotNull(message = "El ID de usuario es obligatorio")
-    private Integer id_usuario;
-
-    @NotBlank(message = "El tipo (Petición, Queja, Recurso, Sugerencia) es obligatorio")
+    @NotNull
+    private Integer idUsuario;
+    
+    @NotBlank
     private String tipo;
-
-    @NotBlank(message = "El asunto no puede estar vacío")
+    
+    @NotBlank
     private String asunto;
-
-    @NotBlank(message = "La descripción es obligatoria")
+    
+    @NotBlank
     private String descripcion;
     
+    private String estado;
+    
+    private String respuesta_admin;
 }

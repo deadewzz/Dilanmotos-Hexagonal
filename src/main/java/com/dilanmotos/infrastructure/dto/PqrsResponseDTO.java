@@ -1,22 +1,20 @@
 package com.dilanmotos.infrastructure.dto;
 
-import java.time.LocalDateTime;
 import lombok.*;
+import java.time.LocalDateTime;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class PqrsResponseDTO {
-
-    private Integer id_pqrs;
+    private Integer id_pqrs; // Cambiado a snake_case para coincidir con tu BD y Front
     private Integer id_usuario;
     private String tipo;
     private String asunto;
     private String descripcion;
-    private LocalDateTime fecha;
+    private String estado;
     private String respuesta_admin;
+    private LocalDateTime fecha;
     private LocalDateTime fecha_respuesta;
-    private String calificacion_servicio;
-    private String comentario_servicio;
 }

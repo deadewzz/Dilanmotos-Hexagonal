@@ -19,4 +19,5 @@ public class PQRS {
     private LocalDateTime fecha_respuesta;
     private String calificacion_servicio;
     private String comentario_servicio;
+    private String estado;
 }

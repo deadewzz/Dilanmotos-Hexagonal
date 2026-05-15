@@ -26,10 +26,10 @@ public class UsuarioUC implements UsuarioService {
         return usuarioRepository.guardar(usuario);
     }
 
-    @Override
-    public Usuario findByCorreo(String correo) { // Nombre corregido según la interfaz
-        return usuarioRepository.buscarPorCorreo(correo)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    @Override // Añade esto para que el IDE te confirme si el nombre es correcto
+    public Usuario buscarPorCorreo(String correo) { // Asegúrate que el nombre coincida con la interfaz
+    return usuarioRepository.buscarPorCorreo(correo)
+        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
     }
 
     @Override
