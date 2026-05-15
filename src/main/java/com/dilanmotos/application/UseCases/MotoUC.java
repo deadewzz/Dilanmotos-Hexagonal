@@ -2,9 +2,11 @@ package com.dilanmotos.application.UseCases;
 
 import com.dilanmotos.domain.model.Moto;
 import com.dilanmotos.domain.repository.MotoRepository;
+import com.dilanmotos.domain.repository.MarcaRepository; // Necesario para el nombre
 import com.dilanmotos.domain.exception.MotoNotFoundException;
 import com.dilanmotos.infrastructure.dto.MotoRequestDTO;
 import com.dilanmotos.infrastructure.dto.MotoResponseDTO;
+import com.dilanmotos.infrastructure.dto.MarcaResponseDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,9 +16,11 @@ import java.util.stream.Collectors;
 public class MotoUC {
 
     private final MotoRepository motoRepository;
+    private final MarcaRepository marcaRepository;
 
-    public MotoUC(MotoRepository motoRepository) {
+    public MotoUC(MotoRepository motoRepository, MarcaRepository marcaRepository) {
         this.motoRepository = motoRepository;
+        this.marcaRepository = marcaRepository;
     }
 
     public List<MotoResponseDTO> listarTodas() {
@@ -33,21 +37,19 @@ public class MotoUC {
     public MotoResponseDTO obtenerPorId(Integer id) {
         return motoRepository.buscarPorId(id)
                 .map(this::mapToDTO)
-                .orElseThrow(() -> new MotoNotFoundException("Moto no encontrada con ID: " + id));
+                .orElseThrow(() -> new MotoNotFoundException("Moto no encontrada: " + id));
     }
 
     public MotoResponseDTO actualizar(Integer id, MotoRequestDTO request) {
         motoRepository.buscarPorId(id)
-                .orElseThrow(() -> new MotoNotFoundException("No se puede actualizar, moto no existe: " + id));
+                .orElseThrow(() -> new MotoNotFoundException("No existe la moto: " + id));
 
         Moto moto = mapToModel(request);
-        moto.setIdMoto(id);
+        moto.setIdMoto(id); // VITAL para que el repositorio sepa qué ID actualizar
         return mapToDTO(motoRepository.actualizar(moto));
     }
 
     public void eliminar(Integer id) {
-        motoRepository.buscarPorId(id)
-                .orElseThrow(() -> new MotoNotFoundException("No se puede eliminar, moto no encontrada: " + id));
         motoRepository.eliminar(id);
     }
 
@@ -67,6 +69,15 @@ public class MotoUC {
         dto.setIdMarca(m.getIdMarca());
         dto.setModelo(m.getModelo());
         dto.setCilindraje(m.getCilindraje());
+
+        // Llenamos el objeto marca dentro del DTO para el Frontend
+        marcaRepository.buscarPorId(m.getIdMarca()).ifPresent(marca -> {
+            MarcaResponseDTO marcaDTO = new MarcaResponseDTO();
+            marcaDTO.setIdMarca(marca.getIdMarca());
+            marcaDTO.setNombre(marca.getNombre());
+            dto.setMarca(marcaDTO);
+        });
+
         return dto;
     }
 }

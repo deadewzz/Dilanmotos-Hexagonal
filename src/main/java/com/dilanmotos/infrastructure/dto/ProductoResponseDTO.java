@@ -8,4 +8,5 @@ public class ProductoResponseDTO {
     private String nombre;
     private Double precio;
     private String descripcion;
+    private MarcaResponseDTO marca;
 }

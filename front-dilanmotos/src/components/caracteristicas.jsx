@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { authFetch } from "../api";
 
 export default function Caracteristicas() {
     const [caracteristicas, setCaracteristicas] = useState([]);
@@ -13,109 +12,114 @@ export default function Caracteristicas() {
 
     const cargarDatos = async () => {
         try {
-            const opciones = {
-                headers: { 'Authorization': `Bearer ${token}` }
-            };
+            const opciones = { headers: { 'Authorization': `Bearer ${token}` } };
             const [resCar, resMoto] = await Promise.all([
                 fetch(API_URL, opciones),
                 fetch('http://localhost:8080/api/motos', opciones)
             ]);
             
             if (resCar.ok && resMoto.ok) {
-                const dataCar = await resCar.json();
-                const dataMoto = await resMoto.json();
-                setCaracteristicas(dataCar);
-                setMotos(dataMoto);
+                setCaracteristicas(await resCar.json());
+                setMotos(await resMoto.json());
             }
         } catch (e) { console.error("Error cargando:", e); }
     };
 
     useEffect(() => { cargarDatos(); }, []);
 
+    const prepararEdicion = (c) => {
+        setEditMode(true);
+        setSelectedId(c.idCaracteristica);
+        setNuevo({
+            descripcion: c.descripcion,
+            idMoto: c.idMoto || ''
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    const cancelarEdicion = () => {
+        setEditMode(false);
+        setSelectedId(null);
+        setNuevo({ descripcion: '', idMoto: '' });
+    };
+
     const guardar = async (e) => {
         e.preventDefault();
-        
-        const payload = {
-            descripcion: nuevo.descripcion,
-            moto: { idMoto: parseInt(nuevo.idMoto) }
-        };
+        const url = editMode ? `${API_URL}/${selectedId}` : API_URL;
 
         try {
-            const res = await fetch(editMode ? `${API_URL}/${selectedId}` : API_URL, {
+            const res = await fetch(url, {
                 method: editMode ? 'PUT' : 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'Authorization': `Bearer ${token}` 
                 },
-                body: JSON.stringify(payload)
+                body: JSON.stringify({
+                    descripcion: nuevo.descripcion,
+                    idMoto: parseInt(nuevo.idMoto)
+                })
             });
 
             if (res.ok) {
-                alert("✅ Guardado correctamente");
-                setNuevo({ descripcion: '', idMoto: '' });
-                setEditMode(false);
+                alert(" Guardado exitosamente");
+                cancelarEdicion();
                 cargarDatos();
             } else {
-                alert("Error 500: Revisa que la descripción no sea nula.");
+                const errorData = await res.status;
+                alert(" Error " + errorData + ": Revisa los permisos o los datos.");
             }
-        } catch (error) { alert("Error de conexión"); }
+        } catch (error) {
+            alert("Error de conexión con el servidor");
+        }
+    };
+
+    const eliminar = async (id) => {
+        if(window.confirm("¿Estás seguro de eliminar este detalle?")) {
+            await fetch(`${API_URL}/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            cargarDatos();
+        }
     };
 
     return (
         <div className="main-content-inner">
             <div className="card-panel">
-                <h3 className="text-primary">⚙️ Detalles de la Moto</h3>
-                <hr />
+                <h3 className="text-primary">{editMode ? '📝 Editar Detalle' : '⚙️ Detalles de la Moto'}</h3>
                 <form onSubmit={guardar}>
-                    <label className="fw-bold">Descripción del detalle</label>
-                    <textarea 
-                        className="input-bs" 
-                        placeholder="Ej: Motor 250cc de 4 tiempos con inyección electrónica..." 
-                        value={nuevo.descripcion} 
-                        onChange={e => setNuevo({...nuevo, descripcion: e.target.value})} 
-                        required 
-                        rows="3"
-                    />
+                    <label className="fw-bold">Descripción Técnica</label>
+                    <textarea className="input-bs" value={nuevo.descripcion} onChange={e => setNuevo({...nuevo, descripcion: e.target.value})} required rows="3" />
                     
-                    <label className="fw-bold mt-2">Asignar a Vehículo</label>
+                    <label className="fw-bold mt-2">Moto Asignada</label>
                     <select className="input-bs" value={nuevo.idMoto} onChange={e => setNuevo({...nuevo, idMoto: e.target.value})} required>
                         <option value="">-- Seleccionar Moto --</option>
-                        {motos.map(m => (
-                            <option key={m.idMoto} value={m.idMoto}>{m.modelo} (ID: {m.idMoto})</option>
-                        ))}
+                        {motos.map(m => <option key={m.idMoto} value={m.idMoto}>{m.modelo}</option>)}
                     </select>
 
-                    <button type="submit" className="btn-bs btn-primary w-100 mt-3">
-                        {editMode ? 'Actualizar Detalle' : 'Registrar Detalle'}
-                    </button>
+                    <div className="d-flex gap-2 mt-3">
+                        <button type="submit" className={`btn-bs w-100 ${editMode ? 'btn-warning' : 'btn-primary'}`}>
+                            {editMode ? 'Actualizar' : 'Registrar'}
+                        </button>
+                        {editMode && <button type="button" className="btn-bs btn-secondary" onClick={cancelarEdicion}>Cancelar</button>}
+                    </div>
                 </form>
             </div>
 
             <div className="card-panel mt-4">
                 <div className="custom-table-container">
                     <div className="custom-table-header">
-                        <div>ID</div>
-                        <div>Descripción Técnica</div>
-                        <div>Moto</div>
-                        <div className="text-center">Acciones</div>
+                        <div>ID</div><div>Descripción</div><div>Moto</div><div className="text-center">Acciones</div>
                     </div>
                     {caracteristicas.map(c => (
                         <div className="custom-table-row" key={c.idCaracteristica}>
                             <div>#{c.idCaracteristica}</div>
                             <div className="text-wrap">{c.descripcion}</div>
-                            <div className="fw-bold text-primary">{c.moto?.modelo || 'N/A'}</div>
-                            <div className="text-center">
-                                <button className="btn-bs btn-danger btn-sm" onClick={async () => {
-                                    if(window.confirm("¿Borrar?")) {
-                                        await fetch(`${API_URL}/${c.idCaracteristica}`, {
-                                            method:'DELETE',
-                                            headers: { 'Authorization': `Bearer ${token}` }
-                                        });
-                                        cargarDatos();
-                                    }
-                                }}>
-                                    <i className="fa-solid fa-trash"></i>
-                                </button>
+                            {/* AQUÍ SE QUITA EL N/A USANDO EL OBJETO MOTO */}
+                            <div className="fw-bold text-primary">{c.moto?.modelo || 'Cargando...'}</div>
+                            <div className="text-center d-flex justify-content-center gap-2">
+                                <button className="btn-bs btn-warning btn-sm" onClick={() => prepararEdicion(c)}><i className="fa-solid fa-pen"></i></button>
+                                <button className="btn-bs btn-danger btn-sm" onClick={() => eliminar(c.idCaracteristica)}><i className="fa-solid fa-trash"></i></button>
                             </div>
                         </div>
                     ))}

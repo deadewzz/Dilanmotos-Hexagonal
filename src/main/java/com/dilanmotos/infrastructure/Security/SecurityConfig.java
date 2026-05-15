@@ -49,7 +49,7 @@ public class SecurityConfig {
                                 "/api/servicio/**",
                                 "/api/pqrs/**",
                                 "/api/mecanico/**",
-                                "/api/caracteristicas/**", // Aseguramos acceso total a características
+                                "/api/caracteristicas/**",
                                 "/api/cotizacion/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
@@ -74,8 +74,14 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        // CORRECCIÓN: Permitir todos los headers para evitar el 401 por preflight
-        configuration.setAllowedHeaders(Arrays.asList("*"));
+
+        // ESTA ES LA LÍNEA CLAVE PARA QUITAR EL 401:
+        // Debemos permitir explícitamente "Authorization" y "Content-Type"
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With"));
+
+        // Esto permite que el navegador vea el token en la respuesta
+        configuration.setExposedHeaders(Arrays.asList("Authorization"));
+
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

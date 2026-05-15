@@ -3,7 +3,6 @@ package com.dilanmotos.infrastructure.persistence;
 import com.dilanmotos.domain.model.Moto;
 import com.dilanmotos.domain.repository.MotoRepository;
 import org.springframework.stereotype.Component;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -25,9 +24,7 @@ public class MotoRepositoryImpl implements MotoRepository {
 
     @Override
     public List<Moto> obtenerTodas() {
-        return jpa.findAll().stream()
-                .map(this::toModel)
-                .collect(Collectors.toList());
+        return jpa.findAll().stream().map(this::toModel).collect(Collectors.toList());
     }
 
     @Override
@@ -37,14 +34,10 @@ public class MotoRepositoryImpl implements MotoRepository {
 
     @Override
     public Moto actualizar(Moto moto) {
-        Integer id = moto.getIdMoto();
-        return jpa.findById(id).map(entity -> {
-            entity.setIdUsuario(moto.getIdUsuario());
-            entity.setIdMarca(moto.getIdMarca());
-            entity.setModelo(moto.getModelo());
-            entity.setCilindraje((int) moto.getCilindraje());
-            return toModel(jpa.save(entity));
-        }).orElseThrow(() -> new RuntimeException("Error al actualizar: Moto no encontrada"));
+        // Al usar toEntity(moto), el ID ya va incluido, por lo que save() hará un
+        // UPDATE
+        MotoEntity entity = toEntity(moto);
+        return toModel(jpa.save(entity));
     }
 
     @Override
@@ -52,7 +45,6 @@ public class MotoRepositoryImpl implements MotoRepository {
         jpa.deleteById(id);
     }
 
-    // MAPPERS INTERNOS
     private Moto toModel(MotoEntity e) {
         Moto m = new Moto();
         m.setIdMoto(e.getIdMoto());
@@ -65,8 +57,10 @@ public class MotoRepositoryImpl implements MotoRepository {
 
     private MotoEntity toEntity(Moto m) {
         MotoEntity e = new MotoEntity();
-        if (m.getIdMoto() != null)
+        // ESTA CONDICIÓN EVITA LOS DUPLICADOS
+        if (m.getIdMoto() != null) {
             e.setIdMoto(m.getIdMoto());
+        }
         e.setIdUsuario(m.getIdUsuario());
         e.setIdMarca(m.getIdMarca());
         e.setModelo(m.getModelo());
