@@ -59,6 +59,7 @@ public class ServicioRepositoryImpl implements ServicioRepository {
     // MAPPERS INTERNOS
     private Servicio toModel(ServicioEntity e) {
         Servicio s = new Servicio();
+        s.setIdServicio(e.getIdServicio());
         s.setIdUsuario(e.getIdUsuario());
         s.setIdMecanico(e.getIdMecanico());
         s.setIdTipoServicio(e.getIdTipoServicio());
