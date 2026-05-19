@@ -1,30 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../global.css';
+import { authFetch } from '../api';
 
-const API_URL = 'http://localhost:8080/categoria';
+const API_URL = 'http://localhost:8080/api/categorias';
 
 const Categoria = () => {
+    const token = localStorage.getItem('token');
 
     const [categorias, setCategorias] = useState([]);
     const [nueva, setNueva] = useState({  nombre: ''});
     const [editMode, setEditMode] = useState(false);
     const [mensaje, setMensaje] = useState('');
-    useEffect(() => {
-        cargarCategorias();
-    }, []);
+    
+    useEffect(() => { cargarCategorias(); }, []);
 
     const cargarCategorias = async () => {
-
         try {
-
-            const response = await fetch(API_URL);
+            const response = await fetch(API_URL, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!response.ok) {
+                console.log("STATUS:", response.status);
+                throw new Error('Error al obtener las categorias');
+            }   
             const data = await response.json();
-
             setCategorias(data);
-
         } catch (error) {
             console.error(error);
+            setMensaje('No se pudieron cargar las categorias');
         }
     };
 
@@ -41,7 +49,8 @@ const Categoria = () => {
                 {
                     method: editMode ? 'PUT' : 'POST',
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}` 
                     },
                     body: JSON.stringify(nueva)
                 }
@@ -56,56 +65,44 @@ const Categoria = () => {
                 );
 
                 resetForm();
-
                 cargarCategorias();
 
             } else {
-
                 setMensaje('Error al guardar');
-
             }
 
         } catch (error) {
-
             console.error(error);
             setMensaje('Error de conexión');
-
         }
     };
 
     const iniciarEdicion = (categoria) => {
-
         setNueva(categoria);
-
         setEditMode(true);
     };
 
     const eliminar = async (id) => {
-
         if(window.confirm('¿Eliminar categoría?')) {
-
             try {
-
                 await fetch(`${API_URL}/${id}`, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
-
                 cargarCategorias();
-
             } catch (error) {
 
                 console.error(error);
-
             }
         }
     };
-
     const resetForm = () => {
-
         setNueva({
             nombre: ''
         });
-
         setEditMode(false);
     };
 
@@ -122,7 +119,6 @@ const Categoria = () => {
                         ? 'Editar Categoría'
                         : 'Nueva Categoría'}
                 </h3>
-
                 <hr />
 
                 {mensaje && (
@@ -151,24 +147,17 @@ const Categoria = () => {
                             }
                             required
                         />
-
                     </div>
-
                     <div className="d-flex gap-2 mt-4">
-
                         <button
                             type="submit"
                             className="btn-bs btn-primary"
                         >
-
                             {editMode
                                 ? 'Guardar Cambios'
                                 : 'Crear Categoría'}
-
                         </button>
-
                         {editMode && (
-
                             <button
                                 type="button"
                                 className="btn-bs btn-secondary"
@@ -176,13 +165,9 @@ const Categoria = () => {
                             >
                                 Cancelar
                             </button>
-
                         )}
-
                     </div>
-
                 </form>
-
             </div>
 
             {/* TABLA */}
@@ -205,15 +190,11 @@ const Categoria = () => {
                             alignItems: 'center'
                         }}
                     >
-
                         <div>ID</div>
-
                         <div>Nombre</div>
-
                         <div className="text-center">
                             Acciones
                         </div>
-
                     </div>
 
                     {/* FILAS */}
@@ -255,19 +236,12 @@ const Categoria = () => {
                                 >
                                     Borrar
                                 </button>
-
                             </div>
-
                         </div>
-
                     ))}
-
                 </div>
-
             </div>
-
         </div>
     );
 };
-
 export default Categoria;
