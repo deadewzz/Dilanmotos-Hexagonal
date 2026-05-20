@@ -11,6 +11,7 @@ const Cotizacion = () => {
     const navigate = useNavigate();
     const [cotizacion, setCotizacion] = useState({ idCotizacion: null, idUsuario: '', producto: '', cantidad: '', precioUnitario: '', fecha: '', productoAgregado: true });
     const [cotizaciones, setCotizaciones] = useState([]);
+    const [productos, setProductos] = useState([]);
     const [mensaje, setMensaje] = useState('');
     
 
@@ -25,8 +26,28 @@ const Cotizacion = () => {
                 idUsuario: idUsuario
             }));
             cargarCotizaciones();
+            cargarProductos();
         }
     }, []);
+
+    const cargarProductos = async () => {
+        try {
+            const response = await fetch('http://localhost:8080/api/productos', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            if (!response.ok) {
+                throw new Error('Error al obtener productos');
+            }
+            const data = await response.json();
+            setProductos(data);
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     const cargarCotizaciones = async () => {
         try {
@@ -55,6 +76,23 @@ const Cotizacion = () => {
             ...cotizacion,
             [name]: type === 'checkbox' ? checked : value
         });
+    };
+
+    const handleProductoChange = (e) => {
+        const selectedProducto = productos.find(p => String(p.idProducto) === e.target.value);
+        if (selectedProducto) {
+            setCotizacion({
+                ...cotizacion,
+                producto: selectedProducto.nombre,
+                precioUnitario: selectedProducto.precio
+            });
+        } else {
+            setCotizacion({
+                ...cotizacion,
+                producto: '',
+                precioUnitario: ''
+            });
+        }
     };
 
     const calcularTotal = () => {
@@ -156,14 +194,24 @@ const Cotizacion = () => {
                             Producto
                         </label>
 
-                        <input
+                        <select
                             className="input-bs"
-                            type="text"
                             name="producto"
-                            value={cotizacion.producto}
-                            onChange={handleChange}
+                            value={productos.find(p => p.nombre === cotizacion.producto)?.idProducto || ''}
+                            onChange={handleProductoChange}
                             required
-                        />
+                        >
+                            <option value="">Seleccione un producto...</option>
+                            {productos.length === 0 ? (
+                                <option value="" disabled>No hay productos disponibles</option>
+                            ) : (
+                                productos.map((producto) => (
+                                    <option key={producto.idProducto} value={producto.idProducto}>
+                                        {producto.nombre}
+                                    </option>
+                                ))
+                            )}
+                        </select>
 
                     </div>
 

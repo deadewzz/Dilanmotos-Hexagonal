@@ -45,7 +45,7 @@ const Mecanico = () => {
         const metodo = editMode ? 'PUT' : 'POST';
         
         // IMPORTANTE: Asegurar que tomamos id_mecanico
-        const idActual = nuevoMecanico.id_mecanico;
+        const idActual = nuevoMecanico.idMecanico;
         const url = editMode ? `${API_URL}/${idActual}` : API_URL;
 
         try {
@@ -81,7 +81,7 @@ const Mecanico = () => {
                 });
                 
                 if (response.ok) {
-                    setMecanicos(mecanicos.filter(m => m.id_mecanico !== id));
+                    setMecanicos(mecanicos.filter(m => m.idMecanico !== id));
                     alert("Eliminado con éxito");
                 }
             } catch (error) {
@@ -126,17 +126,19 @@ const Mecanico = () => {
                     <div className="custom-table-header">
                         <div>Nombre</div>
                         <div>Especialidad</div>
+                        <div>Teléfono</div>
                         <div className="text-center">Acciones</div>
                     </div>
                     {mecanicos.map(m => (
-                        <div className="custom-table-row" key={m.id_mecanico}>
+                        <div className="custom-table-row" key={m.idMecanico}>
                             <div>{m.nombre}</div>
                             <div>{m.especialidad}</div>
+                            <div>{m.telefono}</div>
                             <div className="text-center">
                                 <button className="btn-bs btn-success btn-sm" onClick={() => { setEditMode(true); setNuevoMecanico(m); }}>
                                     <i className="fa-solid fa-pen"></i>
                                 </button>
-                                <button className="btn-bs btn-danger btn-sm" onClick={() => handleEliminar(m.id_mecanico)}>
+                                <button className="btn-bs btn-danger btn-sm" onClick={() => handleEliminar(m.idMecanico)}>
                                     <i className="fa-solid fa-trash"></i>
                                 </button>
                             </div>

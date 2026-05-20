@@ -27,6 +27,7 @@ import Historial from './components/Historial';
 import Mecanico from './components/mecanico';
 import Cotizacion from './components/cotizacion';
 import Categoria from './components/categoria';
+import Marca from './components/marca';
 
 import './global.css';
 
@@ -123,6 +124,9 @@ const AdminLayout = ({ children }) => {
                     <Link to="/categoria" className={`nav-link ${activeClass('/categoria')}`} onClick={handleNavClick}>
                         <i className="fa-solid fa-tags me-2"></i> Categorías
                     </Link>
+                    <Link to="/marca" className={`nav-link ${activeClass('/marca')}`} onClick={handleNavClick}>
+                    <i className="fa-solid fa-tags me-2"></i> Marcas
+                    </Link>
                 </nav>
                 <div className="sidebar-footer">
                     <button onClick={handleLogout} className="btn-bs btn-danger w-100">
@@ -198,6 +202,10 @@ function App() {
 
                 <Route path="/categoria" element={
                     <PrivateRoute requireAdmin><AdminLayout><Categoria /></AdminLayout></PrivateRoute>
+                } />
+
+                <Route path="/marca" element={
+                    <PrivateRoute requireAdmin><AdminLayout><Marca /></AdminLayout></PrivateRoute>
                 } />
 
                 {/* REDIRECCIÓN POR DEFECTO */}
