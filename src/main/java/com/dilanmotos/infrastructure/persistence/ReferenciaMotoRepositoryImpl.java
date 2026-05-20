@@ -29,6 +29,13 @@ public class ReferenciaMotoRepositoryImpl implements ReferenciaMotoRepository {
     }
 
     @Override
+    public List<ReferenciaMoto> obtenerPorMarca(Integer idMarca) {
+        return jpaRepository.findByMarca_IdMarca(idMarca).stream()
+            .map(this::mapToDomain)
+            .toList();
+}
+
+    @Override
     public Optional<ReferenciaMoto> buscarPorId(int id) {
         return jpaRepository.findById(id).map(this::mapToDomain);
     }

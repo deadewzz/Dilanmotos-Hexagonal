@@ -13,4 +13,5 @@ public interface ReferenciaMotoRepository {
 
     void eliminarPorId(int id);
     
+    List<ReferenciaMoto> obtenerPorMarca(Integer idMarca);
 }

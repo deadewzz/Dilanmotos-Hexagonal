@@ -81,7 +81,7 @@ const PerfilUsuario = () => {
                             usuario.motos.map((moto, index) => (
                                 <div key={index} className="moto-card-premium">
                                     <div className="moto-card-header">
-                                        <span className="marca-tag">{moto.marca?.nombre || 'Marca'}</span>
+                                        <span className="marca-tag">{moto.nombreMarca || 'Marca'}</span>
                                         <span className="cilindraje-tag">{moto.cilindraje} CC</span>
                                     </div>
                                     <h3 className="modelo-text">{moto.modelo}</h3>

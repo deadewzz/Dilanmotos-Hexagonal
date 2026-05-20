@@ -21,9 +21,14 @@ public class ReferenciaMotoController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReferenciaMotoResponseDTO>> listarTodas() {
-        return ResponseEntity.ok(referenciaMotoUC.listarTodas());
-    }   
+    public ResponseEntity<List<ReferenciaMotoResponseDTO>> listarTodas(
+        @RequestParam(required = false) Integer marcaId) {
+    
+    if (marcaId != null) {
+        return ResponseEntity.ok(referenciaMotoUC.listarPorMarca(marcaId));
+    }
+    return ResponseEntity.ok(referenciaMotoUC.listarTodas());
+}  
 
     @GetMapping("/{id}")
     public ResponseEntity<ReferenciaMotoResponseDTO> obtenerPorId(@PathVariable Integer id)

@@ -35,6 +35,12 @@ public class ReferenciaMotoUC {
                 .orElseThrow(() -> new RuntimeException("Referencia no encontrada con ID: " + id));
     }
 
+    public List<ReferenciaMotoResponseDTO> listarPorMarca(Integer idMarca) {
+        return referenciaRepository.obtenerPorMarca(idMarca).stream()
+            .map(this::mapToDTO)
+            .collect(Collectors.toList());
+}
+
     public ReferenciaMotoResponseDTO actualizar(Integer id, ReferenciaMotoRequestDTO request) {
         // Buscamos la existencia en el repositorio
         referenciaRepository.buscarPorId(id)
