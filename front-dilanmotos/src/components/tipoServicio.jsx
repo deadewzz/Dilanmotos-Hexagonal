@@ -33,7 +33,7 @@ const TipoServicio = () => {
     const handleGuardar = async (e) => {
         e.preventDefault();
         const metodo = editMode ? 'PUT' : 'POST';
-        const idActual = nuevoTipo.id_tipo_servicio;
+        const idActual = nuevoTipo.idTipo;
         const url = editMode ? `${API_URL}/${idActual}` : API_URL;
 
         try {
@@ -76,7 +76,7 @@ const TipoServicio = () => {
                 });
                
                 if (response.status === 204 || response.ok) {
-                    setTipoServicios(tipoServicios.filter(ts => ts.id_tipo_servicio !== id));
+                    setTipoServicios(tipoServicios.filter(ts => ts.idTipo !== id));
                     alert("Registro eliminado con éxito!");
                 } else {
                     alert("No se pudo eliminar el registro seleccionado");
@@ -138,7 +138,7 @@ const TipoServicio = () => {
                         </div>
 
                         {tipoServicios.map(t => (
-                            <div className="custom-table-row" key={t.id_tipo_servicio}>                               
+                            <div className="custom-table-row" key={t.idTipo}>                               
                                 <div>{t.nombre}</div>
                                 <div>{t.descripcion}</div>
                                 <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
@@ -150,7 +150,7 @@ const TipoServicio = () => {
                                     </button>
                                     <button
                                         className="btn-bs btn-danger btn-sm"
-                                        onClick={() => handleEliminar(t.id_tipo_servicio)}
+                                        onClick={() => handleEliminar(t.idTipo)}
                                     >
                                         <i className="fa-solid fa-trash"></i>
                                     </button>
