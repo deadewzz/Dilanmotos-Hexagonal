@@ -25,6 +25,13 @@ public class ProductoController {
         return ResponseEntity.ok(productoUC.listarTodos());
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductoResponseDTO> obtenerPorId(@PathVariable Integer id) {
+        // Nota: Asegúrate de que tu Caso de Uso (ProductoUC) tenga un método 
+        // para buscar por ID (por ejemplo, obtenerPorId o buscarPorId)
+        return ResponseEntity.ok(productoUC.buscarPorId(id));
+    }
+
     @PostMapping
     public ResponseEntity<ProductoResponseDTO> crear(@RequestBody ProductoRequestDTO request) {
         return new ResponseEntity<>(productoUC.crear(request), HttpStatus.CREATED);
@@ -41,4 +48,5 @@ public class ProductoController {
         productoUC.eliminar(id);
         return ResponseEntity.noContent().build();
     }
+    
 }

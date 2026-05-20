@@ -51,6 +51,13 @@ public class ProductoUC {
         productoRepository.eliminar(id);
     }
 
+    public ProductoResponseDTO buscarPorId(Integer id) {
+      Producto producto = productoRepository.buscarPorId(id)
+               .orElseThrow(() -> new ProductoNotFoundException("No existe el producto con ID: " + id));
+    
+        return mapToDTO(producto);
+    }
+
     private Producto mapToModel(ProductoRequestDTO dto) {
         Producto p = new Producto();
         p.setIdCategoria(dto.getIdCategoria());

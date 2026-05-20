@@ -4,7 +4,7 @@ import './fichaTecnica.css';
 
 const FichaTecnica = () => {
     const navigate = useNavigate();
-    const { id } = useParams(); // Asumiendo que la ruta es /ficha-tecnica/:id
+    const { id } = useParams(); 
     const [showDropdown, setShowDropdown] = useState(false);
     const [user, setUser] = useState({ nombre: "Invitado", rol: "GUEST", id: null });
     
@@ -25,21 +25,32 @@ const FichaTecnica = () => {
 
         // 2. Obtener datos del producto desde Spring Boot
         // Ajusta la URL según tu controlador en el Backend
-        const fetchProducto = async () => {
-            try {
-                const response = await fetch(`http://localhost:8080/api/productos/${id}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setProducto(data);
-                } else {
-                    console.error("Error al obtener el producto");
-                }
-            } catch (error) {
-                console.error("Error de conexión:", error);
-            } finally {
-                setLoading(false);
+const fetchProducto = async () => {
+    try {
+        // 1. Recuperamos el token del almacenamiento local
+        const token = localStorage.getItem('token'); 
+        console.log("El token enviado es:", token);
+        const response = await fetch(`http://localhost:8080/api/productos/${id}`, {
+            method: 'GET',
+            // 2. Añadimos los headers con el token de autorización
+            headers: { 
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
             }
-        };
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            setProducto(data);
+        } else {
+            console.error("Error al obtener el producto. Status:", response.status);
+        }
+    } catch (error) {
+        console.error("Error de conexión:", error);
+    } finally {
+        setLoading(false);
+    }
+};
 
         if (id) fetchProducto();
     }, [isAuthenticated, id]);
