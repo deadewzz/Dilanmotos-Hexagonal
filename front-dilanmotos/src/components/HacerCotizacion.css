@@ -1,0 +1,256 @@
+/* Estilos coherentes con el proyecto (fichaTecnica.css / global.css) */
+.hacer-cotizacion {
+  max-width: 1000px;
+  margin: 24px auto;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.06);
+  padding: 20px 24px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.hacer-cotizacion h2 {
+  margin: 0 0 12px 0;
+  color: #5d50c6;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.hacer-cotizacion p { color: #555; }
+
+.hacer-cotizacion table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.hacer-cotizacion th, .hacer-cotizacion td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #f1f1f1;
+  text-align: left;
+  color: #444;
+}
+
+.hacer-cotizacion thead th {
+  color: #666;
+  font-weight: 600;
+}
+
+.hacer-cotizacion input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e6e6e6;
+  outline: none;
+}
+
+.hacer-cotizacion input:focus {
+  box-shadow: 0 4px 12px rgba(93,80,198,0.12);
+  border-color: rgba(93,80,198,0.3);
+}
+
+.hacer-cotizacion button {
+  padding: 10px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  background: #6c757d; /* default gray like .btn-primary */
+  color: #fff;
+}
+
+.hacer-cotizacion button:hover { transform: translateY(-2px); }
+
+.hacer-cotizacion button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Botón principal verde (coincide con btn-secondary usado en fichaTecnica) */
+.hacer-cotizacion .btn-green {
+  background: #27ae60;
+  box-shadow: 0 6px 14px rgba(39,174,96,0.18);
+}
+.hacer-cotizacion .btn-green:hover { background: #219150; }
+
+/* Contenedores laterales */
+.hacer-cotizacion .side-columns {
+  margin-top: 18px;
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.hacer-cotizacion .side-columns > div { flex: 1 1 260px; }
+
+.hacer-cotizacion h4 { margin: 0 0 8px 0; color: #333; }
+
+.hacer-cotizacion pre {
+  background: #f5f5f5;
+  padding: 12px;
+  border-radius: 8px;
+  overflow: auto;
+}
+
+.invoice-card {
+  margin-top: 22px;
+  background: #fdfdfd;
+  border-radius: 18px;
+  border: 1px solid #e8e8f3;
+  padding: 24px;
+  box-shadow: 0 12px 28px rgba(20, 32, 75, 0.06);
+}
+
+.invoice-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  border-bottom: 1px solid #eef0fb;
+  padding-bottom: 18px;
+}
+
+.invoice-label {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #5d50c6;
+  margin-bottom: 8px;
+}
+
+.invoice-header h3 {
+  margin: 0;
+  font-size: 1.35rem;
+  color: #232323;
+}
+
+.invoice-company {
+  text-align: right;
+  color: #5d50c6;
+  font-weight: 500;
+  line-height: 1.6;
+}
+
+.invoice-company span {
+  display: block;
+  font-size: 0.95rem;
+}
+
+.invoice-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+
+.invoice-client,
+.invoice-details {
+  background: #f8f9ff;
+  border-radius: 12px;
+  padding: 18px;
+  min-width: 240px;
+}
+
+.invoice-client h4,
+.invoice-details p {
+  margin: 0;
+}
+
+.invoice-client h4 {
+  margin-bottom: 10px;
+  font-size: 1rem;
+  color: #333;
+}
+
+.invoice-client p,
+.invoice-details p {
+  color: #555;
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.invoice-table-wrapper {
+  margin-top: 24px;
+  overflow-x: auto;
+}
+
+.invoice-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 650px;
+}
+
+.invoice-table th,
+.invoice-table td {
+  padding: 14px 12px;
+  border-bottom: 1px solid #eef0fb;
+}
+
+.invoice-table thead th {
+  background: #f6f7ff;
+  color: #5b5b8d;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.invoice-table tbody tr:hover {
+  background: rgba(93,80,198,0.04);
+}
+
+.invoice-table td {
+  color: #3f3f56;
+}
+
+.invoice-summary {
+  display: flex;
+  justify-content: flex-end;
+  gap: 22px;
+  margin-top: 18px;
+  flex-wrap: wrap;
+}
+
+.invoice-summary div {
+  min-width: 180px;
+  background: #f8f9ff;
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.invoice-summary span {
+  color: #777;
+}
+
+.invoice-summary strong {
+  color: #232323;
+}
+
+.invoice-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.invoice-actions button {
+  min-width: 180px;
+}
+
+/* Acciones de tabla */
+.hacer-cotizacion .table-actions button {
+  padding: 6px 10px;
+  font-size: 0.95rem;
+  border-radius: 6px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hacer-cotizacion { padding: 16px; margin: 12px; }
+  .hacer-cotizacion table { font-size: 0.95rem; }
+}

@@ -28,6 +28,7 @@ import Mecanico from './components/mecanico';
 import Cotizacion from './components/cotizacion';
 import Categoria from './components/categoria';
 import Marca from './components/marca';
+import HacerCotizacion from './components/HacerCotizacion';
 
 import './global.css';
 
@@ -154,6 +155,7 @@ function App() {
                 <Route path="/catalogoAceites" element={<CatalogoAceites />} />
                 <Route path="/catalogoLlantas" element={<CatalogoLlantas />} />
                 <Route path="/fichaTecnica/:id" element={<FichaTecnica />} />
+                <Route path="/hacer-cotizacion" element={<HacerCotizacion />} />
 
                 {/* ✅ DASHBOARD AHORA ES PÚBLICO */}
                 <Route path="/dashboard" element={<Dashboard />} /> 

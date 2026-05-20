@@ -87,6 +87,7 @@ const fetchProducto = async () => {
                                         <li><Link to="/asistente">Asistente IA</Link></li>
                                         <li><Link to="/historial">Mi Historial</Link></li>
                                         <li><Link to="/nueva-pqrs">Radicar PQRS</Link></li>
+                                        <li><Link to="/hacer-cotizacion">Hacer Cotización</Link></li>
                                         {user.rol === 'ADMIN' && (
                                             <>
                                                 <li className="divider"></li>
@@ -148,7 +149,22 @@ const fetchProducto = async () => {
 
                         <div className="product-actions">
                             <button className="btn-primary" onClick={() => navigate(-1)}>Volver</button>
-                            <button className="btn-secondary">Cotizar Repuesto</button>
+                            <button
+                                className="btn-secondary"
+                                onClick={() => {
+                                    if (!producto) return;
+                                    const sel = [{
+                                        id: producto.id_producto ?? producto.id ?? Math.random().toString(36).slice(2,9),
+                                        nombre: producto.nombre ?? producto.titulo ?? 'Producto',
+                                        precio: Number(producto.precio ?? 0) || 0,
+                                        cantidad: 1,
+                                    }];
+                                    localStorage.setItem('selectedProducts', JSON.stringify(sel));
+                                    navigate('/hacer-cotizacion');
+                                }}
+                            >
+                                Cotizar Repuesto
+                            </button>
                         </div>
                     </div>
                 ) : (

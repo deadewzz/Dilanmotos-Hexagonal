@@ -50,6 +50,7 @@ const CatalogoKit = () => {
                                 <li><Link to="/asistente">Asistente IA</Link></li>
                                 <li><Link to="/historial">Mi Historial</Link></li>
                                 <li><Link to="/nueva-pqrs">Radicar PQRS</Link></li>
+                                <li><Link to="/hacer-cotizacion">Hacer Cotización</Link></li>
                                 {user.rol === 'ADMIN' && (
                                     <>
                                         <li className="divider"></li>

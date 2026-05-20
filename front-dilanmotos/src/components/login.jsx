@@ -40,6 +40,7 @@ const Login = () => {
                 localStorage.setItem('isAuthenticated', 'true'); 
                 localStorage.setItem("idUsuario", idFinal); // Aquí se guarda el número real
                 localStorage.setItem("nombreUsuario", usuario.nombre);
+                localStorage.setItem("correoUsuario", usuario.correo || usuario.email || credenciales.correo || '');
                 localStorage.setItem('token', usuario.token); 
                 localStorage.setItem("rolUsuario", usuario.rol || 'USER'); 
                 
