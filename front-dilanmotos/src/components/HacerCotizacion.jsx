@@ -167,6 +167,44 @@ export default function HacerCotizacion() {
 		return { quoteId, savedItems }
 	}
 
+	function formatDetalleCotizacion(items) {
+		return items
+			.map((item) => `${item.nombre} - ${item.cantidad} x $${item.precio.toFixed(2)} = $${(item.precio * item.cantidad).toFixed(2)}`)
+			.join('\n')
+	}
+
+	async function enviarCotizacionPorCorreo(quote) {
+		if (!quote?.cliente?.email) {
+			throw new Error('No hay correo del cliente para enviar la cotización.')
+		}
+
+		const token = localStorage.getItem('token')
+		const headers = {
+			'Content-Type': 'application/json',
+			...(token ? { Authorization: `Bearer ${token}` } : {}),
+		}
+
+		const payload = {
+			destino: quote.cliente.email,
+			nombreCliente: quote.cliente.nombre || 'Cliente',
+			detalleCotizacion: formatDetalleCotizacion(quote.items),
+			total: quote.total,
+		}
+
+		const response = await fetch('http://localhost:8080/cotizacion/generar', {
+			method: 'POST',
+			headers,
+			body: JSON.stringify(payload),
+		})
+
+		if (!response.ok) {
+			const errorText = await response.text()
+			throw new Error(errorText || 'Error al enviar el correo de cotización.')
+		}
+
+		return response.text()
+	}
+
 	async function generarCotizacion() {
 		if (items.length === 0) return
 		setSavingQuote(true)
@@ -181,9 +219,20 @@ export default function HacerCotizacion() {
 				total,
 			}
 			setQuote(q)
-			setQuoteMessage(quoteId
+
+			let message = quoteId
 				? `Cotización guardada en la base de datos con No. ${quoteId}`
-				: 'Cotización generada localmente.')
+				: 'Cotización generada localmente.'
+
+			try {
+				await enviarCotizacionPorCorreo(q)
+				message += ' Correo enviado al cliente.'
+			} catch (emailError) {
+				console.error(emailError)
+				message += ' No se pudo enviar el correo de cotización.'
+			}
+
+			setQuoteMessage(message)
 			try {
 				navigator.clipboard && navigator.clipboard.writeText(JSON.stringify(q, null, 2))
 			} catch (e) {}
