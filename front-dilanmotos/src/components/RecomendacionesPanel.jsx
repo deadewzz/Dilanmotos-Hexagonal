@@ -7,44 +7,53 @@ const Recomendaciones = () => {
     const [moto, setMoto] = useState(null);
     const [productos, setProductos] = useState([]);
     const [cargando, setCargando] = useState(true);
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
         const cargarDatos = async () => {
             const id = localStorage.getItem('idUsuario');
             try {
                 // 1. Traemos la moto
-                const resMoto = await fetch(`http://localhost:8080/api/motos/usuario/${id}`);
+                const resMoto = await fetch(`http://localhost:8080/api/motos/usuario/${id}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 const dataMoto = await resMoto.json();
-                setMoto(dataMoto);
+                const motoData = Array.isArray(dataMoto) ? dataMoto[0] : dataMoto;
+                setMoto(motoData);
 
-                // 2. Simulamos que la IA elige los nombres exactos para ESA moto
-                // En un escenario real, esto vendría de tu endpoint de IA
-                setTimeout(() => {
-                    const esAlta = dataMoto.cilindraje >= 400;
-                    setProductos([
-                        { 
-                            tipo: "Lubricante Premium", 
-                            nombre: esAlta ? "Motul 7100 10W40 Sintético" : "Motul 5100 15W50 Semi", 
-                            img: "/AceiteMotul.png",
-                            razon: "Ideal para la compresión de tu motor."
-                        },
-                        { 
-                            tipo: "Llantas Recomendadas", 
-                            nombre: esAlta ? "Michelin Road 6" : "Michelin Pilot Street", 
-                            img: "/Llanta.png",
-                            razon: "Máximo agarre en las calles de Bogotá."
-                        },
-                        { 
-                            tipo: "Kit de Arrastre", 
-                            nombre: "Kit DID con Cadena Reforzada", 
-                            img: "/KitDeArrastre.png",
-                            razon: "Diseñado para soportar el torque de tu máquina."
-                        }
-                    ]);
-                    setCargando(false);
-                }, 1000);
+                // 2. Llamamos a la IA real con los datos de la moto
+                const resIA = await fetch('http://localhost:8080/api/ia/consultar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        motor: motoData.modelo,
+                        falla: `Dame exactamente 3 recomendaciones de productos para mi moto ${motoData.modelo} de ${motoData.cilindraje}cc. 
+                                Responde SOLO en formato JSON con esta estructura, sin texto adicional:
+                                [
+                                  {"tipo": "Lubricante", "nombre": "nombre del producto", "razon": "por qué lo recomiendas"},
+                                  {"tipo": "Llantas", "nombre": "nombre del producto", "razon": "por qué lo recomiendas"},
+                                  {"tipo": "Kit de Arrastre", "nombre": "nombre del producto", "razon": "por qué lo recomiendas"}
+                                ]`
+                    })
+                });
+
+                const dataIA = await resIA.json();
+
+                // 3. Parseamos el JSON que devuelve la IA
+                const textoIA = dataIA.content;
+                const jsonMatch = textoIA.match(/\[[\s\S]*\]/);
+                if (jsonMatch) {
+                    const productosIA = JSON.parse(jsonMatch[0]);
+                    const imgs = ["/AceiteMotul.png", "/Llanta.png", "/KitDeArrastre.png"];
+                    setProductos(productosIA.map((p, i) => ({ ...p, img: imgs[i] || "" })));
+                }
+
             } catch (error) {
                 console.error(error);
+            } finally {
                 setCargando(false);
             }
         };

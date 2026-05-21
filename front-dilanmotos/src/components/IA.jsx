@@ -110,9 +110,9 @@ const AsistenteMotos = () => {
     return (
         <div className="chat-container">
             <div className="chat-header">
-                <div className="avatar">DM</div>
+                <div className="avatar">CA</div>
                 <div className="header-info">
-                    <h2>Mecánico Virtual</h2>
+                    <h2>Chanda AI</h2>
                     <p><span className="status-dot"></span> Online - Dilan Motos</p>
                 </div>
             </div>

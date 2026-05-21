@@ -101,7 +101,7 @@ const Dashboard = () => {
 
                     <div className="category-item">
                         <div className="category-img"><img src="/AceiteMotul.png" alt="Aceites" /></div>
-                        <h3>Aceites y Lubricantes</h3>
+                        <h3>Aceites</h3>
                         <Link to="/catalogoAceites" className="category-btn">Ver Catálogo</Link>
                     </div>
                 </div>

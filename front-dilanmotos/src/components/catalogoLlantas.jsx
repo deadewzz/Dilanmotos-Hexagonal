@@ -2,38 +2,77 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Dashboard.css';
 
-
 const CatalogoLlantas = () => {
     const navigate = useNavigate();
     const [showDropdown, setShowDropdown] = useState(false);
-    const [user, setUser] = useState({ nombre: "Admin", rol: "ADMIN", id: null });
+    const [user, setUser] = useState({ nombre: "Invitado", rol: "GUEST", id: null });
+    const [kits, setKits] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-    // Carga de datos de sesión (basado en tu referencia)
+    const isAuthenticated = !!localStorage.getItem('token');
+
+    // 1. Manejo de Sesión de Usuario
     useEffect(() => {
-        const id = localStorage.getItem('idUsuario');
-        const nombre = localStorage.getItem('nombreUsuario');
-        const rol = localStorage.getItem('rolUsuario');
-        
-        if (nombre) {
-            setUser({ nombre: nombre, rol: rol || "USER", id });
+        if (isAuthenticated) {
+            const idU = localStorage.getItem('idUsuario');
+            const nombre = localStorage.getItem('nombreUsuario');
+            const rol = localStorage.getItem('rolUsuario');
+            setUser({ nombre: nombre || "Socio", rol: rol || "USER", id: idU });
         }
+    }, [isAuthenticated]);
+
+    // 2. Obtener y filtrar los productos desde el Backend
+    useEffect(() => {
+        const fetchKits = async () => {
+            const token = localStorage.getItem('token');
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/productos', { 
+                    method: 'GET', 
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    } 
+                });
+
+                // Cambiar el filtro dentro de la respuesta exitosa (response.ok)
+                // Cambiar el filtro dentro de la respuesta exitosa (response.ok)
+                if (response.ok) {
+                const todosLosProductos = await response.json();
+    
+                // Filtramos asegurándonos de que solo entren las Llantas
+                const soloLlantas = todosLosProductos.filter(producto => 
+                producto.nombre && producto.nombre.toLowerCase().includes('llanta')
+                );
+
+                setKits(soloLlantas); // (Puedes renombrar el estado a 'llantas' si lo deseas)
+                }
+            } catch (error) {
+                console.error("Error de conexión:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchKits();
     }, []);
 
     const handleLogout = () => {
         localStorage.clear();
+        setUser({ nombre: "Invitado", rol: "GUEST", id: null });
         navigate('/login');
     };
 
     return (
         <div className="dashboard-wrapper">
-            {/* Header consistente con la imagen */}
+            {/* Header / Barra de Navegación */}
             <header className="dashboard-header">
                 <div className="header-container">
                     <img 
                         src="/LogoDilanMotos.png" 
                         alt="Dilan Motos" 
                         className="main-logo" 
-                        style={{cursor: 'pointer'}} 
+                        style={{ cursor: 'pointer' }} 
                         onClick={() => navigate('/dashboard')} 
                     />
                     
@@ -45,79 +84,74 @@ const CatalogoLlantas = () => {
 
                         {showDropdown && (
                             <ul className="dropdown-menu-custom shadow-lg">
-                                <li><Link to="/perfil">Mi Cuenta</Link></li>
-                                <li><Link to="/asistente">Asistente IA</Link></li>
-                                <li><Link to="/historial">Mi Historial</Link></li>
-                                <li><Link to="/nueva-pqrs">Radicar PQRS</Link></li>
-                                <li><Link to="/hacer-cotizacion">Hacer Cotización</Link></li>
-                                {user.rol === 'ADMIN' && (
+                                {isAuthenticated ? (
                                     <>
+                                        <li><Link to="/perfil">Mi Cuenta</Link></li>
+                                        <li><Link to="/asistente">Asistente IA</Link></li>
+                                        <li><Link to="/historial">Mi Historial</Link></li>
+                                        <li><Link to="/nueva-pqrs">Radicar PQRS</Link></li>
+                                        <li><Link to="/hacer-cotizacion">Hacer Cotización</Link></li>
+                                        {user.rol === 'ADMIN' && (
+                                            <>
+                                                <li className="divider"></li>
+                                                <li><Link to="/usuarios" className="admin-link">Gestión de Sistema</Link></li>
+                                            </>
+                                        )}
                                         <li className="divider"></li>
-                                        <li>
-                                            <Link to="/usuarios" className="admin-link">
-                                                Gestion de Sistema
-                                            </Link>
-                                        </li>
+                                        <li><button onClick={handleLogout} className="logout-btn-custom">Cerrar Sesión</button></li>
+                                    </>
+                                ) : (
+                                    <>
+                                        <li><Link to="/login">Iniciar Sesión</Link></li>
+                                        <li><Link to="/register">Registrarse</Link></li>
                                     </>
                                 )}
-                                
-                                <li className="divider"></li>
-                                <li>
-                                    <button onClick={handleLogout} className="logout-btn-custom">
-                                        Cerrar Sesion
-                                    </button>
-                                </li>
                             </ul>
                         )}
                     </div>
                 </div>
             </header>
 
-            {/* Contenido Principal Estilo Imagen */}
+            {/* Contenido Principal */}
             <main className="dashboard-content">
                 <div className="hero-section text-center">
                     <h1 className="main-title">Mantenimiento Inteligente</h1>
-                    
                     <Link to="/recomendacion" className="promo-banner">
                         Ver Recomendaciones de la IA
                     </Link>
                 </div>
 
-                <h2 className="section-subtitle">Nuestros Productos</h2>
+                <h2 className="section-subtitle">Nuestras Llantas</h2>
                 
                 <div className="categories-grid">
-                   
-                    <div className="category-item">
-                        <div className="category-img">
-                            <img src="/Llanta.png" alt="Llantas" />
+                    {loading ? (
+                        <div className="loading" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '20px' }}>
+                            Cargando kits desde la base de datos...
                         </div>
-                        <h3>Nombre del producto</h3>
-                        <Link to="/fichaTecnica/3" className="category-btn">Ver ficha técnica</Link>
-                    </div>
-                        
-                    
-                    <div className="category-item">
-                        <div className="category-img">
-                            <img src="/Llanta.png" alt="Llantas" />
+                    ) : kits.length > 0 ? (
+                        kits.map((kit) => (
+                            <div className="category-item" key={kit.idProducto}>
+                                <div className="category-img">
+                                    <img src={kit.imagenUrl || "/Llanta.png"} alt={kit.nombre} />
+                                </div>
+                                <h3>{kit.nombre}</h3>
+                                <Link to={`/fichaTecnica/${kit.idProducto}`} className="category-btn">
+                                    Ver ficha técnica
+                                </Link>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="error-message" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '20px' }}>
+                            No se encontraron kits de arrastre disponibles.
                         </div>
-                        <h3>Nombre del producto</h3>
-                        <Link to="/fichaTecnica/4" className="category-btn">Ver ficha técnica</Link>
-                    </div>
-
-                 
-                    <div className="category-item">
-                        <div className="category-img">
-                            <img src="/Llanta.png" alt="Llantas" />
-                        </div>
-                        <h3>Nombre del producto</h3>
-                        <Link to="/fichaTecnica/9" className="category-btn">Ver ficha técnica</Link>
-                    </div>
+                    )}
                 </div>
             </main>
 
+            {/* Pie de Página */}
             <footer className="dashboard-footer">
                 <div className="btn-tech-support">
-                    Soporte Tecnico: 300-XXX-XXXX
+                    Soporte Técnico: 300-XXX-XXXX
                 </div>
             </footer>
         </div>

@@ -16,19 +16,23 @@ public class ChatController {
         this.chatUseCase = chatUseCase;
     }
 
-    @PostMapping("/consultar")                          // ✅ era /ask
-    public ResponseEntity<ChatResponse> consultar(@RequestBody ConsultaRequest request) { // ✅ era @RequestParam
+    @PostMapping("/consultar")
+    public ResponseEntity<ChatResponse> consultar(@RequestBody ConsultaRequest request) {
         if (request == null || request.getFalla() == null || request.getFalla().isBlank()) {
             return ResponseEntity.badRequest().build();
         }
 
-        // Armamos el mensaje combinando moto + falla
-        String mensaje = "Moto: " + request.getMotor() + ". Consulta: " + request.getFalla();
-        ChatResponse response = chatUseCase.execute(mensaje);
-        return ResponseEntity.ok(response);
+        String mensaje = """
+                El cliente tiene la siguiente moto: %s.
+                Pregunta del cliente: %s
+                """.formatted(
+                    request.getMotor() != null ? request.getMotor() : "moto no especificada",
+                    request.getFalla()
+                );
+
+        return ResponseEntity.ok(chatUseCase.execute(mensaje));
     }
 
-    // Clase interna para mapear el JSON del frontend
     static class ConsultaRequest {
         private String motor;
         private String falla;
