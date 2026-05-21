@@ -6,7 +6,7 @@ import lombok.Data;
 public class MotoResumen {
     private Integer idMoto;
     private String modelo;
-    private Integer cilindraje;
+    private Double cilindraje;
     private Integer idMarca;
     private String nombreMarca;
 }

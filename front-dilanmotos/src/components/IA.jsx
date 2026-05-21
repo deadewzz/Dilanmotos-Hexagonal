@@ -84,7 +84,7 @@ const AsistenteMotos = () => {
             if (res.ok) {
                 const data = await res.json();
                 // Usamos 'recomendacion' o 'respuesta' según lo que envíe tu backend
-                setMensajes(prev => [...prev, { rol: 'ia', texto: data.recomendacion || data.respuesta }]);
+                setMensajes(prev => [...prev, { rol: 'ia', texto: data.content }]);
             } else if (res.status === 401) {
                 setMensajes(prev => [...prev, { rol: 'ia', texto: "🚨 Tu sesión ha expirado. Por favor, ingresa de nuevo." }]);
             } else {

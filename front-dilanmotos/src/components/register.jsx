@@ -4,35 +4,31 @@ import '../auth.css';
 
 const Register = () => {
     const navigate = useNavigate();
-    
-    // Estados para los selectores
+
     const [marcas, setMarcas] = useState([]);
     const [referencias, setReferencias] = useState([]);
-    
-    // Estado del formulario 
+
     const [formData, setFormData] = useState({
-        nombre: '', 
-        correo: '', 
-        contrasena: '', 
+        nombre: '',
+        correo: '',
+        contrasena: '',
         idReferencia: ''
     });
 
-    // 1. Cargar Marcas al montar el componente
+    // 1. Cargar marcas al montar
     useEffect(() => {
         fetch("http://localhost:8080/api/marcas")
             .then(res => {
-                if (!res.ok) throw new Error("Error al obtener marcas (401 o 500)");
+                if (!res.ok) throw new Error("Error al obtener marcas");
                 return res.json();
             })
             .then(data => setMarcas(data))
             .catch(err => console.error("Error cargando marcas:", err));
     }, []);
 
-    // 2. Cargar Modelos cuando cambia la marca
+    // 2. Cargar referencias al cambiar marca
     const handleMarcaChange = (e) => {
         const idMarca = e.target.value;
-        
-        // Limpiar modelos y selección previa
         setReferencias([]);
         setFormData(prev => ({ ...prev, idReferencia: '' }));
 
@@ -43,7 +39,6 @@ const Register = () => {
                     return res.json();
                 })
                 .then(data => {
-                    // Filtrar por si acaso hay datos vacíos en el catálogo
                     const validos = data.filter(ref => ref.nombre && ref.nombre !== '');
                     setReferencias(validos);
                 })
@@ -51,15 +46,21 @@ const Register = () => {
         }
     };
 
-    // 3. Manejo del envío del formulario
+    // 3. Enviar formulario
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
+
+        // ✅ Convertir idReferencia a número antes de enviar
+        const payload = {
+            ...formData,
+            idReferencia: formData.idReferencia ? parseInt(formData.idReferencia) : null
+        };
+
         try {
             const res = await fetch("http://localhost:8080/api/usuarios", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(payload)
             });
 
             if (res.ok) {
@@ -80,41 +81,41 @@ const Register = () => {
             <div className="auth-card">
                 <h2>Crea tu cuenta</h2>
                 <p>Únete al mejor taller para tu moto</p>
-                
+
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label>Nombre Completo</label>
-                        <input 
-                            className="auth-input" 
-                            type="text" 
-                            placeholder="Ej: Juan Perez" 
+                        <input
+                            className="auth-input"
+                            type="text"
+                            placeholder="Ej: Juan Perez"
                             value={formData.nombre}
-                            onChange={e => setFormData({...formData, nombre: e.target.value})} 
-                            required 
+                            onChange={e => setFormData({ ...formData, nombre: e.target.value })}
+                            required
                         />
                     </div>
 
                     <div className="form-group">
                         <label>Correo Electrónico</label>
-                        <input 
-                            className="auth-input" 
-                            type="email" 
-                            placeholder="correo@ejemplo.com" 
+                        <input
+                            className="auth-input"
+                            type="email"
+                            placeholder="correo@ejemplo.com"
                             value={formData.correo}
-                            onChange={e => setFormData({...formData, correo: e.target.value})} 
-                            required 
+                            onChange={e => setFormData({ ...formData, correo: e.target.value })}
+                            required
                         />
                     </div>
 
                     <div className="form-group">
                         <label>Contraseña</label>
-                        <input 
-                            className="auth-input" 
-                            type="password" 
-                            placeholder="Mínimo 6 caracteres" 
+                        <input
+                            className="auth-input"
+                            type="password"
+                            placeholder="Mínimo 6 caracteres"
                             value={formData.contrasena}
-                            onChange={e => setFormData({...formData, contrasena: e.target.value})} 
-                            required 
+                            onChange={e => setFormData({ ...formData, contrasena: e.target.value })}
+                            required
                         />
                     </div>
 
@@ -135,10 +136,10 @@ const Register = () => {
 
                     <div className="form-group">
                         <label>Modelo (de nuestro catálogo)</label>
-                        <select 
-                            className="auth-input" 
+                        <select
+                            className="auth-input"
                             value={formData.idReferencia}
-                            onChange={e => setFormData({...formData, idReferencia: e.target.value})}
+                            onChange={e => setFormData({ ...formData, idReferencia: e.target.value })}
                             disabled={referencias.length === 0}
                             required
                         >
@@ -147,7 +148,7 @@ const Register = () => {
                             </option>
                             {referencias.map(ref => (
                                 <option key={ref.idReferencia} value={ref.idReferencia}>
-                                    {ref.nombre} ({ref.cilindraje} cc)
+                                    {ref.nombre}
                                 </option>
                             ))}
                         </select>

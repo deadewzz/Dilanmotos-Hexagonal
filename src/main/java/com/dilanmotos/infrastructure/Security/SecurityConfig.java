@@ -45,6 +45,7 @@ public class SecurityConfig {
                                 "/api/categorias/**",
                                 "/api/productos/**",
                                 "/api/motos/**",
+                                "/api/IA/**",
                                 "/api/tipoServicio/**",
                                 "/api/servicios/**",
                                 "/api/pqrs/**",

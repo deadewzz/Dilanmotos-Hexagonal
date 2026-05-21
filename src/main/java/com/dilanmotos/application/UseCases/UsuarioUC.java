@@ -1,6 +1,9 @@
 package com.dilanmotos.application.UseCases;
 
+import com.dilanmotos.domain.model.Moto;
 import com.dilanmotos.domain.model.Usuario;
+import com.dilanmotos.domain.repository.MotoRepository;
+import com.dilanmotos.domain.repository.ReferenciaMotoRepository;
 import com.dilanmotos.domain.repository.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -11,22 +14,47 @@ public class UsuarioUC implements UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MotoRepository motoRepository;
+    private final ReferenciaMotoRepository referenciaRepository;
 
-    public UsuarioUC(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
+    public UsuarioUC(UsuarioRepository usuarioRepository,
+                     PasswordEncoder passwordEncoder,
+                     MotoRepository motoRepository,
+                     ReferenciaMotoRepository referenciaRepository) {
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.motoRepository = motoRepository;
+        this.referenciaRepository = referenciaRepository;
     }
 
     @Override
     public Usuario registrar(Usuario usuario) {
+        // 1. Encriptar contraseña y asignar rol por defecto
         usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
         if (usuario.getRol() == null || usuario.getRol().isEmpty()) {
             usuario.setRol("USER");
         }
-        return usuarioRepository.guardar(usuario);
+
+        // 2. Guardar usuario y obtener el ID generado por la BD
+        Usuario guardado = usuarioRepository.guardar(usuario);
+
+        // 3. Si viene con referencia, crear la moto asociada
+        if (usuario.getIdReferencia() != null) {
+            referenciaRepository.buscarPorId(usuario.getIdReferencia())
+                .ifPresent(ref -> {
+                    Moto moto = new Moto();
+                    moto.setIdUsuario(guardado.getIdUsuario()); // ✅ ID real de la BD
+                    moto.setIdMarca(ref.getIdMarca());
+                    moto.setModelo(ref.getNombre());
+                    moto.setCilindraje(ref.getCilindraje() != null ? ref.getCilindraje() : 0.0); // ReferenciaMoto no tiene cilindraje, se deja en 0
+                    motoRepository.guardar(moto);
+                });
+        }
+
+        return guardado;
     }
 
-    @Override // se añade esto para que el IDE te confirme si el nombre es correcto
+    @Override
     public Usuario buscarPorCorreo(String correo) {
         return usuarioRepository.buscarPorCorreo(correo)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -50,22 +78,16 @@ public class UsuarioUC implements UsuarioService {
 
     @Override
     public Usuario actualizar(int id, Usuario datosNuevos) {
-        // 1. Buscamos el usuario REAL que ya existe en la BD
         Usuario usuarioExistente = usuarioRepository.buscarPorId(id)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + id));
 
-        // 2. IMPORTANTE: Solo modificamos los campos permitidos
-        // sobre el objeto que ya tiene el ID correcto de la BD
         usuarioExistente.setNombre(datosNuevos.getNombre());
         usuarioExistente.setCorreo(datosNuevos.getCorreo());
 
-        // 3. Manejo de contraseña
         if (datosNuevos.getContrasena() != null && !datosNuevos.getContrasena().isEmpty()) {
             usuarioExistente.setContrasena(passwordEncoder.encode(datosNuevos.getContrasena()));
         }
 
-        // 4. Al guardar 'usuarioExistente', JPA reconoce que el ID ya existe y hace un
-        // UPDATE
         return usuarioRepository.guardar(usuarioExistente);
     }
 }

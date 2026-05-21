@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/motos")
@@ -18,6 +19,11 @@ public class MotoController {
 
     public MotoController(MotoUC uc) {
         this.uc = uc;
+    }
+
+    @GetMapping("/usuario/{idUsuario}")
+    public ResponseEntity<List<MotoResponseDTO>> listarPorUsuario(@PathVariable Integer idUsuario) {
+        return ResponseEntity.ok(uc.listarPorUsuario(idUsuario));
     }
 
     @GetMapping
