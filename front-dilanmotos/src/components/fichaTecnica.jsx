@@ -153,14 +153,27 @@ const fetchProducto = async () => {
                                 className="btn-secondary"
                                 onClick={() => {
                                     if (!producto) return;
-                                    const sel = [{
-                                        id: producto.id_producto ?? producto.id ?? Math.random().toString(36).slice(2,9),
+                                    const stored = localStorage.getItem('selectedProducts')
+                                    const current = stored ? JSON.parse(stored) : []
+                                    const productId = producto.id_producto ?? producto.id ?? Math.random().toString(36).slice(2,9)
+                                    const existing = current.find((item) => String(item.id) === String(productId))
+                                    const newItem = {
+                                        id: productId,
                                         nombre: producto.nombre ?? producto.titulo ?? 'Producto',
                                         precio: Number(producto.precio ?? 0) || 0,
                                         cantidad: 1,
-                                    }];
-                                    localStorage.setItem('selectedProducts', JSON.stringify(sel));
-                                    navigate('/hacer-cotizacion');
+                                    }
+
+                                    const updated = existing
+                                        ? current.map((item) =>
+                                            String(item.id) === String(productId)
+                                                ? { ...item, cantidad: Number(item.cantidad ?? 0) + 1 }
+                                                : item,
+                                        )
+                                        : [...current, newItem]
+
+                                    localStorage.setItem('selectedProducts', JSON.stringify(updated))
+                                    navigate('/hacer-cotizacion')
                                 }}
                             >
                                 Cotizar Repuesto

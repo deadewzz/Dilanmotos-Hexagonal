@@ -21,6 +21,11 @@ export default function HacerCotizacion() {
 	const [items, setItems] = useState([])
 	const [customer, setCustomer] = useState({ nombre: '', email: '' })
 	const [quote, setQuote] = useState(null)
+	const [products, setProducts] = useState([])
+	const [selectedProductId, setSelectedProductId] = useState('')
+	const [loadingProducts, setLoadingProducts] = useState(true)
+	const [savingQuote, setSavingQuote] = useState(false)
+	const [quoteMessage, setQuoteMessage] = useState('')
 
 	useEffect(() => {
 		const nombreGuardado = localStorage.getItem('nombreUsuario') || ''
@@ -43,16 +48,70 @@ export default function HacerCotizacion() {
 		}
 	}, [])
 
+	useEffect(() => {
+		const abortController = new AbortController()
+
+		async function fetchProducts() {
+			setLoadingProducts(true)
+			try {
+				const token = localStorage.getItem('token')
+				const headers = token ? { Authorization: `Bearer ${token}` } : {}
+				const response = await fetch('http://localhost:8080/api/productos', {
+					signal: abortController.signal,
+					headers,
+				})
+				if (!response.ok) throw new Error('No se pudieron cargar los productos')
+				const data = await response.json()
+				setProducts(Array.isArray(data) ? data : [])
+			} catch (error) {
+				// ignore load failure; dropdown stays empty
+			} finally {
+				setLoadingProducts(false)
+			}
+		}
+
+		fetchProducts()
+
+		return () => abortController.abort()
+	}, [])
+
+	useEffect(() => {
+		try {
+			localStorage.setItem('selectedProducts', JSON.stringify(items))
+		} catch (e) {
+			// ignore storage errors
+		}
+	}, [items])
+
+	function addProduct(product) {
+		if (!product) return
+		const id = product.idProducto ?? product.id ?? Math.random().toString(36).slice(2, 9)
+		const price = Number(product.precio ?? product.price ?? 0) || 0
+		const name = product.nombre ?? product.titulo ?? 'Producto'
+
+		setItems((prev) => {
+			const found = prev.find((item) => String(item.id) === String(id))
+			if (found) {
+				return prev.map((item) =>
+					String(item.id) === String(id)
+						? { ...item, cantidad: item.cantidad + 1 }
+						: item,
+				)
+			}
+			return [...prev, { id, nombre: name, precio: price, cantidad: 1 }]
+		})
+	}
+
 	function updateCantidad(id, delta) {
 		setItems((prev) =>
 			prev
-				.map((it) => (it.id === id ? { ...it, cantidad: Math.max(1, it.cantidad + delta) } : it))
+				.map((it) => (String(it.id) === String(id) ? { ...it, cantidad: Math.max(1, it.cantidad + delta) } : it))
 				.filter(Boolean),
 		)
 	}
 
 	function removeItem(id) {
-		setItems((prev) => prev.filter((it) => it.id !== id))
+		setItems((prev) => prev.filter((it) => String(it.id) !== String(id)))
 	}
 
 	function clearAll() {
@@ -61,18 +120,87 @@ export default function HacerCotizacion() {
 
 	const total = items.reduce((s, it) => s + it.precio * it.cantidad, 0)
 
-	function generarCotizacion() {
-		const q = {
-			id: Date.now(),
-			fecha: new Date().toISOString(),
-			cliente: customer,
-			items,
-			total,
+	async function saveCotizacionToBackend(items) {
+		const token = localStorage.getItem('token')
+		const idUsuario = localStorage.getItem('idUsuario')
+		if (!token || !idUsuario) {
+			throw new Error('Es necesario iniciar sesión para guardar la cotización en la base de datos.')
 		}
-		setQuote(q)
+
+		const headers = {
+			'Content-Type': 'application/json',
+			Authorization: `Bearer ${token}`,
+		}
+
+		const fecha = new Date().toISOString()
+		let quoteId = null
+		const savedItems = []
+
+		for (const item of items) {
+			const payload = {
+				idUsuario: Number(idUsuario),
+				producto: item.nombre,
+				cantidad: item.cantidad,
+				precioUnitario: item.precio,
+				fecha,
+				producto_agregado: true,
+			}
+
+			const response = await fetch('http://localhost:8080/api/cotizaciones', {
+				method: 'POST',
+				headers,
+				body: JSON.stringify(payload),
+			})
+
+			if (!response.ok) {
+				const errorText = await response.text()
+				throw new Error(errorText || 'Error al guardar la cotización')
+			}
+
+			const saved = await response.json()
+			savedItems.push(saved)
+			if (quoteId === null) {
+				quoteId = saved.idCotizacion ?? saved.id
+			}
+		}
+
+		return { quoteId, savedItems }
+	}
+
+	async function generarCotizacion() {
+		if (items.length === 0) return
+		setSavingQuote(true)
+		setQuoteMessage('')
 		try {
-			navigator.clipboard && navigator.clipboard.writeText(JSON.stringify(q, null, 2))
-		} catch (e) {}
+			const { quoteId } = await saveCotizacionToBackend(items)
+			const q = {
+				idCotizacion: quoteId,
+				fecha: new Date().toISOString(),
+				cliente: customer,
+				items,
+				total,
+			}
+			setQuote(q)
+			setQuoteMessage(quoteId
+				? `Cotización guardada en la base de datos con No. ${quoteId}`
+				: 'Cotización generada localmente.')
+			try {
+				navigator.clipboard && navigator.clipboard.writeText(JSON.stringify(q, null, 2))
+			} catch (e) {}
+		} catch (error) {
+			console.error(error)
+			setQuoteMessage('No se pudo guardar la cotización en la base de datos. Revise la conexión o el inicio de sesión.')
+			const q = {
+				idCotizacion: Date.now(),
+				fecha: new Date().toISOString(),
+				cliente: customer,
+				items,
+				total,
+			}
+			setQuote(q)
+		} finally {
+			setSavingQuote(false)
+		}
 	}
 
 	function descargarJSON() {
@@ -81,13 +209,28 @@ export default function HacerCotizacion() {
 		const url = URL.createObjectURL(blob)
 		const a = document.createElement('a')
 		a.href = url
-		a.download = `cotizacion_${quote.id}.json`
+		a.download = `cotizacion_${quote.idCotizacion ?? quote.id ?? 'sin-id'}.json`
 		a.click()
 		URL.revokeObjectURL(url)
 	}
 
+	const isSelected = (id) => items.some((item) => String(item.id) === String(id))
+
+	const handleSelectProduct = (e) => {
+		setSelectedProductId(e.target.value)
+	}
+
+	const addSelectedProduct = () => {
+		if (!selectedProductId) return
+		const product = products.find((product) => String(product.idProducto ?? product.id) === String(selectedProductId))
+		if (product) {
+			addProduct(product)
+			setSelectedProductId('')
+		}
+	}
+
 	return (
-		<div className="hacer-cotizacion" style={{ padding: 16 }}>
+		<div className="hacer-cotizacion">
 			<h2>Cotización</h2>
 
 			{items.length === 0 ? (
@@ -125,8 +268,8 @@ export default function HacerCotizacion() {
 				</div>
 			)}
 
-			<div style={{ marginTop: 16, display: 'flex', gap: 16, flexWrap: 'wrap' }}>
-				<div style={{ minWidth: 260 }}>
+			<div className="side-columns">
+				<div>
 					<h4>Datos Personales</h4>
 					<div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
 						<input placeholder="Nombre" value={customer.nombre} readOnly />
@@ -134,16 +277,38 @@ export default function HacerCotizacion() {
 					</div>
 				</div>
 
-				<div style={{ minWidth: 220 }}>
+				<div>
 					<h4>Resumen</h4>
 					<p>Total: <strong>{total.toFixed(2)}</strong></p>
-					<div style={{ display: 'flex', gap: 8 }}>
-						<button onClick={generarCotizacion} disabled={items.length === 0}>Generar Cotización</button>
+					<div className="product-selector-row">
+						<select value={selectedProductId} onChange={handleSelectProduct} disabled={loadingProducts || products.length === 0}>
+							<option value="">
+							{loadingProducts
+								? 'Cargando productos...'
+								: products.length === 0
+									? 'No hay productos disponibles'
+									: 'Seleccionar producto...'}
+						</option>
+							{products.map((product) => {
+								const id = product.idProducto ?? product.id
+								return (
+									<option key={id} value={id}>
+										{product.nombre ?? product.titulo ?? 'Producto'} - ${Number(product.precio ?? product.price ?? 0).toFixed(2)}
+									</option>
+								)
+							})}
+						</select>
+						<button onClick={addSelectedProduct} disabled={!selectedProductId || isSelected(selectedProductId)}>
+							{isSelected(selectedProductId) ? 'Ya seleccionado' : 'Agregar'}
+						</button>
+					</div>
+					<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+						<button onClick={generarCotizacion} disabled={savingQuote || items.length === 0}>{savingQuote ? 'Guardando...' : 'Generar Cotización'}</button>
 						<button onClick={clearAll} disabled={items.length === 0}>Vaciar</button>
 					</div>
 				</div>
 			</div>
-
+							
 			{quote && (
 				<div className="invoice-card">
 					<div className="invoice-header">
@@ -166,7 +331,7 @@ export default function HacerCotizacion() {
 						</div>
 						<div className="invoice-details">
 							<p><strong>Fecha:</strong> {new Date(quote.fecha).toLocaleString()}</p>
-							<p><strong>No. Cotización:</strong> {quote.id}</p>
+							<p><strong>No. Cotización:</strong> {quote.idCotizacion ?? quote.id}</p>
 							<p><strong>Total:</strong> ${quote.total.toFixed(2)}</p>
 						</div>
 					</div>
@@ -203,11 +368,6 @@ export default function HacerCotizacion() {
 							<span>Total</span>
 							<strong>${quote.total.toFixed(2)}</strong>
 						</div>
-					</div>
-
-					<div className="invoice-actions">
-						<button className="btn-green" onClick={descargarJSON}>Descargar JSON</button>
-						<button className="btn-green" onClick={() => navigator.clipboard && navigator.clipboard.writeText(JSON.stringify(quote, null, 2))}>Copiar al portapapeles</button>
 					</div>
 				</div>
 			)}

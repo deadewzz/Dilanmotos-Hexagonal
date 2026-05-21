@@ -242,6 +242,64 @@
   min-width: 180px;
 }
 
+.add-products-section {
+  margin-bottom: 24px;
+  padding: 18px;
+  border: 1px solid #eef0fb;
+  border-radius: 14px;
+  background: #fafbff;
+}
+
+.add-products-section h4 {
+  margin: 0 0 12px;
+  font-size: 1.1rem;
+  color: #2f2f56;
+}
+
+.product-table-wrapper {
+  overflow-x: auto;
+}
+
+.product-table-wrapper table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.product-table-wrapper th,
+.product-table-wrapper td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #eef0fb;
+  text-align: left;
+}
+
+.product-table-wrapper tbody tr:hover {
+  background: rgba(93,80,198,0.04);
+}
+
+.product-selector-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin: 14px 0 12px;
+}
+
+.product-selector-row select {
+  flex: 1 1 180px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #e6e6e6;
+  background: #fff;
+  color: #333;
+}
+
+.product-selector-row button {
+  min-width: 140px;
+}
+
+.error {
+  color: #c0392b;
+}
+
 /* Acciones de tabla */
 .hacer-cotizacion .table-actions button {
   padding: 6px 10px;
