@@ -45,26 +45,32 @@ public class MotoRepositoryImpl implements MotoRepository {
         jpa.deleteById(id);
     }
 
-    private Moto toModel(MotoEntity e) {
-        Moto m = new Moto();
-        m.setIdMoto(e.getIdMoto());
-        m.setIdUsuario(e.getIdUsuario());
-        m.setIdMarca(e.getIdMarca());
-        m.setModelo(e.getModelo());
-        m.setCilindraje(e.getCilindraje());
-        return m;
+   private Moto toModel(MotoEntity e) {
+    Moto m = new Moto();
+    m.setIdMoto(e.getIdMoto());
+    m.setIdUsuario(e.getIdUsuario());
+    m.setIdMarca(e.getIdMarca());
+    m.setModelo(e.getModelo());
+    m.setCilindraje(e.getCilindraje() != null ? e.getCilindraje() : 0.0); // ✅ null-safe
+    return m;
+}
+
+    @Override
+public List<Moto> obtenerPorUsuario(Integer idUsuario) {
+    return jpa.findByIdUsuario(idUsuario).stream()
+            .map(this::toModel)
+            .collect(Collectors.toList());
     }
 
     private MotoEntity toEntity(Moto m) {
-        MotoEntity e = new MotoEntity();
-        // ESTA CONDICIÓN EVITA LOS DUPLICADOS
-        if (m.getIdMoto() != null) {
-            e.setIdMoto(m.getIdMoto());
-        }
-        e.setIdUsuario(m.getIdUsuario());
-        e.setIdMarca(m.getIdMarca());
-        e.setModelo(m.getModelo());
-        e.setCilindraje((int) m.getCilindraje());
-        return e;
+    MotoEntity e = new MotoEntity();
+    if (m.getIdMoto() != null) {
+        e.setIdMoto(m.getIdMoto());
     }
+    e.setIdUsuario(m.getIdUsuario());
+    e.setIdMarca(m.getIdMarca());
+    e.setModelo(m.getModelo());
+    e.setCilindraje(m.getCilindraje()); // ✅ sin cast
+    return e;
+}
 }

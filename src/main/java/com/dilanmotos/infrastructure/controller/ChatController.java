@@ -3,40 +3,39 @@ package com.dilanmotos.infrastructure.controller;
 import com.dilanmotos.application.UseCases.ChatUseCase;
 import com.dilanmotos.domain.model.ChatResponse;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/chat")
+@RequestMapping("/api/ia")
 @CrossOrigin(origins = "*")
 public class ChatController {
 
     private final ChatUseCase chatUseCase;
 
-    // Inyección por constructor (Spring se encarga gracias a tu BeanConfiguration)
     public ChatController(ChatUseCase chatUseCase) {
         this.chatUseCase = chatUseCase;
     }
 
-    /**
-     * Endpoint para consultar a la IA de Groq.
-     * Acceso: POST http://localhost:8080/chat/ask?message=Tu consulta aquí
-     */
-    @PostMapping("/ask")
-    public ResponseEntity<ChatResponse> ask(@RequestParam(name = "message") String message) {
-        
-        // 1. Validamos que el mensaje no esté vacío
-        if (message == null || message.isBlank()) {
+    @PostMapping("/consultar")                          // ✅ era /ask
+    public ResponseEntity<ChatResponse> consultar(@RequestBody ConsultaRequest request) { // ✅ era @RequestParam
+        if (request == null || request.getFalla() == null || request.getFalla().isBlank()) {
             return ResponseEntity.badRequest().build();
         }
 
-        // 2. Llamamos al caso de uso (Capa de Aplicación)
-        ChatResponse response = chatUseCase.execute(message);
-
-        // 3. Devolvemos la respuesta con estado 200 OK
+        // Armamos el mensaje combinando moto + falla
+        String mensaje = "Moto: " + request.getMotor() + ". Consulta: " + request.getFalla();
+        ChatResponse response = chatUseCase.execute(mensaje);
         return ResponseEntity.ok(response);
+    }
+
+    // Clase interna para mapear el JSON del frontend
+    static class ConsultaRequest {
+        private String motor;
+        private String falla;
+
+        public String getMotor() { return motor; }
+        public void setMotor(String motor) { this.motor = motor; }
+        public String getFalla() { return falla; }
+        public void setFalla(String falla) { this.falla = falla; }
     }
 }

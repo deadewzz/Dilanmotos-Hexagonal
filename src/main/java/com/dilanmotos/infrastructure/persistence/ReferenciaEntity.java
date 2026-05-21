@@ -6,7 +6,7 @@ import lombok.*;
 
 @Entity
 @Table(name = "referencia_motos")
-@Getter @Setter              
+@Getter @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ReferenciaEntity {
@@ -16,11 +16,14 @@ public class ReferenciaEntity {
     @Column(name = "id_referencia")
     private Integer idReferencia;
 
-    @Column(name = "nombre") 
-        private String nombre;
+    @Column(name = "nombre")
+    private String nombre;
+
+    @Column(name = "cilindraje")
+    private Double cilindraje; // ✅ nuevo campo
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id_marca")  
+    @JoinColumn(name = "id_marca")
     @JsonIgnoreProperties("referencias")
-    private MarcaEntity marca;       
+    private MarcaEntity marca;
 }

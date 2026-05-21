@@ -25,5 +25,5 @@ public class MotoEntity {
     private String modelo;
 
     @Column(name = "cilindraje")
-    private Integer cilindraje;
+    private Double cilindraje;
 }

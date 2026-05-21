@@ -40,6 +40,13 @@ public class MotoUC {
                 .orElseThrow(() -> new MotoNotFoundException("Moto no encontrada: " + id));
     }
 
+    public List<MotoResponseDTO> listarPorUsuario(Integer idUsuario) {
+    return motoRepository.obtenerPorUsuario(idUsuario).stream()
+            .map(this::mapToDTO)
+            .collect(Collectors.toList());
+    }
+    
+
     public MotoResponseDTO actualizar(Integer id, MotoRequestDTO request) {
         motoRepository.buscarPorId(id)
                 .orElseThrow(() -> new MotoNotFoundException("No existe la moto: " + id));

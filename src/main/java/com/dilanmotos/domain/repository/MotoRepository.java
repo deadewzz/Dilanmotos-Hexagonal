@@ -15,4 +15,7 @@ public interface MotoRepository {
     Moto actualizar(Moto moto);
 
     void eliminar(Integer id);
+
+    List<Moto> obtenerPorUsuario(Integer idUsuario);
+
 }

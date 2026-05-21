@@ -31,9 +31,9 @@ public class ReferenciaMotoRepositoryImpl implements ReferenciaMotoRepository {
     @Override
     public List<ReferenciaMoto> obtenerPorMarca(Integer idMarca) {
         return jpaRepository.findByMarca_IdMarca(idMarca).stream()
-            .map(this::mapToDomain)
-            .toList();
-}
+                .map(this::mapToDomain)
+                .toList();
+    }
 
     @Override
     public Optional<ReferenciaMoto> buscarPorId(int id) {
@@ -52,7 +52,8 @@ public class ReferenciaMotoRepositoryImpl implements ReferenciaMotoRepository {
         ReferenciaMoto domain = new ReferenciaMoto();
         domain.setIdReferencia(entity.getIdReferencia());
         domain.setNombre(entity.getNombre());
-        
+        domain.setCilindraje(entity.getCilindraje()); // ✅ agregado
+
         if (entity.getMarca() != null) {
             domain.setIdMarca(entity.getMarca().getIdMarca());
         }
@@ -64,8 +65,8 @@ public class ReferenciaMotoRepositoryImpl implements ReferenciaMotoRepository {
         ReferenciaEntity entity = new ReferenciaEntity();
         entity.setIdReferencia(domain.getIdReferencia());
         entity.setNombre(domain.getNombre());
+        entity.setCilindraje(domain.getCilindraje()); // ✅ agregado
 
-        // IMPORTANTE: Para que no cree una marca nueva, le pasamos una entidad con el ID
         if (domain.getIdMarca() != null) {
             MarcaEntity marca = new MarcaEntity();
             marca.setIdMarca(domain.getIdMarca());
