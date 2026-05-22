@@ -6,7 +6,7 @@ export default function Productos() {
     const [categorias, setCategorias] = useState([]);
     
     const [nuevo, setNuevo] = useState({ 
-        nombre: '', descripcion: '', precio: '', idMarca: '', idCategoria: '' 
+        nombre: '', descripcion: '', precio: '', idMarca: '', idCategoria: '', imagenUrl: '' 
     });
     
     // Estados para la edición
@@ -44,8 +44,10 @@ export default function Productos() {
             nombre: prod.nombre,
             descripcion: prod.descripcion,
             precio: prod.precio,
+            imagenUrl: prod.imagenUrl,
             idMarca: prod.idMarca || '',
             idCategoria: prod.idCategoria || ''
+            
         });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -53,7 +55,7 @@ export default function Productos() {
     const cancelarEdicion = () => {
         setEditMode(false);
         setSelectedId(null);
-        setNuevo({ nombre: '', descripcion: '', precio: '', idMarca: '', idCategoria: '' });
+        setNuevo({ nombre: '', descripcion: '', precio: '', imagenUrl: '', idMarca: '', idCategoria: '' });
     };
 
     const guardar = async (e) => {
@@ -66,6 +68,7 @@ export default function Productos() {
             nombre: nuevo.nombre,
             descripcion: nuevo.descripcion,
             precio: parseFloat(nuevo.precio),
+            imagenUrl: nuevo.imagenUrl,
             idMarca: parseInt(nuevo.idMarca),
             idCategoria: parseInt(nuevo.idCategoria)
         };
@@ -132,6 +135,11 @@ export default function Productos() {
                     <div className="mb-3">
                         <label className="form-label">Descripción</label>
                         <textarea className="input-bs" rows="2" placeholder="Detalles del producto..." value={nuevo.descripcion} onChange={e => setNuevo({...nuevo, descripcion: e.target.value})} required />
+                    </div>
+
+                    <div className="mb-3">
+                        <label className="form-label">URL de la imagen</label>
+                        <textarea className="input-bs" rows="2" placeholder="ingresa la url..." value={nuevo.imagenUrl} onChange={e => setNuevo({...nuevo, imagenUrl: e.target.value})} required />
                     </div>
                     
                     <div className="row mb-3">
