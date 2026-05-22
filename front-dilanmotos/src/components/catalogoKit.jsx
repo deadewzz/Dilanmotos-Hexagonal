@@ -130,8 +130,12 @@ const CatalogoKit = () => {
                         kits.map((kit) => (
                             <div className="category-item" key={kit.idProducto}>
                                 <div className="category-img">
-                                    <img src={kit.imagenUrl || "/KTTakasago14-45.png"} alt={kit.nombre} />
-                                </div>
+                                    <img 
+                                        src={kit.imagenUrl || "/KTTakasago14-45.png"} 
+                                        alt={kit.nombre} 
+                                        onError={(e) => { e.target.onerror = null; e.target.src="/KTTakasago14-45.png"; }}
+                                    />
+                                    </div>
                                 <h3>{kit.nombre}</h3>
                                 <Link to={`/fichaTecnica/${kit.idProducto}`} className="category-btn">
                                     Ver ficha técnica

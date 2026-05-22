@@ -41,6 +41,7 @@ public class ProductoRepositoryImpl implements ProductoRepository {
             entity.setNombre(producto.getNombre());
             entity.setDescripcion(producto.getDescripcion());
             entity.setPrecio(producto.getPrecio());
+            entity.setImagenUrl(producto.getImagenUrl());
             return toModel(jpaRepository.save(entity));
         }).orElseThrow(() -> new RuntimeException("ID no encontrado"));
     }
@@ -58,6 +59,7 @@ public class ProductoRepositoryImpl implements ProductoRepository {
         p.setNombre(entity.getNombre());
         p.setDescripcion(entity.getDescripcion());
         p.setPrecio(entity.getPrecio());
+        p.setImagenUrl(entity.getImagenUrl());
         return p;
     }
 
@@ -68,6 +70,7 @@ public class ProductoRepositoryImpl implements ProductoRepository {
         entity.setNombre(p.getNombre());
         entity.setDescripcion(p.getDescripcion());
         entity.setPrecio(p.getPrecio());
+        entity.setImagenUrl(p.getImagenUrl());
         return entity;
     }
 }

@@ -26,4 +26,7 @@ public class ProductoEntity {
     private String descripcion;
 
     private Double precio;
+    
+    @Column(name = "`imagenUrl`")
+    private String imagenUrl;
 }

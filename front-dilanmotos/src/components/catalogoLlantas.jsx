@@ -6,7 +6,7 @@ const CatalogoLlantas = () => {
     const navigate = useNavigate();
     const [showDropdown, setShowDropdown] = useState(false);
     const [user, setUser] = useState({ nombre: "Invitado", rol: "GUEST", id: null });
-    const [kits, setKits] = useState([]);
+    const [llantas, setLlantas] = useState([]); // Estado renombrado para coherencia
     const [loading, setLoading] = useState(true);
 
     const isAuthenticated = !!localStorage.getItem('token');
@@ -23,7 +23,7 @@ const CatalogoLlantas = () => {
 
     // 2. Obtener y filtrar los productos desde el Backend
     useEffect(() => {
-        const fetchKits = async () => {
+        const fetchLlantas = async () => {
             const token = localStorage.getItem('token');
             
             try {
@@ -35,17 +35,15 @@ const CatalogoLlantas = () => {
                     } 
                 });
 
-                // Cambiar el filtro dentro de la respuesta exitosa (response.ok)
-                // Cambiar el filtro dentro de la respuesta exitosa (response.ok)
                 if (response.ok) {
-                const todosLosProductos = await response.json();
-    
-                // Filtramos asegurándonos de que solo entren las Llantas
-                const soloLlantas = todosLosProductos.filter(producto => 
-                producto.nombre && producto.nombre.toLowerCase().includes('llanta')
-                );
+                    const todosLosProductos = await response.json();
+        
+                    // Filtramos asegurándonos de que solo entren las Llantas
+                    const soloLlantas = todosLosProductos.filter(producto => 
+                        producto.nombre && producto.nombre.toLowerCase().includes('llanta')
+                    );
 
-                setKits(soloLlantas); // (Puedes renombrar el estado a 'llantas' si lo deseas)
+                    setLlantas(soloLlantas);
                 }
             } catch (error) {
                 console.error("Error de conexión:", error);
@@ -54,7 +52,7 @@ const CatalogoLlantas = () => {
             }
         };
 
-        fetchKits();
+        fetchLlantas();
     }, []);
 
     const handleLogout = () => {
@@ -126,23 +124,23 @@ const CatalogoLlantas = () => {
                 <div className="categories-grid">
                     {loading ? (
                         <div className="loading" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '20px' }}>
-                            Cargando kits desde la base de datos...
+                            Cargando llantas desde la base de datos...
                         </div>
-                    ) : kits.length > 0 ? (
-                        kits.map((kit) => (
-                            <div className="category-item" key={kit.idProducto}>
+                    ) : llantas.length > 0 ? (
+                        llantas.map((llanta) => (
+                            <div className="category-item" key={llanta.idProducto}>
                                 <div className="category-img">
-                                    <img src={kit.imagenUrl || "/Llanta.png"} alt={kit.nombre} />
+                                    <img src={llanta.imagenUrl || "/LlantasMichelin.png"} alt={llanta.nombre} />
                                 </div>
-                                <h3>{kit.nombre}</h3>
-                                <Link to={`/fichaTecnica/${kit.idProducto}`} className="category-btn">
+                                <h3>{llanta.nombre}</h3>
+                                <Link to={`/fichaTecnica/${llanta.idProducto}`} className="category-btn">
                                     Ver ficha técnica
                                 </Link>
                             </div>
                         ))
                     ) : (
                         <div className="error-message" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '20px' }}>
-                            No se encontraron kits de arrastre disponibles.
+                            No se encontraron llantas disponibles en este momento.
                         </div>
                     )}
                 </div>

@@ -9,4 +9,5 @@ public class ProductoResponseDTO {
     private Double precio;
     private String descripcion;
     private MarcaResponseDTO marca;
+    private String imagenUrl;
 }

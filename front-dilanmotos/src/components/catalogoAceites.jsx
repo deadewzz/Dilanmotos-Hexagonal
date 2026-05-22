@@ -6,7 +6,7 @@ const CatalogoAceites = () => {
     const navigate = useNavigate();
     const [showDropdown, setShowDropdown] = useState(false);
     const [user, setUser] = useState({ nombre: "Invitado", rol: "GUEST", id: null });
-    const [kits, setKits] = useState([]);
+    const [aceites, setAceites] = useState([]); // Estado renombrado para coherencia
     const [loading, setLoading] = useState(true);
 
     const isAuthenticated = !!localStorage.getItem('token');
@@ -23,7 +23,7 @@ const CatalogoAceites = () => {
 
     // 2. Obtener y filtrar los productos desde el Backend
     useEffect(() => {
-        const fetchKits = async () => {
+        const fetchAceites = async () => {
             const token = localStorage.getItem('token');
             
             try {
@@ -35,16 +35,15 @@ const CatalogoAceites = () => {
                     } 
                 });
 
-                // Cambiar el filtro dentro de la respuesta exitosa (response.ok)
                 if (response.ok) {
-                const todosLosProductos = await response.json();
-    
-                 // Filtramos asegurándonos de que solo entren los Aceites
-                 const soloAceites = todosLosProductos.filter(producto => 
-                    producto.nombre && producto.nombre.toLowerCase().includes('aceite')
-                     );
+                    const todosLosProductos = await response.json();
+        
+                    // Filtramos asegurándonos de que solo entren los Aceites
+                    const soloAceites = todosLosProductos.filter(producto => 
+                        producto.nombre && producto.nombre.toLowerCase().includes('aceite')
+                    );
 
-                setKits(soloAceites); // (Puedes renombrar el estado a 'aceites' si lo deseas)
+                    setAceites(soloAceites);
                 }
             } catch (error) {
                 console.error("Error de conexión:", error);
@@ -53,7 +52,7 @@ const CatalogoAceites = () => {
             }
         };
 
-        fetchKits();
+        fetchAceites();
     }, []);
 
     const handleLogout = () => {
@@ -125,23 +124,23 @@ const CatalogoAceites = () => {
                 <div className="categories-grid">
                     {loading ? (
                         <div className="loading" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '20px' }}>
-                            Cargando kits desde la base de datos...
+                            Cargando aceites desde la base de datos...
                         </div>
-                    ) : kits.length > 0 ? (
-                        kits.map((kit) => (
-                            <div className="category-item" key={kit.idProducto}>
+                    ) : aceites.length > 0 ? (
+                        aceites.map((aceite) => (
+                            <div className="category-item" key={aceite.idProducto}>
                                 <div className="category-img">
-                                    <img src={kit.imagenUrl || "/AceiteMotul.png"} alt={kit.nombre} />
+                                    <img src={aceite.imagenUrl || "/AceiteMotul.png"} alt={aceite.nombre} />
                                 </div>
-                                <h3>{kit.nombre}</h3>
-                                <Link to={`/fichaTecnica/${kit.idProducto}`} className="category-btn">
+                                <h3>{aceite.nombre}</h3>
+                                <Link to={`/fichaTecnica/${aceite.idProducto}`} className="category-btn">
                                     Ver ficha técnica
                                 </Link>
                             </div>
                         ))
                     ) : (
                         <div className="error-message" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '20px' }}>
-                            No se encontraron kits de arrastre disponibles.
+                            No se encontraron aceites disponibles en este momento.
                         </div>
                     )}
                 </div>

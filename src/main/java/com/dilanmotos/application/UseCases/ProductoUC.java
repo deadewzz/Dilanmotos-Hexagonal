@@ -65,24 +65,28 @@ public class ProductoUC {
         p.setNombre(dto.getNombre());
         p.setDescripcion(dto.getDescripcion());
         p.setPrecio(dto.getPrecio());
+        p.setImagenUrl(dto.getImagenUrl());
         return p;
     }
 
-    private ProductoResponseDTO mapToDTO(Producto p) {
-        ProductoResponseDTO dto = new ProductoResponseDTO();
-        dto.setIdProducto(p.getIdProducto());
-        dto.setNombre(p.getNombre());
-        dto.setPrecio(p.getPrecio());
-        dto.setDescripcion(p.getDescripcion());
+private ProductoResponseDTO mapToDTO(Producto p) {
+    ProductoResponseDTO dto = new ProductoResponseDTO();
+    dto.setIdProducto(p.getIdProducto());
+    dto.setNombre(p.getNombre());
+    dto.setPrecio(p.getPrecio());
+    dto.setDescripcion(p.getDescripcion());
+    
+    // 🔴 AGREGA ESTA LÍNEA AQUÍ PARA PASAR LA URL RECTAMENTE A REACT:
+    dto.setImagenUrl(p.getImagenUrl());
 
-        // Buscamos la marca en la base de datos para obtener el nombre
-        marcaRepository.buscarPorId(p.getIdMarca()).ifPresent(marca -> {
-            MarcaResponseDTO marcaDTO = new MarcaResponseDTO();
-            marcaDTO.setIdMarca(marca.getIdMarca());
-            marcaDTO.setNombre(marca.getNombre());
-            dto.setMarca(marcaDTO); // Seteamos el objeto marca completo
-        });
+    // Buscamos la marca en la base de datos para obtener el nombre
+    marcaRepository.buscarPorId(p.getIdMarca()).ifPresent(marca -> {
+        MarcaResponseDTO marcaDTO = new MarcaResponseDTO();
+        marcaDTO.setIdMarca(marca.getIdMarca());
+        marcaDTO.setNombre(marca.getNombre());
+        dto.setMarca(marcaDTO); 
+    });
 
-        return dto;
-    }
+    return dto;
+}
 }
