@@ -24,6 +24,11 @@ public class PqrsJpaAdapter implements PqrsRepository {
     }
 
     @Override
+    public List<PqrsEntity> findByIdUsuario(Integer idUsuario) {
+    return jpaRepository.findByIdUsuario(idUsuario); 
+    }
+
+    @Override
     public PQRS guardar(PQRS pqrs) {
         System.out.println("=== GUARDANDO PQRS ===");
         System.out.println("Model a guardar - ID: " + pqrs.getId_pqrs());

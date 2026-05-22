@@ -5,6 +5,9 @@ import com.dilanmotos.domain.repository.ServicioRepository;
 import com.dilanmotos.domain.exception.ServicioNotFoundException;
 import com.dilanmotos.infrastructure.dto.ServicioRequestDTO;
 import com.dilanmotos.infrastructure.dto.ServicioResponseDTO;
+import com.dilanmotos.infrastructure.persistence.MecanicoJpaRepository;
+import com.dilanmotos.infrastructure.persistence.TipoServicioJpaRepository;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,16 +17,61 @@ import java.util.stream.Collectors;
 public class ServicioUC {
 
     private final ServicioRepository servicioRepository;
+    private final MecanicoJpaRepository mecanicoJpaRepository;        // ← agregar
+    private final TipoServicioJpaRepository tipoServicioJpaRepository;
 
-    public ServicioUC(ServicioRepository servicioRepository) {
-        this.servicioRepository = servicioRepository;
-    }
+    public ServicioUC(ServicioRepository servicioRepository,
+                  MecanicoJpaRepository mecanicoJpaRepository,
+                  TipoServicioJpaRepository tipoServicioJpaRepository) {
+    this.servicioRepository = servicioRepository;
+    this.mecanicoJpaRepository = mecanicoJpaRepository;
+    this.tipoServicioJpaRepository = tipoServicioJpaRepository;
+}
 
     public List<ServicioResponseDTO> listarTodas() {
         return servicioRepository.obtenerTodas().stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
+
+    public List<ServicioResponseDTO> listarPorUsuario(Integer idUsuario) {
+    return servicioRepository.findByIdUsuario(idUsuario).stream()
+            .map(entity -> {
+                ServicioResponseDTO dto = new ServicioResponseDTO();
+                dto.setIdServicio(entity.getIdServicio());
+                dto.setIdUsuario(entity.getIdUsuario());
+                dto.setIdMecanico(entity.getIdMecanico());
+                dto.setIdTipoServicio(entity.getIdTipoServicio());
+                dto.setFechaServicio(entity.getFechaServicio());
+                dto.setEstadoServicio(entity.getEstadoServicio());
+                dto.setComentario(entity.getComentario());
+                dto.setPuntuacion(entity.getPuntuacion());
+                dto.setVisibleEnHistorial(entity.getVisibleEnHistorial());
+
+                // LOG para debug
+                System.out.println("idMecanico: " + entity.getIdMecanico());
+                System.out.println("idTipoServicio: " + entity.getIdTipoServicio());
+
+                if (entity.getIdMecanico() != null) {
+                    mecanicoJpaRepository.findById(entity.getIdMecanico())
+                        .ifPresent(m -> {
+                            System.out.println("Mecánico encontrado: " + m.getNombre());
+                            dto.setNombreMecanico(m.getNombre());
+                        });
+                }
+
+                if (entity.getIdTipoServicio() != null) {
+                    tipoServicioJpaRepository.findById(entity.getIdTipoServicio())
+                        .ifPresent(t -> {
+                            System.out.println("Servicio encontrado: " + t.getNombre());
+                            dto.setNombreServicio(t.getNombre());
+                        });
+                }
+
+                return dto;
+            })
+            .collect(Collectors.toList());
+}
 
     public ServicioResponseDTO crear(ServicioRequestDTO request) {
         Servicio servicio = mapToModel(request);

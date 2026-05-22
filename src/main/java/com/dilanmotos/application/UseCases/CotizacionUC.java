@@ -24,6 +24,22 @@ public class CotizacionUC {
                 .collect(Collectors.toList());
     }
 
+    public List<CotizacionResponseDTO> listarPorUsuario(Integer idUsuario) {
+    return cotizacionRepository.findByIdUsuario(idUsuario).stream()
+            .map(entity -> {
+                CotizacionResponseDTO dto = new CotizacionResponseDTO();
+                dto.setIdCotizacion(entity.getIdCotizacion());
+                dto.setIdUsuario(entity.getIdUsuario());  
+                dto.setProducto(entity.getProducto());
+                dto.setCantidad(entity.getCantidad());
+                dto.setPrecioUnitario(entity.getPrecioUnitario());
+                dto.setFecha(entity.getFecha());
+                dto.setProducto_agregado(entity.getProducto_agregado());
+                return dto;
+            })
+            .collect(Collectors.toList());
+}
+
     public CotizacionResponseDTO crear(CotizacionRequestDTO request) {
         Cotizacion cotizacion = mapToModel(request);
         return mapToDTO(cotizacionRepository.guardar(cotizacion));

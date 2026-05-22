@@ -25,6 +25,11 @@ public class CotizacionController {
         return ResponseEntity.ok(uc.listarTodas());
     }
 
+    @GetMapping("/usuario/{idUsuario}")
+    public ResponseEntity<List<CotizacionResponseDTO>> listarPorUsuario(@PathVariable Integer idUsuario) {
+    return ResponseEntity.ok(uc.listarPorUsuario(idUsuario));
+}
+
     @GetMapping("/{id}")
     public ResponseEntity<CotizacionResponseDTO> obtenerPorId(@PathVariable Integer id) {
         return ResponseEntity.ok(uc.obtenerPorId(id));

@@ -1,10 +1,14 @@
 package com.dilanmotos.domain.repository;
 
 import com.dilanmotos.domain.model.Servicio;
+import com.dilanmotos.infrastructure.persistence.ServicioEntity;
+
 import java.util.List;
 import java.util.Optional;
 
 public interface ServicioRepository {
+
+     List<ServicioEntity> findByIdUsuario(Integer idUsuario);
 
     Servicio guardar(Servicio servicio);
 

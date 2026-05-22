@@ -70,10 +70,10 @@ const CrearPqrs = () => {
         <div className="dashboard-wrapper">
             <header className="dashboard-header">
                 <div className="header-container">
-                    <button onClick={() => navigate('/dashboard')} className="btn-bs btn-danger btn-sm">
-                         Volver
+                    <button onClick={() => navigate('/dashboard')} className="btn-back-clean">
+                        <i className="fa-solid fa-arrow-left"></i>
                     </button>
-                    <h3 className="text-white m-0">Nueva Solicitud</h3>
+                    <h3 className="text-white m-0" style={{ color: '#ffffff' }}>Nueva Solicitud</h3>
                     <div style={{width: '60px'}}></div>
                 </div>
             </header>

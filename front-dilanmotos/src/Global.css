@@ -358,7 +358,7 @@ html, body, #root {
 @media (max-width: 480px) {
     .main-content {
         padding: 65px 0.75rem 1rem 0.75rem;
-    }
+    }   
 
     .card-panel {
         padding: 1rem;

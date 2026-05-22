@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom';
 import './HacerCotizacion.css'
 
 const STORAGE_KEYS = ['cart', 'selectedProducts', 'selected_items']
@@ -18,6 +19,8 @@ function readStoredItems() {
 }
 
 export default function HacerCotizacion() {
+
+	const navigate = useNavigate();
 	const [items, setItems] = useState([])
 	const [customer, setCustomer] = useState({ nombre: '', email: '' })
 	const [quote, setQuote] = useState(null)
@@ -279,148 +282,195 @@ export default function HacerCotizacion() {
 	}
 
 	return (
-		<div className="hacer-cotizacion">
-			<h2>Cotización</h2>
+    <div className="dashboard-wrapper">
+        <header className="dashboard-header">
+            <div className="header-container">
+                <button onClick={() => navigate('/dashboard')} className="btn-back-clean">
+                    <i className="fa-solid fa-arrow-left"></i>
+                </button>
+                <h3 className="text-white m-0" style={{ color: '#ffffff' }}>Hacer Cotización</h3>
+                <div style={{ width: '40px' }}></div>
+            </div>
+        </header>
 
-			{items.length === 0 ? (
-				<p>No hay productos seleccionados. Añade productos para generar una cotización.</p>
-			) : (
-				<div style={{ overflowX: 'auto' }}>
-					<table style={{ width: '100%', borderCollapse: 'collapse' }}>
-						<thead>
-							<tr>
-								<th style={{ textAlign: 'left', padding: 8 }}>Producto</th>
-								<th style={{ padding: 8 }}>Precio</th>
-								<th style={{ padding: 8 }}>Cantidad</th>
-								<th style={{ padding: 8 }}>Subtotal</th>
-								<th style={{ padding: 8 }}>Acciones</th>
-							</tr>
-						</thead>
-						<tbody>
-							{items.map((it) => (
-								<tr key={it.id}>
-									<td style={{ padding: 8 }}>{it.nombre}</td>
-									<td style={{ padding: 8 }}>{it.precio.toFixed(2)}</td>
-									<td style={{ padding: 8 }}>
-										<button onClick={() => updateCantidad(it.id, -1)} style={{ marginRight: 6 }}>-</button>
-										{it.cantidad}
-										<button onClick={() => updateCantidad(it.id, +1)} style={{ marginLeft: 6 }}>+</button>
-									</td>
-									<td style={{ padding: 8 }}>{(it.precio * it.cantidad).toFixed(2)}</td>
-									<td style={{ padding: 8 }}>
-										<button onClick={() => removeItem(it.id)}>Quitar</button>
-									</td>
-								</tr>
-							))}
-						</tbody>
-					</table>
-				</div>
-			)}
+        <main className="dashboard-content">
+            <div className="card-panel shadow" style={{ maxWidth: '1000px', margin: '0 auto', background: 'white' }}>
+                <h2 className="text-primary mb-4">Cotización</h2>
 
-			<div className="side-columns">
-				<div>
-					<h4>Datos Personales</h4>
-					<div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-						<input placeholder="Nombre" value={customer.nombre} readOnly />
-						<input placeholder="Email" value={customer.email} readOnly />
-					</div>
-				</div>
+                {/* --- TABLA DE PRODUCTOS SELECCIONADOS --- */}
+                {items.length === 0 ? (
+                    <p className="text-muted">No hay productos seleccionados. Añade productos para generar una cotización.</p>
+                ) : (
+                    <div style={{ overflowX: 'auto', marginBottom: '1.5rem' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                                <tr style={{ backgroundColor: '#343a40', color: 'white' }}>
+                                    <th style={{ textAlign: 'left', padding: '10px 12px' }}>Producto</th>
+                                    <th style={{ padding: '10px 12px' }}>Precio</th>
+                                    <th style={{ padding: '10px 12px' }}>Cantidad</th>
+                                    <th style={{ padding: '10px 12px' }}>Subtotal</th>
+                                    <th style={{ padding: '10px 12px' }}>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {items.map((it) => (
+                                    <tr key={it.id} style={{ borderBottom: '1px solid #eee' }}>
+                                        <td style={{ padding: '10px 12px' }}>{it.nombre}</td>
+                                        <td style={{ padding: '10px 12px', textAlign: 'center' }}>${it.precio.toFixed(2)}</td>
+                                        <td style={{ padding: '10px 12px', textAlign: 'center' }}>
+                                            <button className="btn-bs btn-primary btn-sm" onClick={() => updateCantidad(it.id, -1)}>-</button>
+                                            <span style={{ margin: '0 10px', fontWeight: 'bold' }}>{it.cantidad}</span>
+                                            <button className="btn-bs btn-primary btn-sm" onClick={() => updateCantidad(it.id, +1)}>+</button>
+                                        </td>
+                                        <td style={{ padding: '10px 12px', textAlign: 'center' }}>${(it.precio * it.cantidad).toFixed(2)}</td>
+                                        <td style={{ padding: '10px 12px', textAlign: 'center' }}>
+                                            <button className="btn-bs btn-danger btn-sm" onClick={() => removeItem(it.id)}>
+                                                <i className="fa-solid fa-trash"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
 
-				<div>
-					<h4>Resumen</h4>
-					<p>Total: <strong>{total.toFixed(2)}</strong></p>
-					<div className="product-selector-row">
-						<select value={selectedProductId} onChange={handleSelectProduct} disabled={loadingProducts || products.length === 0}>
-							<option value="">
-							{loadingProducts
-								? 'Cargando productos...'
-								: products.length === 0
-									? 'No hay productos disponibles'
-									: 'Seleccionar producto...'}
-						</option>
-							{products.map((product) => {
-								const id = product.idProducto ?? product.id
-								return (
-									<option key={id} value={id}>
-										{product.nombre ?? product.titulo ?? 'Producto'} - ${Number(product.precio ?? product.price ?? 0).toFixed(2)}
-									</option>
-								)
-							})}
-						</select>
-						<button onClick={addSelectedProduct} disabled={!selectedProductId || isSelected(selectedProductId)}>
-							{isSelected(selectedProductId) ? 'Ya seleccionado' : 'Agregar'}
-						</button>
-					</div>
-					<div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-						<button onClick={generarCotizacion} disabled={savingQuote || items.length === 0}>{savingQuote ? 'Guardando...' : 'Generar Cotización'}</button>
-						<button onClick={clearAll} disabled={items.length === 0}>Vaciar</button>
-					</div>
-				</div>
-			</div>
-							
-			{quote && (
-				<div className="invoice-card">
-					<div className="invoice-header">
-						<div>
-							<span className="invoice-label">COTIZACIÓN</span>
-							<h3>Detalle de Repuesto</h3>
-						</div>
-						<div className="invoice-company">
-							<strong>Dilan Motos</strong>
-							<span>Servicios, repuestos y asesoría técnica</span>
-							<span>Soporte: 300-XXX-XXXX</span>
-						</div>
-					</div>
+                {/* --- DATOS PERSONALES --- */}
+                <div className="mb-3">
+                    <label className="fw-bold d-block mb-2">Datos Personales</label>
+                    <input className="input-bs" placeholder="Nombre" value={customer.nombre} readOnly />
+                    <input className="input-bs" placeholder="Email" value={customer.email} readOnly />
+                </div>
 
-					<div className="invoice-meta">
-						<div className="invoice-client">
-							<h4>Cliente</h4>
-							<p>{quote.cliente.nombre || 'Invitado'}</p>
-							<p>{quote.cliente.email || 'Sin correo'}</p>
-						</div>
-						<div className="invoice-details">
-							<p><strong>Fecha:</strong> {new Date(quote.fecha).toLocaleString()}</p>
-							<p><strong>No. Cotización:</strong> {quote.idCotizacion ?? quote.id}</p>
-							<p><strong>Total:</strong> ${quote.total.toFixed(2)}</p>
-						</div>
-					</div>
+                {/* --- SELECTOR DE PRODUCTO --- */}
+                <div className="mb-3">
+                    <label className="fw-bold d-block mb-2">Agregar Producto</label>
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <select
+                            className="input-bs"
+                            style={{ marginBottom: 0, flex: 1 }}
+                            value={selectedProductId}
+                            onChange={handleSelectProduct}
+                            disabled={loadingProducts || products.length === 0}
+                        >
+                            <option value="">
+                                {loadingProducts
+                                    ? 'Cargando productos...'
+                                    : products.length === 0
+                                        ? 'No hay productos disponibles'
+                                        : 'Seleccionar producto...'}
+                            </option>
+                            {products.map((product) => {
+                                const id = product.idProducto ?? product.id
+                                return (
+                                    <option key={id} value={id}>
+                                        {product.nombre ?? product.titulo ?? 'Producto'} - ${Number(product.precio ?? product.price ?? 0).toFixed(2)}
+                                    </option>
+                                )
+                            })}
+                        </select>
+                        <button
+                            className="btn-bs btn-primary"
+                            onClick={addSelectedProduct}
+                            disabled={!selectedProductId || isSelected(selectedProductId)}
+                        >
+                            {isSelected(selectedProductId) ? 'Agregado' : 'Agregar'}
+                        </button>
+                    </div>
+                </div>
 
-					<div className="invoice-table-wrapper">
-						<table className="invoice-table">
-							<thead>
-								<tr>
-									<th>Producto</th>
-									<th>Precio</th>
-									<th>Cantidad</th>
-									<th>Subtotal</th>
-								</tr>
-							</thead>
-							<tbody>
-								{quote.items.map((item) => (
-									<tr key={item.id}>
-										<td>{item.nombre}</td>
-										<td>${item.precio.toFixed(2)}</td>
-										<td>{item.cantidad}</td>
-										<td>${(item.precio * item.cantidad).toFixed(2)}</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-					</div>
+                {/* --- RESUMEN Y ACCIONES --- */}
+                <div style={{ borderTop: '1px solid #eee', paddingTop: '1rem', marginBottom: '1rem' }}>
+                    <p className="fw-bold" style={{ fontSize: '1.1rem' }}>
+                        Total: <span className="text-primary">${total.toFixed(2)}</span>
+                    </p>
+                </div>
 
-					<div className="invoice-summary">
-						<div>
-							<span>Subtotal</span>
-							<strong>${quote.total.toFixed(2)}</strong>
-						</div>
-						<div>
-							<span>Total</span>
-							<strong>${quote.total.toFixed(2)}</strong>
-						</div>
-					</div>
-				</div>
-			)}
-		</div>
-	)
+                <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                        className="btn-bs btn-success w-100"
+                        onClick={generarCotizacion}
+                        disabled={savingQuote || items.length === 0}
+                    >
+                        <i className="fa-solid fa-file-invoice"></i>
+                        {savingQuote ? 'Guardando...' : 'Generar Cotización'}
+                    </button>
+                    <button
+                        className="btn-bs btn-danger"
+                        onClick={clearAll}
+                        disabled={items.length === 0}
+                    >
+                        <i className="fa-solid fa-trash"></i> Vaciar
+                    </button>
+                </div>
+
+                {/* --- MENSAJE DE ESTADO --- */}
+                {quoteMessage && (
+                    <p style={{ marginTop: '1rem', color: '#198754', fontWeight: 'bold', textAlign: 'center' }}>
+                        {quoteMessage}
+                    </p>
+                )}
+
+                {/* --- INVOICE / COTIZACIÓN GENERADA --- */}
+                {quote && (
+                    <div className="invoice-card" style={{ marginTop: '1.5rem' }}>
+                        <div className="invoice-header">
+                            <div>
+                                <span className="invoice-label">COTIZACIÓN</span>
+                                <h3>Detalle de Repuesto</h3>
+                            </div>
+                            <div className="invoice-company">
+                                <strong>Dilan Motos</strong>
+                                <span>Servicios, repuestos y asesoría técnica</span>
+                                <span>Soporte: 300-XXX-XXXX</span>
+                            </div>
+                        </div>
+
+                        <div className="invoice-meta">
+                            <div className="invoice-client">
+                                <h4>Cliente</h4>
+                                <p>{quote.cliente.nombre || 'Invitado'}</p>
+                                <p>{quote.cliente.email || 'Sin correo'}</p>
+                            </div>
+                            <div className="invoice-details">
+                                <p><strong>Fecha:</strong> {new Date(quote.fecha).toLocaleString()}</p>
+                                <p><strong>No. Cotización:</strong> {quote.idCotizacion ?? quote.id}</p>
+                                <p><strong>Total:</strong> ${quote.total.toFixed(2)}</p>
+                            </div>
+                        </div>
+
+                        <div className="invoice-table-wrapper">
+                            <table className="invoice-table">
+                                <thead>
+                                    <tr>
+                                        <th>Producto</th>
+                                        <th>Precio</th>
+                                        <th>Cantidad</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {quote.items.map((item) => (
+                                        <tr key={item.id}>
+                                            <td>{item.nombre}</td>
+                                            <td>${item.precio.toFixed(2)}</td>
+                                            <td>{item.cantidad}</td>
+                                            <td>${(item.precio * item.cantidad).toFixed(2)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div className="invoice-summary">
+                            <div><span>Total</span><strong>${quote.total.toFixed(2)}</strong></div>
+                        </div>
+							<h3 style={{ textAlign: 'center', color: '#732dcf' }}>¡Gracias por utilizar nuestros servicios!</h3>
+                    </div>
+                )}
+            </div>
+        </main>
+    </div>
+)
 }
 

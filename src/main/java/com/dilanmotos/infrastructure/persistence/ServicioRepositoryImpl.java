@@ -24,6 +24,11 @@ public class ServicioRepositoryImpl implements ServicioRepository {
     }
 
     @Override
+    public List<ServicioEntity> findByIdUsuario(Integer idUsuario) {
+    return jpa.findByIdUsuario(idUsuario);
+}
+
+    @Override
     public List<Servicio> obtenerTodas() {
         return jpa.findAll().stream()
                 .map(this::toModel)

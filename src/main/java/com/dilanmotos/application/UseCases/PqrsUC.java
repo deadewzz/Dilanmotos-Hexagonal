@@ -32,6 +32,24 @@ public class PqrsUC {
                 .orElseThrow(() -> new PqrsNotFoundException("PQRS no encontrada: " + id));
     }
 
+    public List<PqrsResponseDTO> listarPorUsuario(Integer idUsuario) {
+    return pqrsRepository.findByIdUsuario(idUsuario).stream()
+            .map(entity -> {
+                PqrsResponseDTO dto = new PqrsResponseDTO();
+                dto.setId_pqrs(entity.getId_pqrs());
+                dto.setId_usuario(entity.getId_usuario());
+                dto.setTipo(entity.getTipo());
+                dto.setAsunto(entity.getAsunto());
+                dto.setDescripcion(entity.getDescripcion());
+                dto.setFecha(entity.getFecha());
+                dto.setEstado(entity.getEstado() != null ? entity.getEstado() : "PENDIENTE");
+                dto.setRespuesta_admin(entity.getRespuesta_admin());
+                dto.setFecha_respuesta(entity.getFecha_respuesta());
+                return dto;
+            })
+            .collect(Collectors.toList());
+}
+
     @Transactional
     public PqrsResponseDTO crear(PqrsRequestDTO request) {
         PQRS pqrs = new PQRS();

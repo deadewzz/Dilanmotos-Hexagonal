@@ -18,10 +18,15 @@ public class CotizacionRepositoryImpl implements CotizacionRepository {
     }
 
     @Override
-    public Cotizacion guardar(Cotizacion cotizacion) {
+        public Cotizacion guardar(Cotizacion cotizacion) {
         CotizacionEntity entity = toEntity(cotizacion);
         return toModel(jpa.save(entity));
     }
+
+    @Override
+    public List<CotizacionEntity> findByIdUsuario(Integer idUsuario) {
+    return jpa.findByIdUsuario(idUsuario);
+}
 
     @Override
     public List<Cotizacion> obtenerTodas() {

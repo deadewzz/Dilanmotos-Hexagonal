@@ -25,6 +25,11 @@ public class ServicioController {
         return ResponseEntity.ok(uc.listarTodas());
     }
 
+    @GetMapping("/usuario/{idUsuario}")
+    public ResponseEntity<List<ServicioResponseDTO>> listarPorUsuario(@PathVariable Integer idUsuario) {
+    return ResponseEntity.ok(uc.listarPorUsuario(idUsuario));
+}
+
     @GetMapping("/{id}")
     public ResponseEntity<ServicioResponseDTO> obtenerPorId(@PathVariable Integer id) {
         return ResponseEntity.ok(uc.obtenerPorId(id));

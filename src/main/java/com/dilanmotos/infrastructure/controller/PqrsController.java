@@ -27,6 +27,12 @@ public class PqrsController {
         return ResponseEntity.ok(pqrsUC.listarTodas());
     }
 
+    @GetMapping("/usuario/{idUsuario}")
+    public ResponseEntity<List<PqrsResponseDTO>> listarPorUsuario(@PathVariable Integer idUsuario) {
+    System.out.println("GET /api/pqrs/usuario/" + idUsuario);
+    return ResponseEntity.ok(pqrsUC.listarPorUsuario(idUsuario));
+}
+
     @GetMapping("/{id}")
     public ResponseEntity<PqrsResponseDTO> obtenerPorId(@PathVariable Integer id) {
         System.out.println("GET /api/pqrs/" + id);
