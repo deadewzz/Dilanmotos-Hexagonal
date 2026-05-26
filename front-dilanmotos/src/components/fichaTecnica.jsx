@@ -153,27 +153,28 @@ const fetchProducto = async () => {
                                 className="btn-secondary"
                                 onClick={() => {
                                     if (!producto) return;
-                                    const stored = localStorage.getItem('selectedProducts')
-                                    const current = stored ? JSON.parse(stored) : []
-                                    const productId = producto.id_producto ?? producto.id ?? Math.random().toString(36).slice(2,9)
-                                    const existing = current.find((item) => String(item.id) === String(productId))
-                                    const newItem = {
+
+                                    const productId = producto.id_producto ?? producto.id ?? Math.random().toString(36).slice(2, 9)
+                                    const normalizedProduct = {
                                         id: productId,
                                         nombre: producto.nombre ?? producto.titulo ?? 'Producto',
                                         precio: Number(producto.precio ?? 0) || 0,
                                         cantidad: 1,
                                     }
 
+                                    const stored = localStorage.getItem('selectedProducts')
+                                    const current = stored ? JSON.parse(stored) : []
+                                    const existing = current.find((item) => String(item.id) === String(productId))
                                     const updated = existing
                                         ? current.map((item) =>
                                             String(item.id) === String(productId)
                                                 ? { ...item, cantidad: Number(item.cantidad ?? 0) + 1 }
                                                 : item,
                                         )
-                                        : [...current, newItem]
+                                        : [...current, normalizedProduct]
 
                                     localStorage.setItem('selectedProducts', JSON.stringify(updated))
-                                    navigate('/hacer-cotizacion')
+                                    navigate('/hacer-cotizacion', { state: { producto: normalizedProduct } })
                                 }}
                             >
                                 Cotizar Repuesto

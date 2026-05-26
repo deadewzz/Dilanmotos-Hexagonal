@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import './HacerCotizacion.css'
 
 const STORAGE_KEYS = ['cart', 'selectedProducts', 'selected_items']
@@ -21,6 +21,7 @@ function readStoredItems() {
 export default function HacerCotizacion() {
 
 	const navigate = useNavigate();
+	const location = useLocation();
 	const [items, setItems] = useState([])
 	const [customer, setCustomer] = useState({ nombre: '', email: '' })
 	const [quote, setQuote] = useState(null)
@@ -50,6 +51,31 @@ export default function HacerCotizacion() {
 			setItems([])
 		}
 	}, [])
+
+	useEffect(() => {
+		const productoDesdeRuta = location.state?.producto
+		if (!productoDesdeRuta) return
+
+		setItems((prev) => {
+			const currentId = String(productoDesdeRuta.id)
+			const existing = prev.find((item) => String(item.id) === currentId)
+
+			if (existing) {
+				return prev.map((item) =>
+					String(item.id) === currentId
+						? { ...item, cantidad: Number(item.cantidad ?? 0) + Number(productoDesdeRuta.cantidad ?? 1) }
+						: item,
+				)
+			}
+
+			return [...prev, {
+				id: currentId,
+				nombre: productoDesdeRuta.nombre ?? 'Producto',
+				precio: Number(productoDesdeRuta.precio ?? 0) || 0,
+				cantidad: Number(productoDesdeRuta.cantidad ?? 1) || 1,
+			}]
+		})
+	}, [location.state])
 
 	useEffect(() => {
 		const abortController = new AbortController()
