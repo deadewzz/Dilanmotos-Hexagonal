@@ -37,7 +37,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/usuarios/login").permitAll()
+                        .requestMatchers("/api/productos/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers(
                                 "/api/usuarios/**",
                                 "/api/marcas/**",
@@ -73,12 +75,12 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173" ,"http://10.0.2.2:8000","http://10.0.2.2"));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
         // ESTA ES LA LÍNEA CLAVE PARA QUITAR EL 401:
         // Debemos permitir explícitamente "Authorization" y "Content-Type"
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With", "Cache-Control"));
 
         // Esto permite que el navegador vea el token en la respuesta
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
