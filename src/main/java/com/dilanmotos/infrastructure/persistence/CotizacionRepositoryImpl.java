@@ -18,15 +18,15 @@ public class CotizacionRepositoryImpl implements CotizacionRepository {
     }
 
     @Override
-        public Cotizacion guardar(Cotizacion cotizacion) {
+    public Cotizacion guardar(Cotizacion cotizacion) {
         CotizacionEntity entity = toEntity(cotizacion);
         return toModel(jpa.save(entity));
     }
 
     @Override
     public List<CotizacionEntity> findByIdUsuario(Integer idUsuario) {
-    return jpa.findByIdUsuario(idUsuario);
-}
+        return jpa.findByIdUsuario(idUsuario);
+    }
 
     @Override
     public List<Cotizacion> obtenerTodas() {
@@ -57,33 +57,35 @@ public class CotizacionRepositoryImpl implements CotizacionRepository {
     @Override
     public void eliminar(Integer id) {
         jpa.deleteById(id);
-    
+
     }
 
     // MAPPERS INTERNOS
-    private Cotizacion toModel(CotizacionEntity e) {
+    private Cotizacion toModel(CotizacionEntity entity) {
         Cotizacion c = new Cotizacion();
-        c.setIdCotizacion(e.getIdCotizacion());
-        c.setIdUsuario(e.getIdUsuario());
-        c.setProducto(e.getProducto());
-        c.setCantidad(e.getCantidad());
-        c.setPrecioUnitario(e.getPrecioUnitario());
-        c.setFecha(e.getFecha());
-        c.setProducto_agregado(e.getProducto_agregado());
+        c.setIdCotizacion(entity.getIdCotizacion());
+        c.setIdUsuario(entity.getIdUsuario());
+        c.setIdProducto(entity.getIdProducto());
+        c.setProducto(entity.getProducto());
+        c.setCantidad(entity.getCantidad());
+        c.setPrecioUnitario(entity.getPrecioUnitario());
+        c.setFecha(entity.getFecha());
+        c.setProducto_agregado(entity.getProducto_agregado());
         return c;
     }
 
+    // MAPPERS INTERNOS
     private CotizacionEntity toEntity(Cotizacion c) {
-        CotizacionEntity e = new CotizacionEntity();
-        if (c.getIdCotizacion() != null) {
-            e.setIdCotizacion(c.getIdCotizacion());
-        }
-        e.setIdUsuario(c.getIdUsuario());
-        e.setProducto(c.getProducto());
-        e.setCantidad(c.getCantidad());
-        e.setPrecioUnitario(c.getPrecioUnitario());
-        e.setFecha(c.getFecha());
-        e.setProducto_agregado(c.getProducto_agregado());
-        return e;
+        CotizacionEntity entity = new CotizacionEntity();
+        entity.setIdCotizacion(c.getIdCotizacion());
+        entity.setIdUsuario(c.getIdUsuario());
+        entity.setIdProducto(c.getIdProducto());
+        entity.setProducto(c.getProducto());
+        entity.setCantidad(c.getCantidad());
+        entity.setPrecioUnitario(c.getPrecioUnitario());
+        entity.setFecha(c.getFecha());
+        entity.setProducto_agregado(c.getProducto_agregado());
+        return entity;
     }
+
 }

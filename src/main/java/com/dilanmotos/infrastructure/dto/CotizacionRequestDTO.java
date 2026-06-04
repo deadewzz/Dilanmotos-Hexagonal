@@ -7,10 +7,11 @@ import lombok.Data;
 public class CotizacionRequestDTO {
     private Integer idCotizacion;
     private Integer idUsuario;
+    private Integer idProducto;
     private String producto;
     private Integer cantidad;
     private double precioUnitario;
     private Date fecha;
     private Boolean producto_agregado;
-    
+
 }

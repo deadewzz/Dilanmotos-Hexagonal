@@ -13,7 +13,7 @@ import java.util.List;
 @RequestMapping("/api/cotizaciones")
 @CrossOrigin(origins = "*")
 public class CotizacionController {
-    
+
     private final CotizacionUC uc;
 
     public CotizacionController(CotizacionUC uc) {
@@ -27,8 +27,8 @@ public class CotizacionController {
 
     @GetMapping("/usuario/{idUsuario}")
     public ResponseEntity<List<CotizacionResponseDTO>> listarPorUsuario(@PathVariable Integer idUsuario) {
-    return ResponseEntity.ok(uc.listarPorUsuario(idUsuario));
-}
+        return ResponseEntity.ok(uc.listarPorUsuario(idUsuario));
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<CotizacionResponseDTO> obtenerPorId(@PathVariable Integer id) {
@@ -41,8 +41,14 @@ public class CotizacionController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CotizacionResponseDTO> actualizar(@PathVariable Integer id, @RequestBody CotizacionRequestDTO request) {
+    public ResponseEntity<CotizacionResponseDTO> actualizar(@PathVariable Integer id,
+            @RequestBody CotizacionRequestDTO request) {
         return ResponseEntity.ok(uc.actualizar(id, request));
+    }
+
+    @PutMapping("/{id}/confirmar")
+    public ResponseEntity<CotizacionResponseDTO> confirmarCompra(@PathVariable Integer id) {
+        return ResponseEntity.ok(uc.confirmarCompra(id));
     }
 
     @DeleteMapping("/{id}")
@@ -50,5 +56,5 @@ public class CotizacionController {
         uc.eliminar(id);
         return ResponseEntity.noContent().build();
     }
-    
+
 }

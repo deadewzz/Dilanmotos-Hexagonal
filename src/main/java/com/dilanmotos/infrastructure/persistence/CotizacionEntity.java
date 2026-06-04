@@ -18,6 +18,9 @@ public class CotizacionEntity {
     @Column(name = "id_usuario")
     private Integer idUsuario;
 
+    @Column(name = "id_producto")
+    private Integer idProducto;
+
     @Column(name = "producto")
     private String producto;
 
@@ -29,8 +32,7 @@ public class CotizacionEntity {
 
     @Column(name = "fecha")
     private Date fecha;
-    
+
     @Column(name = "producto_agregado")
     private Boolean producto_agregado;
-    
 }

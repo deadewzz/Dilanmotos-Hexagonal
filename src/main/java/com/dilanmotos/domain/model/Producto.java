@@ -16,4 +16,8 @@ public class Producto {
     private Double precio;
     private String imagenUrl;
 
+    // Agregamos el campo para el inventario
+    private Integer stock;
+    private Boolean disponible;
+
 }

@@ -26,7 +26,14 @@ public class ProductoEntity {
     private String descripcion;
 
     private Double precio;
-    
+
     @Column(name = "`imagenUrl`")
     private String imagenUrl;
+
+    // Campos adicionales para stock y disponibilidad
+    @Column(name = "stock", nullable = false, columnDefinition = "int default 0")
+    private Integer stock = 0;
+
+    @Column(name = "disponible", nullable = false, columnDefinition = "boolean default true")
+    private Boolean disponible = true;
 }
