@@ -98,7 +98,7 @@ export default function Caracteristicas() {
         <div className="main-content-inner">
             <div className="card-panel">
                 <h3 className="text-primary mb-4">
-                    {editMode ? '📝 Editar Detalle' : '⚙️ Detalles de la Moto'}
+                    {editMode ? '✏️ Editar Detalle' : '⚙️ Detalles de la Moto'}
                 </h3>
                 <form onSubmit={guardar}>
                     <div className="mb-3">
@@ -128,13 +128,23 @@ export default function Caracteristicas() {
                         </select>
                     </div>
 
-                    <div className="d-flex gap-2 mt-2">
-                        <button type="submit" className="btn-bs w-100 btn-primary">
+                    {/* SECCIÓN DE BOTONES EN VERTICAL */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '15px' }}>
+                        <button 
+                            type="submit" 
+                            className={`btn-bs w-100 ${editMode ? 'btn-success' : 'btn-success'}`}
+                            style={{ padding: '12px', fontSize: '1rem' }}
+                        >
                             {editMode ? 'Actualizar Cambios' : 'Registrar Características'}
                         </button>
                         {editMode && (
-                            <button type="button" className="btn-bs btn-danger" onClick={cancelarEdicion}>
-                                Cancelar
+                            <button 
+                                type="button" 
+                                className="btn-bs btn-danger w-100" 
+                                onClick={cancelarEdicion}
+                                style={{ padding: '12px', fontSize: '1rem' }}
+                            >
+                                Cancelar Edición
                             </button>
                         )}
                     </div>
@@ -142,6 +152,12 @@ export default function Caracteristicas() {
             </div>
 
             <div className="card-panel mt-4">
+                <div className="row align-items-center mb-3">
+                    <div className="col-md-6">
+                        <h4 className="text-muted m-0">📚 Características Registradas</h4>
+                    </div>
+                </div>
+
                 {/* Contenedor responsivo con bordes unificados de tu CSS */}
                 <div style={{ width: '100%', overflowX: 'auto', background: 'var(--white)', borderRadius: '10px', border: '1px solid #dee2e6' }}>
                     
@@ -163,10 +179,10 @@ export default function Caracteristicas() {
                         <div style={{ display: 'flex', justifyContent: 'center' }}>Acciones</div>
                     </div>
 
+                    {/* CUERPO DE LAS FILAS */}
                     {caracteristicas.length > 0 ? (
                         caracteristicas.map(c => (
-                            /* FILAS CON ALINEACIÓN PERFECTA E INTERSECCIONES */
-                            <div key={c.idCaracteristica} style={{ 
+                            <div key={c.idCaracteristica} className="table-row-hover-effect" style={{ 
                                 display: 'grid', 
                                 gridTemplateColumns: '0.8fr 3fr 1.5fr 1.2fr', 
                                 gap: '15px', 
@@ -185,7 +201,7 @@ export default function Caracteristicas() {
                                     {c.moto?.modelo || 'S/M'}
                                 </div>
                                 <div className="text-center">
-                                    <button className="btn-bs btn-primary btn-sm" style={{ padding: '6px 12px' }} onClick={() => prepararEdicion(c)}>
+                                    <button className="btn-bs btn-success btn-sm" style={{ padding: '6px 12px' }} onClick={() => prepararEdicion(c)}>
                                         <i className="fa-solid fa-pen"></i>
                                     </button>
                                     <button className="btn-bs btn-danger btn-sm" style={{ padding: '6px 12px' }} onClick={() => eliminar(c.idCaracteristica)}>

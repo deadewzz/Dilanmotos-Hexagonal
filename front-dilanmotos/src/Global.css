@@ -152,7 +152,7 @@ html, body, #root {
 }
 
 .text-primary { color: var(--primary); }
-.text-muted { color: #7e8299; }
+.text-muted { color: #998a7e; }
 .fw-bold { font-weight: bold; }
 
 /* --- 4. DISEÑO DE TABLA UNIFICADO (GRID SYSTEM) --- */

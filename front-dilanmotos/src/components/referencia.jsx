@@ -127,20 +127,28 @@ const Referencia = () => {
                             required 
                         />
                     </div>
-                    <div className="col-12 mt-2 d-flex gap-2">
-                        <button className={`btn-bs w-100 ${editMode ? 'btn-primary' : 'btn-primary'}`} type="submit">
+
+                    {/* SECCIÓN DE BOTONES EN VERTICAL CON COLORES VERDE Y ROJO EN MODO EDICIÓN */}
+                    <div className="col-12" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '15px' }}>
+                        <button 
+                            className={`btn-bs w-100 ${editMode ? 'btn-success' : 'btn-success'}`} 
+                            type="submit"
+                            style={{ padding: '12px', fontSize: '1rem' }}
+                        >
                             {editMode ? 'Actualizar Cambios' : 'Guardar en Catálogo'}
                         </button>
+                        
                         {editMode && (
                             <button 
                                 type="button" 
-                                className="btn-bs btn-danger" 
+                                className="btn-bs btn-danger w-100" 
                                 onClick={() => {
                                     setEditMode(false); 
                                     setFormData({nombre:'', cilindraje:'', idMarca:''});
                                 }}
+                                style={{ padding: '12px', fontSize: '1rem' }}
                             >
-                                Cancelar
+                                Cancelar Edición
                             </button>
                         )}
                     </div>
@@ -184,9 +192,9 @@ const Referencia = () => {
                         <div style={{ display: 'flex', justifyContent: 'center' }}>Acciones</div>
                     </div>
 
+                    {/* CUERPO DE LAS FILAS */}
                     {referenciasFiltradas.length > 0 ? (
                         referenciasFiltradas.map(ref => (
-                            /* FILA ALINEADA CON HOVER E INTERSECCIONES DEL CSS */
                             <div key={ref.idReferencia} style={{ 
                                 display: 'grid', 
                                 gridTemplateColumns: '1.5fr 2.5fr 1.2fr 1.3fr', 
@@ -208,7 +216,7 @@ const Referencia = () => {
                                     {ref.cilindraje} cc
                                 </div>
                                 <div className="text-center">
-                                    <button className="btn-bs btn-primary btn-sm" style={{ padding: '6px 12px' }} onClick={() => prepararEdicion(ref)}>
+                                    <button className="btn-bs btn-success btn-sm" style={{ padding: '6px 12px' }} onClick={() => prepararEdicion(ref)}>
                                         <i className="fa-solid fa-pen"></i>
                                     </button>
                                     <button 

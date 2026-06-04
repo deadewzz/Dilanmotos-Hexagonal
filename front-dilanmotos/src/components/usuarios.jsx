@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { authFetch } from "../api";
+import '../global.css';
 
 export default function Usuarios() {
     const [usuarios, setUsuarios] = useState([]);
     const [nuevo, setNuevo] = useState({ nombre: '', correo: '', contrasena: '', idReferencia: 1 });
     const [editMode, setEditMode] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
+    const [mensaje, setMensaje] = useState('');
 
     const token = localStorage.getItem('token');
 
@@ -15,14 +16,50 @@ export default function Usuarios() {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const d = await r.json();
-            setUsuarios(d);
-        } catch (e) { console.error("Error al cargar:", e); }
+            setUsuarios(Array.isArray(d) ? d : []);
+        } catch (e) { 
+            console.error("Error al cargar:", e); 
+            setMensaje("❌ No se pudieron cargar los usuarios.");
+        }
     };
 
-    useEffect(() => { cargar(); }, []);
+    useEffect(() => { 
+        cargar(); 
+    }, []);
+
+    // FUNCIÓN DE VALIDACIÓN MANUAL EN JS
+    const validarFormulario = () => {
+        const regexNombre = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
+        const regexCorreo = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$/;
+
+        if (!regexNombre.test(nuevo.nombre.trim())) {
+            setMensaje("❌ El nombre completo no puede contener números ni caracteres especiales.");
+            return false;
+        }
+
+        if (!regexCorreo.test(nuevo.correo.trim())) {
+            setMensaje("❌ El correo electrónico debe tener un formato válido y terminar en '.com' (Ej: usuario@gmail.com).");
+            return false;
+        }
+
+        // VALIDACIÓN DE CONTRASEÑA (Mínimo 6 caracteres)
+        // En registro siempre es obligatoria. En edición solo se valida si el usuario escribió algo.
+        if (!editMode || nuevo.contrasena.length > 0) {
+            if (nuevo.contrasena.length < 6) {
+                setMensaje("❌ La contraseña debe tener al menos 6 caracteres.");
+                return false;
+            }
+        }
+
+        return true;
+    };
 
     const guardar = async (e) => {
         e.preventDefault();
+        setMensaje('');
+
+        if (!validarFormulario()) return;
+
         const url = editMode 
             ? `http://localhost:8080/api/usuarios/${selectedId}` 
             : 'http://localhost:8080/api/usuarios';
@@ -35,138 +72,215 @@ export default function Usuarios() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}` 
                 },
-                body: JSON.stringify(nuevo)
+                body: JSON.stringify({
+                    ...nuevo,
+                    nombre: nuevo.nombre.trim(),
+                    correo: nuevo.correo.trim().toLowerCase()
+                })
             });
             
             if (res.ok) {
-                setNuevo({ nombre: '', correo: '', contrasena: '', idReferencia: 1 });
-                setEditMode(false);
-                setSelectedId(null);
+                setMensaje(editMode ? "✅ ¡Usuario actualizado con éxito!" : "✅ ¡Usuario registrado exitosamente!");
+                resetForm();
                 cargar();
-                alert(editMode ? "Usuario actualizado" : "Usuario registrado exitosamente");
             } else {
                 const errorData = await res.text();
-                alert("Error: " + errorData);
+                setMensaje(`❌ Error: ${errorData}`);
             }
-        } catch (error) { alert("Error de conexión"); }
+        } catch (error) { 
+            setMensaje("❌ Error de conexión con el servidor."); 
+        }
     };
 
     const iniciarEdicion = (u) => {
-        window.scrollTo(0, 0);
         const id = u.idUsuario || u.id_usuario;
         setEditMode(true);
         setSelectedId(id);
         setNuevo({ nombre: u.nombre, correo: u.correo, contrasena: '', idReferencia: 1 });
+        setMensaje('');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     };
 
     const eliminar = async (id) => {
         if (!id || id === "undefined") return;
-        if (!window.confirm("¿Eliminar este usuario?")) return;
+        if (!window.confirm("¿Estás seguro de que deseas eliminar este usuario?")) return;
         
         try {
             const res = await fetch(`http://localhost:8080/api/usuarios/${id}`, { 
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });
-            if (res.ok) { cargar(); alert("Eliminado"); }
-        } catch (e) { alert("Error al eliminar"); }
+            if (res.ok) { 
+                cargar(); 
+                setMensaje("✅ Registro eliminado con éxito.");
+            } else {
+                setMensaje("❌ No se pudo eliminar el usuario seleccionado.");
+            }
+        } catch (e) { 
+            setMensaje("❌ Error al intentar conectar para eliminar."); 
+        }
     };
 
-    // Estilos inline de fuerza bruta con !important lógicos
-    const containerForzado = {
-        width: '100%',
-        maxWidth: '100%',
-        display: 'block',
-        boxSizing: 'border-box'
-    };
-
-    const panelForzado = {
-        width: '100%',
-        maxWidth: '100%',
-        background: '#ffffff',
-        borderRadius: '12px',
-        padding: '25px',
-        boxSizing: 'border-box',
-        marginBottom: '20px',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+    const resetForm = () => {
+        setNuevo({ nombre: '', correo: '', contrasena: '', idReferencia: 1 });
+        setEditMode(false);
+        setSelectedId(null);
     };
 
     const gridLayoutTabla = {
         display: 'grid',
-        gridTemplateColumns: '80px 2fr 2fr 120px 150px', // Anchos explícitos fijos para cada celda
+        gridTemplateColumns: '80px 2fr 2fr 120px 150px',
+        gap: '15px',
         alignItems: 'center',
-        padding: '12px 15px',
-        minWidth: '800px', // Evita que las columnas colapsen entre sí
-        boxSizing: 'border-box'
+        padding: '15px',
+        minWidth: '800px'
     };
 
     return (
-        <div style={containerForzado}>
+        <div className="main-content-inner">
+            
             {/* PANEL DEL FORMULARIO */}
-            <div style={panelForzado}>
-                <h3 className="text-primary" style={{ margin: '0 0 15px 0', color: '#0d6efd' }}>
-                    {editMode ? 'Editar Usuario' : 'Gestión de Usuarios'}
+            <div className="card-panel">
+                <h3 className="text-primary mb-4">
+                    {editMode ? '📝 Editar Usuario' : '👥 Gestión de Usuarios'}
                 </h3>
-                <hr style={{ border: '0', borderTop: '1px solid #eee', marginBottom: '15px' }} />
+
+                {mensaje && (
+                    <div className="alert alert-info fw-bold mb-3">
+                        {mensaje}
+                    </div>
+                )}
+
                 <form onSubmit={guardar}>
-                    <input className="input-bs" placeholder="Nombre completo" value={nuevo.nombre} onChange={e => setNuevo({...nuevo, nombre: e.target.value})} required />
-                    <input className="input-bs" placeholder="Correo electrónico" value={nuevo.correo} onChange={e => setNuevo({...nuevo, correo: e.target.value})} required />
-                    <input className="input-bs" type="password" placeholder={editMode ? "Contraseña (dejar vacío para no cambiar)" : "Contraseña"} value={nuevo.contrasena} onChange={e => setNuevo({...nuevo, contrasena: e.target.value})} required={!editMode} />
+                    <div className="mb-3">
+                        <label className="form-label fw-bold">Nombre Completo</label>
+                        <input 
+                            className="input-bs" 
+                            type="text"
+                            placeholder="Ej: Juan Pérez" 
+                            value={nuevo.nombre} 
+                            onChange={e => setNuevo({...nuevo, nombre: e.target.value})} 
+                            pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
+                            title="El nombre solo debe contener letras y espacios."
+                            required 
+                        />
+                    </div>
+
+                    <div className="mb-3">
+                        <label className="form-label fw-bold">Correo Electrónico</label>
+                        <input 
+                            className="input-bs" 
+                            type="text" 
+                            placeholder="nombre@correo.com" 
+                            value={nuevo.correo} 
+                            onChange={e => setNuevo({...nuevo, correo: e.target.value})} 
+                            pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$"
+                            title="El correo debe ser válido y terminar estrictamente en '.com'."
+                            required 
+                        />
+                    </div>
+
+                    <div className="mb-3">
+                        <label className="form-label fw-bold">Contraseña</label>
+                        <input 
+                            className="input-bs" 
+                            type="password" 
+                            placeholder={editMode ? "Dejar vacío para mantener la contraseña actual" : "Asigne una contraseña segura (mín. 6 caracteres)"} 
+                            value={nuevo.contrasena} 
+                            onChange={e => setNuevo({...nuevo, contrasena: e.target.value})} 
+                            // Propiedad HTML5: Valida la longitud mínima nativamente en el navegador
+                            minLength={editMode ? undefined : 6}
+                            title="La contraseña debe tener un mínimo de 6 caracteres."
+                            required={!editMode} 
+                        />
+                    </div>
                     
-                    <button type="submit" className={`btn-bs ${editMode ? 'btn-success' : 'btn-primary'} w-100`}>
-                        {editMode ? 'Guardar Cambios' : 'Registrar Usuario'}
-                    </button>
-                    {editMode && (
-                        <button type="button" className="btn-bs btn-danger w-100 mt-2" onClick={() => {setEditMode(false); setNuevo({nombre:'', correo:'', contrasena:'', idReferencia: 1})}}>
-                            Cancelar Edición
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }} className="mt-4">
+                        <button 
+                            type="submit" 
+                            className={`btn-bs w-100 ${editMode ? 'btn-success' : 'btn-success'}`}
+                            style={{ padding: '12px', fontSize: '1rem' }}
+                        >
+                            {editMode ? 'Actualizar Cambios' : 'Registrar Usuario'}
                         </button>
-                    )}
+                        {editMode && (
+                            <button 
+                                type="button" 
+                                className="btn-bs btn-danger w-100" 
+                                onClick={() => { resetForm(); setMensaje(''); }}
+                                style={{ padding: '12px', fontSize: '1rem' }}
+                            >
+                                Cancelar Edición
+                            </button>
+                        )}
+                    </div>
                 </form>
             </div>
 
             {/* PANEL DE LA TABLA */}
-            <div style={panelForzado}>
-                {/* Contenedor con scroll horizontal garantizado si la pantalla es pequeña */}
-                <div style={{ width: '100%', overflowX: 'auto', border: '1px solid #dee2e6', borderRadius: '8px' }}>
+            <div className="card-panel mt-4">
+                <h4 className="mb-4">📋 Listado de Usuarios Registrados</h4>
+
+                <div style={{ width: '100%', overflowX: 'auto', background: 'var(--white)', borderRadius: '10px', border: '1px solid #dee2e6' }}>
                     
                     {/* ENCABEZADO */}
-                    <div style={{ ...gridLayoutTabla, backgroundColor: '#343a40', color: '#ffffff', fontWeight: 'bold' }}>
+                    <div style={{ 
+                        ...gridLayoutTabla, 
+                        background: 'var(--header-table)', 
+                        color: 'var(--white)', 
+                        fontWeight: 'bold' 
+                    }}>
                         <div>ID</div>
                         <div>Nombre</div>
-                        <div>Correo</div>
+                        <div>Correo Electrónico</div>
                         <div>Estado</div>
-                        <div style={{ textAlign: 'center', display: 'block', width: '100%' }}>Acciones</div>
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>Acciones</div>
                     </div>
 
                     {/* FILAS */}
-                    {usuarios.map(u => {
-                        const currentId = u.idUsuario || u.id_usuario;
-                        return (
-                            <div style={{ ...gridLayoutTabla, borderBottom: '1px solid #f1f1f1' }} key={currentId}>
-                                <div style={{ color: '#6c757d' }}>#{currentId}</div>
-                                <div style={{ fontWeight: '600', color: '#212529' }}>{u.nombre}</div>
-                                <div style={{ wordBreak: 'break-all' }}>{u.correo}</div>
-                                <div>
-                                    <span style={{ backgroundColor: '#e8f5e9', color: '#2e7d32', padding: '4px 8px', borderRadius: '4px', fontSize: '12px', fontWeight: 'bold' }}>
-                                        ACTIVO
-                                    </span>
+                    {usuarios.length > 0 ? (
+                        usuarios.map(u => {
+                            const currentId = u.idUsuario || u.id_usuario;
+                            return (
+                                <div 
+                                    className="table-row-hover-effect"
+                                    style={{ 
+                                        ...gridLayoutTabla, 
+                                        borderBottom: '1px solid #eee',
+                                        background: 'var(--white)',
+                                        transition: '0.2s'
+                                    }} 
+                                    key={currentId}
+                                >
+                                    <div style={{ color: 'var(--text-dark)', fontWeight: 'bold' }}>#{currentId}</div>
+                                    <div style={{ fontWeight: '600', color: '#212529' }}>{u.nombre}</div>
+                                    <div style={{ color: '#4b5563', wordBreak: 'break-all' }}>{u.correo}</div>
+                                    <div>
+                                        <span style={{ backgroundColor: '#e8f5e9', color: '#2e7d32', padding: '5px 10px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 'bold' }}>
+                                            ACTIVO
+                                        </span>
+                                    </div>
+                                    <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
+                                        <button 
+                                            className="btn-bs btn-success btn-sm" 
+                                            style={{ padding: '6px 12px' }} 
+                                            onClick={() => iniciarEdicion(u)}
+                                        >
+                                            <i className="fa-solid fa-pen"></i>
+                                        </button>
+                                        <button 
+                                            className="btn-bs btn-danger btn-sm" 
+                                            style={{ padding: '6px 12px' }} 
+                                            onClick={() => eliminar(currentId)}
+                                        >
+                                            <i className="fa-solid fa-trash"></i>
+                                        </button>
+                                    </div>
                                 </div>
-                                <div style={{ display: 'flex', justifyContent: 'center', gap: '6px' }}>
-                                    <button className="btn-bs btn-success btn-sm" style={{ padding: '4px 8px', height: 'auto' }} onClick={() => iniciarEdicion(u)}>
-                                        <i className="fa-solid fa-pen" style={{ fontSize: '12px' }}></i>
-                                    </button>
-                                    <button className="btn-bs btn-danger btn-sm" style={{ padding: '4px 8px', height: 'auto' }} onClick={() => eliminar(currentId)}>
-                                        <i className="fa-solid fa-trash" style={{ fontSize: '12px' }}></i>
-                                    </button>
-                                </div>
-                            </div>
-                        );
-                    })}
-
-                    {usuarios.length === 0 && (
-                        <div style={{ padding: '20px', textAlign: 'center', color: '#6c757d' }}>
-                            No hay usuarios registrados.
-                        </div>
+                            );
+                        })
+                    ) : (
+                        <div className="p-4 text-center text-muted">No se encontraron usuarios registrados en el sistema.</div>
                     )}
                 </div>
             </div>

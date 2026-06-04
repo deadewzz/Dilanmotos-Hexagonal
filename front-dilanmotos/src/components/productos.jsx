@@ -118,7 +118,7 @@ export default function Productos() {
         <div className="main-content-inner">
             <div className="card-panel">
                 <h3 className="text-primary mb-4">
-                    {editMode ? '📝 Editar Producto' : '📦 Registro de Productos'}
+                    {editMode ? '✏️ Editar Producto' : '📦 Registro de Productos'}
                 </h3>
                 <form onSubmit={guardar}>
                     <div className="row">
@@ -201,13 +201,23 @@ export default function Productos() {
                         </div>
                     </div>
 
-                    <div className="d-flex gap-2 mt-2">
-                        <button type="submit" className={`btn-bs w-100 ${editMode ? 'btn-warning' : 'btn-primary'}`}>
+                    {/* SECCIÓN DE BOTONES ADAPTADA EN VERTICAL */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '15px' }}>
+                        <button 
+                            type="submit" 
+                            className={`btn-bs w-100 ${editMode ? 'btn-success' : 'btn-success'}`}
+                            style={{ padding: '12px', fontSize: '1rem' }}
+                        >
                             {editMode ? 'Actualizar Cambios' : 'Registrar Producto'}
                         </button>
                         {editMode && (
-                            <button type="button" className="btn-bs btn-danger" onClick={cancelarEdicion}>
-                                Cancelar
+                            <button 
+                                type="button" 
+                                className="btn-bs btn-danger w-100" 
+                                onClick={cancelarEdicion}
+                                style={{ padding: '12px', fontSize: '1rem' }}
+                            >
+                                Cancelar Edición
                             </button>
                         )}
                     </div>
@@ -215,6 +225,12 @@ export default function Productos() {
             </div>
 
             <div className="card-panel mt-4">
+                <div className="row align-items-center mb-3">
+                    <div className="col-md-6">
+                        <h4 className="text-muted m-0">📚 Productos Registrados</h4>
+                    </div>
+                </div>
+
                 {/* Contenedor con bordes y radio unificados de tu CSS */}
                 <div style={{ width: '100%', overflowX: 'auto', background: 'var(--white)', borderRadius: '10px', border: '1px solid #dee2e6' }}>
                     
@@ -236,9 +252,9 @@ export default function Productos() {
                         <div style={{ display: 'flex', justifyContent: 'center' }}>Acciones</div>
                     </div>
 
+                    {/* CUERPO DE LAS FILAS */}
                     {productos.length > 0 ? (
                         productos.map(p => (
-                            /* FILA ALINEADA CON HOVER E INTERSECCIONES DEL CSS */
                             <div key={p.idProducto} className="table-row-hover-effect" style={{ 
                                 display: 'grid', 
                                 gridTemplateColumns: '3fr 1.5fr 1.2fr 1.3fr', 
@@ -260,7 +276,7 @@ export default function Productos() {
                                     ${p.precio}
                                 </div>
                                 <div className="text-center">
-                                    <button className="btn-bs btn-primary btn-sm" style={{ padding: '6px 12px' }} onClick={() => prepararEdicion(p)}>
+                                    <button className="btn-bs btn-success btn-sm" style={{ padding: '6px 12px' }} onClick={() => prepararEdicion(p)}>
                                         <i className="fa-solid fa-pen"></i>
                                     </button>
                                     <button className="btn-bs btn-danger btn-sm" style={{ padding: '6px 12px' }} onClick={() => eliminarProducto(p.idProducto)}>

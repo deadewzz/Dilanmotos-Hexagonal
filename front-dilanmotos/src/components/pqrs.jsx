@@ -125,7 +125,7 @@ export default function Pqrs() {
                 <form onSubmit={guardar}>
                     <div className="row">
                         <div className="col-md-6 mb-3">
-                            <label className="form-label fw-bold">Tipo de Solicitud</label>
+                            <label className="form-label fw-bold">Tipo de Solicitul</label>
                             <select className="input-bs" value={nuevo.tipo} onChange={e => setNuevo({...nuevo, tipo: e.target.value})} disabled={editMode}>
                                 <option value="Peticion">Petición</option>
                                 <option value="Queja">Queja</option>
@@ -183,13 +183,23 @@ export default function Pqrs() {
                         </div>
                     )}
 
-                    <div className="d-flex gap-2 mt-4">
-                        <button type="submit" className="btn-bs btn-primary flex-grow-1">
+                    {/* SECCIÓN DE BOTONES EN VERTICAL PARA MANTENER LA CONSISTENCIA */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '20px' }}>
+                        <button 
+                            type="submit" 
+                            className={`btn-bs w-100 ${editMode ? 'btn-success' : 'btn-success'}`}
+                            style={{ padding: '12px', fontSize: '1rem' }}
+                        >
                             {editMode ? 'Guardar Cambios' : 'Enviar Formulario'}
                         </button>
                         {editMode && (
-                            <button type="button" className="btn-bs btn-danger" onClick={resetForm}>
-                                Cancelar
+                            <button 
+                                type="button" 
+                                className="btn-bs btn-danger w-100" 
+                                onClick={resetForm}
+                                style={{ padding: '12px', fontSize: '1rem' }}
+                            >
+                                Cancelar Edición
                             </button>
                         )}
                     </div>
@@ -198,7 +208,12 @@ export default function Pqrs() {
 
             {/* PANEL DE LA LISTA / TABLA DE REGISTROS */}
             <div className="card-panel mt-4">
-                <h4 className="text-secondary mb-3">Historial y Listado General</h4>
+                <div className="row align-items-center mb-3">
+                    <div className="col-md-6">
+                        <h4 className="text-muted m-0">📚 Historial y Listado General</h4>
+                    </div>
+                </div>
+                
                 <div style={{ width: '100%', overflowX: 'auto', background: 'var(--white)', borderRadius: '10px', border: '1px solid #dee2e6' }}>
                     
                     {/* CABECERA CON GRID: Proporciones 1.2fr | 2fr | 1.2fr | 2.5fr | 1fr */}
@@ -220,10 +235,10 @@ export default function Pqrs() {
                         <div style={{ display: 'flex', justifyContent: 'center' }}>Acciones</div>
                     </div>
 
-                    {/* CUERPO DINÁMICO DE LA TABLA */}
+                    {/* CUERPO DINÁMICO DE LA TABLA CON EFECTOS HOVER */}
                     {solicitudes.length > 0 ? (
                         solicitudes.map(p => (
-                            <div key={p.id_pqrs} style={{ 
+                            <div key={p.id_pqrs} className="table-row-hover-effect" style={{ 
                                 display: 'grid', 
                                 gridTemplateColumns: '1.2fr 2fr 1.2fr 2.5fr 1fr', 
                                 gap: '15px', 
@@ -231,10 +246,11 @@ export default function Pqrs() {
                                 padding: '15px',
                                 borderBottom: '1px solid #eee',
                                 minWidth: '850px',
-                                background: 'var(--white)'
+                                background: 'var(--white)',
+                                transition: '0.2s'
                             }}>
                                 <div className="fw-bold" style={{ color: 'var(--text-dark)' }}>{p.tipo}</div>
-                                <div style={{ color: '#4b5563', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                <div style={{ color: '#4b5563', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={p.asunto}>
                                     {p.asunto}
                                 </div>
                                 <div>
@@ -245,11 +261,11 @@ export default function Pqrs() {
                                         {p.estado || 'PENDIENTE'}
                                     </span>
                                 </div>
-                                <div style={{ color: '#6b7280', fontSize: '0.9rem', display: '-webkit-box', WebkitLineClamp: '2', WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                <div style={{ color: '#4b5563', fontSize: '0.9rem', display: '-webkit-box', WebkitLineClamp: '2', WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis' }} title={p.respuesta_admin || ''}>
                                     {p.respuesta_admin || <span className="text-muted italic">Sin responder</span>}
                                 </div>
                                 <div className="text-center d-flex justify-content-center gap-2">
-                                    <button className="btn-bs btn-primary btn-sm" style={{ padding: '6px 12px' }} onClick={() => iniciarEdicion(p)}>
+                                    <button className="btn-bs btn-success btn-sm" style={{ padding: '6px 12px' }} onClick={() => iniciarEdicion(p)}>
                                         <i className="fa-solid fa-pen"></i>
                                     </button>
                                     <button className="btn-bs btn-danger btn-sm" style={{ padding: '6px 12px' }} onClick={() => eliminar(p.id_pqrs, p.asunto)}>

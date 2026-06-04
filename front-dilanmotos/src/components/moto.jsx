@@ -141,10 +141,10 @@ export default function Motos() {
     // Grid personalizado de 5 columnas para los datos de Motos
     const gridLayoutTabla = {
         display: 'grid',
-        gridTemplateColumns: '2fr 2fr 1.5fr 2fr 150px', // Distribución proporcional robusta
+        gridTemplateColumns: '2fr 2fr 1.5fr 2fr 150px', 
         alignItems: 'center',
         padding: '12px 15px',
-        minWidth: '850px', // Previene el colapso horizontal entre los textos
+        minWidth: '850px', 
         boxSizing: 'border-box'
     };
 
@@ -153,7 +153,7 @@ export default function Motos() {
             {/* PANEL DEL FORMULARIO DE REGISTRO */}
             <div style={panelForzado}>
                 <h3 className="text-primary" style={{ margin: '0 0 15px 0', color: '#0d6efd' }}>
-                    {editMode ? 'Editar Moto' : 'Registro de Motos'}
+                    {editMode ? 'Editar Usuario' : 'Registro de Motos'}
                 </h3>
                 <hr style={{ border: '0', borderTop: '1px solid #eee', marginBottom: '15px' }} />
                 <form onSubmit={guardar}>
@@ -215,13 +215,24 @@ export default function Motos() {
                         </div>
                     </div>
 
-                    <div className="d-flex gap-2">
-                        <button type="submit" className={`btn-bs w-100 ${editMode ? 'btn-warning' : 'btn-primary'}`}>
-                            {editMode ? 'Actualizar Cambios' : 'Guardar Moto'}
+                    {/* SECCIÓN DE BOTONES CONFIGURADOS EN VERTICAL CON SUS RESPECTIVOS COLORES */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '15px' }}>
+                        <button 
+                            type="submit" 
+                            className={`btn-bs ${editMode ? 'btn-success' : 'btn-success'}`}
+                            style={{ width: '100%', padding: '12px', fontSize: '1rem' }}
+                        >
+                            {editMode ? 'Guardar Cambios' : 'Guardar Moto'}
                         </button>
+                        
                         {editMode && (
-                            <button type="button" className="btn-bs btn-secondary" onClick={cancelarEdicion}>
-                                Cancelar
+                            <button 
+                                type="button" 
+                                className="btn-bs btn-danger" 
+                                onClick={cancelarEdicion}
+                                style={{ width: '100%', padding: '12px', fontSize: '1rem' }}
+                            >
+                                Cancelar Edición
                             </button>
                         )}
                     </div>
@@ -230,7 +241,6 @@ export default function Motos() {
 
             {/* PANEL DE LA LISTA / TABLA */}
             <div style={panelForzado}>
-                {/* Contenedor responsivo con scroll de seguridad */}
                 <div style={{ width: '100%', overflowX: 'auto', border: '1px solid #dee2e6', borderRadius: '8px', background: '#fff' }}>
                     
                     {/* ENCABEZADO DE LA TABLA */}
@@ -258,7 +268,7 @@ export default function Motos() {
                                 <div style={{ color: '#495057' }}>{m.tipoServicio?.nombre || 'No especificado'}</div>
                                 <div style={{ display: 'flex', justifyContent: 'center', gap: '6px' }}>
                                     <button 
-                                        className="btn-bs btn-warning btn-sm" 
+                                        className="btn-bs btn-success btn-sm" 
                                         style={{ padding: '4px 8px', height: 'auto' }}
                                         onClick={() => prepararEdicion(m)}
                                         title="Editar"

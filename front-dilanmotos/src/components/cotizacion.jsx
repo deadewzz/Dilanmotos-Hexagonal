@@ -104,7 +104,6 @@ const Cotizacion = () => {
             const method = isEditing ? 'PUT' : 'POST';
             const url = isEditing ? `${API_URL}/${idReal}` : API_URL;
 
-            // Preparamos el cuerpo asegurando compatibilidad del ID con el backend mapeado
             const payload = {
                 ...cotizacion,
                 idCotizacion: idReal,
@@ -121,7 +120,7 @@ const Cotizacion = () => {
             });
 
             if (response.ok) {
-                setMensaje(isEditing ? 'Cotización actualizada correctamente' : 'Cotización creada correctamente');
+                setMensaje(isEditing ? '✅ Cotización actualizada correctamente' : '✅ Cotización creada correctamente');
                 cargarCotizaciones();
                 setEditMode(false);
                 setCotizacion({
@@ -134,7 +133,7 @@ const Cotizacion = () => {
                     productoAgregado: true
                 });
             } else {
-                setMensaje(isEditing ? 'Error al actualizar la cotización' : 'Error al crear la cotización');
+                setMensaje(isEditing ? '❌ Error al actualizar la cotización' : '❌ Error al crear la cotización');
             }
         } catch (error) {
             console.error(error);
@@ -143,6 +142,7 @@ const Cotizacion = () => {
     };
 
     const iniciarEdicion = (c) => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
         setEditMode(true);
         const idReal = c.id || c.idCotizacion;
         setCotizacion({
@@ -178,9 +178,9 @@ const Cotizacion = () => {
             });
             if(response.ok) {
                 cargarCotizaciones();
-                setMensaje('Cotización管liminada correctamente');
+                setMensaje('✅ Cotización eliminada correctamente');
             } else {
-                setMensaje('Error al eliminar la cotización');
+                setMensaje('❌ Error al eliminar la cotización');
             }
         } catch (error) {
             console.error(error);
@@ -192,20 +192,22 @@ const Cotizacion = () => {
         gridTemplateColumns: '2fr 1fr 1fr 1fr 1.5fr 1.5fr 2fr', 
         gap: '15px',
         alignItems: 'center',
-        padding: '12px 15px'
+        padding: '15px',
+        minWidth: '850px'
     };
 
     return (
         <div className="main-content-inner">
-            {/* FORMULARIO DE REGISTRO / EDICIÓN */}
+            {/* PANEL DE FORMULARIO */}
             <div className="card-panel">
-                <h3 className="text-primary">{editMode ? 'Editar Cotización' : 'Nueva Cotización'}</h3>
-                <hr />
-                {mensaje && <div className="alert alert-info">{mensaje}</div>}
+                <h3 className="text-primary mb-4">
+                    {editMode ? '📝 Editar Cotización Existente' : '📩 Crear Nueva Cotización'}
+                </h3>
+                {mensaje && <div className="alert alert-info fw-bold mb-3">{mensaje}</div>}
                 
                 <form onSubmit={handleSubmit}>
                     <div className="mb-3">
-                        <label className="fw-bold">Producto</label>
+                        <label className="form-label fw-bold">Producto Seleccionable</label>
                         <select
                             className="input-bs"
                             name="producto"
@@ -226,26 +228,28 @@ const Cotizacion = () => {
                         </select>
                     </div>
 
-                    <div className="row" style={{ display: 'flex', gap: '20px', marginBottom: '15px' }}>
-                        <div style={{ flex: 1 }}>
-                            <label className="fw-bold">Cantidad</label>
+                    <div className="row">
+                        <div className="col-md-6 mb-3">
+                            <label className="form-label fw-bold">Cantidad</label>
                             <input
                                 className="input-bs"
                                 type="number"
                                 name="cantidad"
+                                placeholder="Ej: 5"
                                 value={cotizacion.cantidad}
                                 onChange={handleChange}
                                 required
                             />
                         </div>
 
-                        <div style={{ flex: 1 }}>
-                            <label className="fw-bold">Precio Unitario</label>
+                        <div className="col-md-6 mb-3">
+                            <label className="form-label fw-bold">Precio Unitario ($)</label>
                             <input
                                 className="input-bs"
                                 type="number"
                                 step="0.01"
                                 name="precioUnitario"
+                                placeholder="0.00"
                                 value={cotizacion.precioUnitario}
                                 onChange={handleChange}
                                 required
@@ -253,64 +257,80 @@ const Cotizacion = () => {
                         </div>
                     </div>
 
-                    <div className="mb-3">
-                        <label className="fw-bold">Fecha</label>
-                        <input
-                            className="input-bs"
-                            type="date"
-                            name="fecha"
-                            value={cotizacion.fecha}
-                            onChange={handleChange}
-                            required
-                        />
+                    <div className="row">
+                        <div className="col-md-6 mb-3">
+                            <label className="form-label fw-bold">Fecha de Registro</label>
+                            <input
+                                className="input-bs"
+                                type="date"
+                                name="fecha"
+                                value={cotizacion.fecha}
+                                onChange={handleChange}
+                                required
+                            />
+                        </div>
+
+                        <div className="col-md-6 mb-3">
+                            <label className="form-label fw-bold">Estado del Proceso</label>
+                            <select
+                                className={`input-bs ${cotizacion.productoAgregado ? 'text-success fw-bold' : 'text-warning fw-bold'}`}
+                                name="productoAgregado"
+                                value={cotizacion.productoAgregado}
+                                onChange={(e) =>
+                                    setCotizacion({
+                                        ...cotizacion,
+                                        productoAgregado: e.target.value === 'true'
+                                    })
+                                }
+                            >
+                                <option value="true" className="text-success fw-bold">AGREGADO</option>
+                                <option value="false" className="text-warning fw-bold">PENDIENTE</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div className="mb-3">
-                        <label className="fw-bold">Estado</label>
-                        <select
-                            className={`input-bs ${cotizacion.productoAgregado ? 'text-success fw-bold' : 'text-warning fw-bold'}`}
-                            name="productoAgregado"
-                            value={cotizacion.productoAgregado}
-                            onChange={(e) =>
-                                setCotizacion({
-                                    ...cotizacion,
-                                    productoAgregado: e.target.value === 'true'
-                                })
-                            }
+                    <div className="mt-3 p-3 border rounded mb-4" style={{ background: '#f8f9fa', border: '1px solid #dee2e6' }}>
+                        <h5 className="m-0 fw-bold text-dark"> Total Proyectado: ${calcularTotal()} </h5>
+                    </div>
+
+                    {/* SECCIÓN DE BOTONES EN VERTICAL PARA MANTENER LA CONSISTENCIA */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <button 
+                            type="submit" 
+                            className={`btn-bs w-100 ${editMode ? 'btn-success' : 'btn-success'}`}
+                            style={{ padding: '12px', fontSize: '1rem' }}
                         >
-                            <option value="true" className="text-success fw-bold">AGREGADO</option>
-                            <option value="false" className="text-warning fw-bold">PENDIENTE</option>
-                        </select>
-                    </div>
-
-                    <div className="mt-3 p-3 bg-light border rounded" style={{ background: '#f8fafc', padding: '15px', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
-                        <h5 style={{ margin: 0 }}> Total: ${calcularTotal()} </h5>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        <button type="submit" className="btn-bs btn-primary mt-3">
                             {editMode ? 'Actualizar Cotización' : 'Guardar Cotización'}
                         </button>
                         {editMode && (
-                            <button type="button" className="btn-bs btn-danger mt-3" onClick={cancelarEdicion}>
-                                Cancelar
+                            <button 
+                                type="button" 
+                                className="btn-bs btn-danger w-100" 
+                                onClick={cancelarEdicion}
+                                style={{ padding: '12px', fontSize: '1rem' }}
+                            >
+                                Cancelar Edición
                             </button>
                         )}
                     </div>
                 </form>
             </div>
 
-            {/* TABLA CON LA BARRA DE ENCABEZADO GRIS OSCURO */}
+            {/* PANEL DE LA LISTA / TABLA DE REGISTROS */}
             <div className="card-panel mt-4">
-                <h4 className="mb-4">Listado General de Cotizaciones</h4>
-                <div className="custom-table-container">
+                <div className="row align-items-center mb-3">
+                    <div className="col-md-6">
+                        <h4 className="text-muted m-0">📚 Listado General de Cotizaciones</h4>
+                    </div>
+                </div>
+                
+                <div style={{ width: '100%', overflowX: 'auto', background: 'var(--white)', borderRadius: '10px', border: '1px solid #dee2e6' }}>
                     
-                    {/* Encabezado con color exacto #2d3748 */}
-                    <div className="grid-cotizaciones-header" style={{
+                    {/* CABECERA CON GRID */}
+                    <div style={{
                         ...gridStyle,
-                        backgroundColor: '#2d3748',
-                        color: '#ffffff',
-                        borderRadius: '6px 6px 0 0',
+                        background: 'var(--header-table)',
+                        color: 'var(--white)',
                         fontWeight: 'bold'
                     }}>
                         <div>Producto</div>
@@ -322,51 +342,56 @@ const Cotizacion = () => {
                         <div style={{ display: 'flex', justifyContent: 'center' }}>Acciones</div>
                     </div>
 
-                    {/* Filas de la Tabla */}
-                    {cotizaciones.map(c => (
-                        <div className="grid-cotizaciones-row" style={{
-                            ...gridStyle,
-                            borderBottom: '1px solid #e2e8f0'
-                        }} key={c.id || c.idCotizacion}>
-                            <div style={{ fontWeight: '500', color: '#334155' }}>{c.producto}</div>
-                            <div>{c.cantidad}</div>
-                            <div>${c.precioUnitario}</div>
-                            <div style={{ fontWeight: '600', color: '#1e293b' }}>
-                                ${(c.cantidad * c.precioUnitario).toFixed(2)}
+                    {/* CUERPO DINÁMICO DE LA TABLA CON EFECTOS HOVER */}
+                    {cotizaciones.length > 0 ? (
+                        cotizaciones.map(c => (
+                            <div className="table-row-hover-effect" style={{
+                                ...gridStyle,
+                                borderBottom: '1px solid #eee',
+                                background: 'var(--white)',
+                                transition: '0.2s'
+                            }} key={c.id || c.idCotizacion}>
+                                <div className="fw-bold" style={{ color: 'var(--text-dark)' }}>{c.producto}</div>
+                                <div style={{ color: '#4b5563' }}>{c.cantidad}</div>
+                                <div style={{ color: '#4b5563' }}>${c.precioUnitario}</div>
+                                <div style={{ fontWeight: '600', color: '#1e293b' }}>
+                                    ${(c.cantidad * c.precioUnitario).toFixed(2)}
+                                </div>
+                                <div style={{ color: '#4b5563', fontSize: '0.9rem' }}>{c.fecha}</div>
+                                
+                                <div>
+                                    <span className={`badge ${c.productoAgregado ? 'bg-success text-white' : 'bg-warning text-dark'}`} 
+                                          style={{ padding: '5px 10px', borderRadius: '5px', fontSize: '0.85rem', fontWeight: 'bold' }}>
+                                        {c.productoAgregado ? 'AGREGADO' : 'PENDIENTE'}
+                                    </span>
+                                </div>
+                                
+                                <div className="text-center d-flex justify-content-center gap-2">
+                                    <button
+                                        className="btn-bs btn-success btn-sm"
+                                        style={{ padding: '6px 12px' }}
+                                        onClick={() => iniciarEdicion(c)}
+                                    >
+                                        <i className="fa-solid fa-pen"></i>
+                                    </button>
+                                    <button
+                                        className="btn-bs btn-danger btn-sm"
+                                        style={{ padding: '6px 12px' }}
+                                        onClick={() => {
+                                            const idParaEliminar = c.id || c.idCotizacion;
+                                            if(window.confirm('¿Está seguro de que desea eliminar esta cotización?')) {
+                                                eliminarCotizacion(idParaEliminar);
+                                            }
+                                        }}
+                                    >
+                                        <i className="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
                             </div>
-                            <div>{c.fecha}</div>
-                            
-                            {/* ESTADO LIMPIO Y ESTÁTICO (Badge tradicional) */}
-                            <div>
-                                <span className={`badge-cotizacion ${c.productoAgregado ? 'bg-success-badge' : 'bg-warning-badge'}`}>
-                                    {c.productoAgregado ? 'AGREGADO' : 'PENDIENTE'}
-                                </span>
-                            </div>
-                            
-                            {/* Botones de acción originales */}
-                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                                <button
-                                    className="btn-bs btn-success"
-                                    style={{ padding: '6px 12px', fontSize: '13px', borderRadius: '4px' }}
-                                    onClick={() => iniciarEdicion(c)}
-                                >
-                                    Editar
-                                </button>
-                                <button
-                                    className="btn-bs btn-danger"
-                                    style={{ padding: '6px 12px', fontSize: '13px', borderRadius: '4px' }}
-                                    onClick={() => {
-                                        const idParaEliminar = c.id || c.idCotizacion;
-                                        if(window.confirm('¿Eliminar cotización?')) {
-                                            eliminarCotizacion(idParaEliminar);
-                                        }
-                                    }}
-                                >
-                                    Borrar
-                                </button>
-                            </div>
-                        </div>
-                    ))}
+                        ))
+                    ) : (
+                        <div className="p-4 text-center text-muted">No se registran cotizaciones en el sistema.</div>
+                    )}
                 </div>
             </div>
         </div>
