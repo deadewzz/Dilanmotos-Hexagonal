@@ -8,6 +8,7 @@ public interface ProductoRepository {
     Producto guardar(Producto producto);
 
     List<Producto> obtenerTodos();
+    List<Producto> obtenerPorCategoria(Integer idCategoria);
 
     Optional<Producto> buscarPorId(Integer id);
 

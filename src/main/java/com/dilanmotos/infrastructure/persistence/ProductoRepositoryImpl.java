@@ -19,13 +19,21 @@ public class ProductoRepositoryImpl implements ProductoRepository {
 
     @Override
     public Producto guardar(Producto producto) {
-        ProductoEntity entity = toEntity(producto);
-        return toModel(jpaRepository.save(entity));
+        return toModel(jpaRepository.save(toEntity(producto)));
     }
 
     @Override
     public List<Producto> obtenerTodos() {
-        return jpaRepository.findAll().stream().map(this::toModel).collect(Collectors.toList());
+        return jpaRepository.findAll().stream()
+                .map(this::toModel)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Producto> obtenerPorCategoria(Integer idCategoria) {
+        return jpaRepository.findByIdCategoria(idCategoria).stream()
+                .map(this::toModel)
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -51,6 +59,7 @@ public class ProductoRepositoryImpl implements ProductoRepository {
         jpaRepository.deleteById(id);
     }
 
+    // ← toModel ahora extrae nombre de marca y categoría desde las relaciones
     private Producto toModel(ProductoEntity entity) {
         Producto p = new Producto();
         p.setIdProducto(entity.getIdProducto());
@@ -60,6 +69,17 @@ public class ProductoRepositoryImpl implements ProductoRepository {
         p.setDescripcion(entity.getDescripcion());
         p.setPrecio(entity.getPrecio());
         p.setImagenUrl(entity.getImagenUrl());
+        p.setStock(entity.getStock());
+        p.setDisponible(entity.getDisponible());
+
+        // Nombres desde las relaciones JPA
+        if (entity.getMarca() != null) {
+            p.setNombreMarca(entity.getMarca().getNombre());
+        }
+        if (entity.getCategoria() != null) {
+            p.setNombreCategoria(entity.getCategoria().getNombre());
+        }
+
         return p;
     }
 

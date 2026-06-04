@@ -34,4 +34,20 @@ public class EmailService {
 
         mailSender.send(mensaje);
     }
+
+    public void enviarCorreoRecuperacion(String destinatario, String token) {
+        SimpleMailMessage mensaje = new SimpleMailMessage();
+        mensaje.setTo(destinatario);
+        mensaje.setSubject("Recuperación de contraseña - Dilan Motos");
+        mensaje.setText(
+            "Hola parcero,\n\n" +
+            "Recibimos una solicitud para restablecer tu contraseña.\n\n" +
+            "Tu código de recuperación es:\n\n" +
+            ">>> " + token + " <<<\n\n" +
+            "Este código expira en 15 minutos.\n" +
+            "Si no solicitaste esto, ignora este correo.\n\n" +
+            "Dilan Motos"
+        );
+        mailSender.send(mensaje);
+    }
 }

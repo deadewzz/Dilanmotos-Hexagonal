@@ -1,21 +1,21 @@
-package com.dilanmotos.domain.repository;
+    package com.dilanmotos.domain.repository;
 
-import com.dilanmotos.domain.model.Moto;
-import java.util.List;
-import java.util.Optional;
+    import com.dilanmotos.domain.model.Moto;
+    import java.util.List;
+    import java.util.Optional;
 
-public interface MotoRepository {
+    public interface MotoRepository {
 
-    Moto guardar(Moto moto);
+        Moto guardar(Moto moto);
 
-    List<Moto> obtenerTodas();
+        List<Moto> obtenerTodas();
 
-    Optional<Moto> buscarPorId(Integer id);
+        Optional<Moto> buscarPorId(Integer id);
 
-    Moto actualizar(Moto moto);
+        Moto actualizar(Moto moto);
 
-    void eliminar(Integer id);
+        void eliminar(Integer id);
 
-    List<Moto> obtenerPorUsuario(Integer idUsuario);
+        List<Moto> obtenerPorUsuario(Integer idUsuario);
 
-}
+    }

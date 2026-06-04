@@ -2,6 +2,7 @@ package com.dilanmotos.infrastructure.persistence;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,4 +27,11 @@ public class UsuarioEntity {
 
     @Column(name = "habilitado", nullable = false)
     private Integer habilitado = 1;
+
+    // ← Hibernate crea estas dos columnas automáticamente al arrancar
+    @Column(name = "reset_token", length = 100)
+    private String resetToken;
+
+    @Column(name = "token_expiracion", columnDefinition = "TIMESTAMP")
+    private LocalDateTime tokenExpiracion;
 }

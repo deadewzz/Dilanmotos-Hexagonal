@@ -7,7 +7,8 @@ import java.util.Optional;
 @Repository
 public interface JpaUsuarioRepository extends JpaRepository<UsuarioEntity, Integer> {
   
-    // Método personalizado para buscar por correo
     Optional<UsuarioEntity> findByCorreo(String correo);
 
-} 
+    // ← nuevo
+    Optional<UsuarioEntity> findByResetToken(String resetToken);
+}
