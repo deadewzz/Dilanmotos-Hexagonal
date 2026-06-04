@@ -1,23 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../global.css';
-import { authFetch } from '../api';
 
 const API_URL = 'http://localhost:8080/api/cotizaciones';
 
 const Cotizacion = () => {
     const token = localStorage.getItem('token');
-
     const navigate = useNavigate();
-    const [cotizacion, setCotizacion] = useState({ idCotizacion: null, idUsuario: '', producto: '', cantidad: '', precioUnitario: '', fecha: '', productoAgregado: true });
+    
+    const [cotizacion, setCotizacion] = useState({ 
+        idCotizacion: null, 
+        idUsuario: '', 
+        producto: '', 
+        cantidad: '', 
+        precioUnitario: '', 
+        fecha: '', 
+        productoAgregado: true 
+    });
     const [cotizaciones, setCotizaciones] = useState([]);
     const [productos, setProductos] = useState([]);
     const [mensaje, setMensaje] = useState('');
-    
+    const [editMode, setEditMode] = useState(false);
 
     useEffect(() => {
         const idUsuario = localStorage.getItem('idUsuario');
-        console.log("TOKEN:", token);
         if (!idUsuario || !token) {
             navigate('/login');
         } else {
@@ -39,9 +45,7 @@ const Cotizacion = () => {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            if (!response.ok) {
-                throw new Error('Error al obtener productos');
-            }
+            if (!response.ok) throw new Error('Error al obtener productos');
             const data = await response.json();
             setProductos(data);
         } catch (error) {
@@ -58,10 +62,7 @@ const Cotizacion = () => {
                     'Authorization': `Bearer ${token}`
                 }
             });
-            if (!response.ok) {
-                console.log("STATUS:", response.status);
-                throw new Error('Error al obtener cotizaciones');
-            }   
+            if (!response.ok) throw new Error('Error al obtener cotizaciones');
             const data = await response.json();
             setCotizaciones(data);
         } catch (error) {
@@ -87,28 +88,28 @@ const Cotizacion = () => {
                 precioUnitario: selectedProducto.precio
             });
         } else {
-            setCotizacion({
-                ...cotizacion,
-                producto: '',
-                precioUnitario: ''
-            });
+            setCotizacion({ ...cotizacion, producto: '', precioUnitario: '' });
         }
     };
 
     const calcularTotal = () => {
-        return (
-            Number(cotizacion.cantidad || 0) *
-            Number(cotizacion.precioUnitario || 0)
-        ).toFixed(2);
+        return (Number(cotizacion.cantidad || 0) * Number(cotizacion.precioUnitario || 0)).toFixed(2);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         try {
-            const isEditing = cotizacion.idCotizacion !== null && cotizacion.idCotizacion !== undefined;
+            const idReal = cotizacion.idCotizacion || cotizacion.id;
+            const isEditing = idReal !== null && idReal !== undefined;
             const method = isEditing ? 'PUT' : 'POST';
-            const url = isEditing ? `${API_URL}/${cotizacion.idCotizacion}` : API_URL;
+            const url = isEditing ? `${API_URL}/${idReal}` : API_URL;
+
+            // Preparamos el cuerpo asegurando compatibilidad del ID con el backend mapeado
+            const payload = {
+                ...cotizacion,
+                idCotizacion: idReal,
+                id: idReal
+            };
 
             const response = await fetch(url, {
                 method,
@@ -116,12 +117,13 @@ const Cotizacion = () => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify(cotizacion)
+                body: JSON.stringify(payload)
             });
 
             if (response.ok) {
                 setMensaje(isEditing ? 'Cotización actualizada correctamente' : 'Cotización creada correctamente');
                 cargarCotizaciones();
+                setEditMode(false);
                 setCotizacion({
                     idCotizacion: null,
                     idUsuario: localStorage.getItem('idUsuario'),
@@ -132,7 +134,6 @@ const Cotizacion = () => {
                     productoAgregado: true
                 });
             } else {
-                console.log("STATUS:", response.status);
                 setMensaje(isEditing ? 'Error al actualizar la cotización' : 'Error al crear la cotización');
             }
         } catch (error) {
@@ -142,8 +143,11 @@ const Cotizacion = () => {
     };
 
     const iniciarEdicion = (c) => {
+        setEditMode(true);
+        const idReal = c.id || c.idCotizacion;
         setCotizacion({
-            idCotizacion: c.idCotizacion,
+            idCotizacion: idReal,
+            id: idReal, 
             idUsuario: c.idUsuario,
             producto: c.producto,
             cantidad: c.cantidad,
@@ -153,47 +157,55 @@ const Cotizacion = () => {
         });
     };
 
+    const cancelarEdicion = () => {
+        setEditMode(false);
+        setCotizacion({
+            idCotizacion: null,
+            idUsuario: localStorage.getItem('idUsuario'),
+            producto: '',
+            cantidad: '',
+            precioUnitario: '',
+            fecha: '',
+            productoAgregado: true
+        });
+    };
+
     const eliminarCotizacion = async (id) => {
         try {
             const response = await fetch(`${API_URL}/${id}`, {
                 method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
+                headers: { 'Authorization': `Bearer ${token}` }
             });
-
             if(response.ok) {
                 cargarCotizaciones();
+                setMensaje('Cotización管liminada correctamente');
             } else {
-                setMensaje('Error al eliminar');
+                setMensaje('Error al eliminar la cotización');
             }
         } catch (error) {
             console.error(error);
         }
     };
 
+    const gridStyle = {
+        display: 'grid',
+        gridTemplateColumns: '2fr 1fr 1fr 1fr 1.5fr 1.5fr 2fr', 
+        gap: '15px',
+        alignItems: 'center',
+        padding: '12px 15px'
+    };
+
     return (
-
         <div className="main-content-inner">
-
-            {/* FORMULARIO */}
+            {/* FORMULARIO DE REGISTRO / EDICIÓN */}
             <div className="card-panel">
-                <h3 className="text-primary">
-                    Nueva Cotización
-                </h3>
+                <h3 className="text-primary">{editMode ? 'Editar Cotización' : 'Nueva Cotización'}</h3>
                 <hr />
-                {mensaje && (
-                    <div className="alert alert-info">
-                        {mensaje}
-                    </div>
-                )}
+                {mensaje && <div className="alert alert-info">{mensaje}</div>}
+                
                 <form onSubmit={handleSubmit}>
                     <div className="mb-3">
-
-                        <label className="fw-bold">
-                            Producto
-                        </label>
-
+                        <label className="fw-bold">Producto</label>
                         <select
                             className="input-bs"
                             name="producto"
@@ -212,17 +224,11 @@ const Cotizacion = () => {
                                 ))
                             )}
                         </select>
-
                     </div>
 
-                    <div className="row">
-
-                        <div className="col-md-6 mb-3">
-
-                            <label className="fw-bold">
-                                Cantidad
-                            </label>
-
+                    <div className="row" style={{ display: 'flex', gap: '20px', marginBottom: '15px' }}>
+                        <div style={{ flex: 1 }}>
+                            <label className="fw-bold">Cantidad</label>
                             <input
                                 className="input-bs"
                                 type="number"
@@ -231,15 +237,10 @@ const Cotizacion = () => {
                                 onChange={handleChange}
                                 required
                             />
-
                         </div>
 
-                        <div className="col-md-6 mb-3">
-
-                            <label className="fw-bold">
-                                Precio Unitario
-                            </label>
-
+                        <div style={{ flex: 1 }}>
+                            <label className="fw-bold">Precio Unitario</label>
                             <input
                                 className="input-bs"
                                 type="number"
@@ -249,15 +250,11 @@ const Cotizacion = () => {
                                 onChange={handleChange}
                                 required
                             />
-
                         </div>
-
                     </div>
 
                     <div className="mb-3">
-                        <label className="fw-bold">
-                            Fecha
-                        </label>
+                        <label className="fw-bold">Fecha</label>
                         <input
                             className="input-bs"
                             type="date"
@@ -266,100 +263,102 @@ const Cotizacion = () => {
                             onChange={handleChange}
                             required
                         />
-
                     </div>
+
                     <div className="mb-3">
-
-                        <label className="fw-bold">
-                            Estado
-                        </label>
-
+                        <label className="fw-bold">Estado</label>
                         <select
-                            className="input-bs"
+                            className={`input-bs ${cotizacion.productoAgregado ? 'text-success fw-bold' : 'text-warning fw-bold'}`}
                             name="productoAgregado"
                             value={cotizacion.productoAgregado}
                             onChange={(e) =>
                                 setCotizacion({
                                     ...cotizacion,
-                                    productoAgregado:
-                                        e.target.value === 'true'
+                                    productoAgregado: e.target.value === 'true'
                                 })
                             }
                         >
-                            <option value={true}>
-                                AGREGADO
-                            </option>
-
-                            <option value={false}>
-                                PENDIENTE
-                            </option>
+                            <option value="true" className="text-success fw-bold">AGREGADO</option>
+                            <option value="false" className="text-warning fw-bold">PENDIENTE</option>
                         </select>
                     </div>
 
-                    <div className="mt-3 p-3 bg-light border rounded">
-                        <h5> Total: ${calcularTotal()} </h5>
+                    <div className="mt-3 p-3 bg-light border rounded" style={{ background: '#f8fafc', padding: '15px', border: '1px solid #e2e8f0', borderRadius: '6px' }}>
+                        <h5 style={{ margin: 0 }}> Total: ${calcularTotal()} </h5>
                     </div>
 
-                    <button
-                        type="submit"
-                        className="btn-bs btn-primary mt-3"
-                    >
-                        Guardar Cotización
-                    </button>
-
+                    <div style={{ display: 'flex', gap: '10px' }}>
+                        <button type="submit" className="btn-bs btn-primary mt-3">
+                            {editMode ? 'Actualizar Cotización' : 'Guardar Cotización'}
+                        </button>
+                        {editMode && (
+                            <button type="button" className="btn-bs btn-danger mt-3" onClick={cancelarEdicion}>
+                                Cancelar
+                            </button>
+                        )}
+                    </div>
                 </form>
-
             </div>
 
-            {/* TABLA */}
+            {/* TABLA CON LA BARRA DE ENCABEZADO GRIS OSCURO */}
             <div className="card-panel mt-4">
-                <h4 className="mb-4">
-                    Listado General de Cotizaciones
-                </h4>
+                <h4 className="mb-4">Listado General de Cotizaciones</h4>
                 <div className="custom-table-container">
-
-                    <div className="custom-table-header">
+                    
+                    {/* Encabezado con color exacto #2d3748 */}
+                    <div className="grid-cotizaciones-header" style={{
+                        ...gridStyle,
+                        backgroundColor: '#2d3748',
+                        color: '#ffffff',
+                        borderRadius: '6px 6px 0 0',
+                        fontWeight: 'bold'
+                    }}>
                         <div>Producto</div>
                         <div>Cantidad</div>
                         <div>Precio</div>
                         <div>Total</div>
                         <div>Fecha</div>
                         <div>Estado</div>
-                        <div>Acciones</div>
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>Acciones</div>
                     </div>
 
+                    {/* Filas de la Tabla */}
                     {cotizaciones.map(c => (
-                        <div
-                            className="custom-table-row"
-                            key={c.idCotizacion}
-                        >
-
-                            <div>{c.producto}</div>
+                        <div className="grid-cotizaciones-row" style={{
+                            ...gridStyle,
+                            borderBottom: '1px solid #e2e8f0'
+                        }} key={c.id || c.idCotizacion}>
+                            <div style={{ fontWeight: '500', color: '#334155' }}>{c.producto}</div>
                             <div>{c.cantidad}</div>
                             <div>${c.precioUnitario}</div>
-                            <div>${(c.cantidad * c.precioUnitario).toFixed(2)}</div>
-                            <div>{c.fecha}</div>
-
-                            <div>
-                                <span className={`badge ${c.productoAgregado ? 'bg-success' : 'bg-warning' }`}>
-                                     {c.productoAgregado ? 'AGREGADO': 'PENDIENTE'}
-                                </span>
-
+                            <div style={{ fontWeight: '600', color: '#1e293b' }}>
+                                ${(c.cantidad * c.precioUnitario).toFixed(2)}
                             </div>
-
-                            <div className="d-flex gap-2">
+                            <div>{c.fecha}</div>
+                            
+                            {/* ESTADO LIMPIO Y ESTÁTICO (Badge tradicional) */}
+                            <div>
+                                <span className={`badge-cotizacion ${c.productoAgregado ? 'bg-success-badge' : 'bg-warning-badge'}`}>
+                                    {c.productoAgregado ? 'AGREGADO' : 'PENDIENTE'}
+                                </span>
+                            </div>
+                            
+                            {/* Botones de acción originales */}
+                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                                 <button
-                                    className="btn-bs btn-success btn-sm"
+                                    className="btn-bs btn-success"
+                                    style={{ padding: '6px 12px', fontSize: '13px', borderRadius: '4px' }}
                                     onClick={() => iniciarEdicion(c)}
                                 >
                                     Editar
                                 </button>
-
                                 <button
-                                    className="btn-bs btn-danger btn-sm"
+                                    className="btn-bs btn-danger"
+                                    style={{ padding: '6px 12px', fontSize: '13px', borderRadius: '4px' }}
                                     onClick={() => {
+                                        const idParaEliminar = c.id || c.idCotizacion;
                                         if(window.confirm('¿Eliminar cotización?')) {
-                                            eliminarCotizacion(c.idCotizacion);
+                                            eliminarCotizacion(idParaEliminar);
                                         }
                                     }}
                                 >
@@ -373,4 +372,5 @@ const Cotizacion = () => {
         </div>
     );
 };
+
 export default Cotizacion;

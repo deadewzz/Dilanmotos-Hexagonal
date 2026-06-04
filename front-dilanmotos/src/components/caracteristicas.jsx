@@ -22,17 +22,21 @@ export default function Caracteristicas() {
                 setCaracteristicas(await resCar.json());
                 setMotos(await resMoto.json());
             }
-        } catch (e) { console.error("Error cargando:", e); }
+        } catch (e) { 
+            console.error("Error cargando:", e); 
+        }
     };
 
-    useEffect(() => { cargarDatos(); }, []);
+    useEffect(() => { 
+        cargarDatos(); 
+    }, []);
 
     const prepararEdicion = (c) => {
         setEditMode(true);
         setSelectedId(c.idCaracteristica);
         setNuevo({
-            descripcion: c.descripcion,
-            idMoto: c.idMoto || ''
+            descripcion: c.descripcion || '',
+            idMoto: c.moto?.idMoto || c.idMoto || ''
         });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -61,12 +65,11 @@ export default function Caracteristicas() {
             });
 
             if (res.ok) {
-                alert(" Guardado exitosamente");
+                alert(editMode ? "✅ Detalle actualizado exitosamente" : "✅ Detalle guardado exitosamente");
                 cancelarEdicion();
                 cargarDatos();
             } else {
-                const errorData = await res.status;
-                alert(" Error " + errorData + ": Revisa los permisos o los datos.");
+                alert("❌ Error " + res.status + ": Revisa los permisos o los datos.");
             }
         } catch (error) {
             alert("Error de conexión con el servidor");
@@ -75,54 +78,125 @@ export default function Caracteristicas() {
 
     const eliminar = async (id) => {
         if(window.confirm("¿Estás seguro de eliminar este detalle?")) {
-            await fetch(`${API_URL}/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-            });
-            cargarDatos();
+            try {
+                const res = await fetch(`${API_URL}/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                    cargarDatos();
+                } else {
+                    alert("No se pudo eliminar el registro.");
+                }
+            } catch (error) {
+                console.error(error);
+            }
         }
     };
 
     return (
         <div className="main-content-inner">
             <div className="card-panel">
-                <h3 className="text-primary">{editMode ? '📝 Editar Detalle' : '⚙️ Detalles de la Moto'}</h3>
+                <h3 className="text-primary mb-4">
+                    {editMode ? '📝 Editar Detalle' : '⚙️ Detalles de la Moto'}
+                </h3>
                 <form onSubmit={guardar}>
-                    <label className="fw-bold">Descripción Técnica</label>
-                    <textarea className="input-bs" value={nuevo.descripcion} onChange={e => setNuevo({...nuevo, descripcion: e.target.value})} required rows="3" />
+                    <div className="mb-3">
+                        <label className="form-label fw-bold">Descripción Técnica</label>
+                        <textarea 
+                            className="input-bs" 
+                            value={nuevo.descripcion} 
+                            onChange={e => setNuevo({...nuevo, descripcion: e.target.value})} 
+                            required 
+                            rows="3" 
+                            placeholder="Ej: Sistema de frenado ABS doble canal con discos ventilados..."
+                        />
+                    </div>
                     
-                    <label className="fw-bold mt-2">Moto Asignada</label>
-                    <select className="input-bs" value={nuevo.idMoto} onChange={e => setNuevo({...nuevo, idMoto: e.target.value})} required>
-                        <option value="">-- Seleccionar Moto --</option>
-                        {motos.map(m => <option key={m.idMoto} value={m.idMoto}>{m.modelo}</option>)}
-                    </select>
+                    <div className="mb-3">
+                        <label className="form-label fw-bold">Moto Asignada</label>
+                        <select 
+                            className="input-bs" 
+                            value={nuevo.idMoto} 
+                            onChange={e => setNuevo({...nuevo, idMoto: e.target.value})} 
+                            required
+                        >
+                            <option value="">-- Seleccionar Moto --</option>
+                            {motos.map(m => (
+                                <option key={m.idMoto} value={m.idMoto}>{m.modelo}</option>
+                            ))}
+                        </select>
+                    </div>
 
-                    <div className="d-flex gap-2 mt-3">
-                        <button type="submit" className={`btn-bs w-100 ${editMode ? 'btn-warning' : 'btn-primary'}`}>
-                            {editMode ? 'Actualizar' : 'Registrar'}
+                    <div className="d-flex gap-2 mt-2">
+                        <button type="submit" className="btn-bs w-100 btn-primary">
+                            {editMode ? 'Actualizar Cambios' : 'Registrar Características'}
                         </button>
-                        {editMode && <button type="button" className="btn-bs btn-secondary" onClick={cancelarEdicion}>Cancelar</button>}
+                        {editMode && (
+                            <button type="button" className="btn-bs btn-danger" onClick={cancelarEdicion}>
+                                Cancelar
+                            </button>
+                        )}
                     </div>
                 </form>
             </div>
 
             <div className="card-panel mt-4">
-                <div className="custom-table-container">
-                    <div className="custom-table-header">
-                        <div>ID</div><div>Descripción</div><div>Moto</div><div className="text-center">Acciones</div>
+                {/* Contenedor responsivo con bordes unificados de tu CSS */}
+                <div style={{ width: '100%', overflowX: 'auto', background: 'var(--white)', borderRadius: '10px', border: '1px solid #dee2e6' }}>
+                    
+                    {/* CABECERA CON COLOR DEL CSS (--header-table): Distribución ID, Descripción, Moto, Acciones */}
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: '0.8fr 3fr 1.5fr 1.2fr', 
+                        gap: '15px', 
+                        alignItems: 'center', 
+                        padding: '15px',
+                        background: 'var(--header-table)',
+                        color: 'var(--white)',
+                        fontWeight: 'bold',
+                        minWidth: '600px'
+                    }}>
+                        <div>ID</div>
+                        <div>Descripción Técnica</div>
+                        <div>Moto</div>
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>Acciones</div>
                     </div>
-                    {caracteristicas.map(c => (
-                        <div className="custom-table-row" key={c.idCaracteristica}>
-                            <div>#{c.idCaracteristica}</div>
-                            <div className="text-wrap">{c.descripcion}</div>
-                            {/* AQUÍ SE QUITA EL N/A USANDO EL OBJETO MOTO */}
-                            <div className="fw-bold text-primary">{c.moto?.modelo || 'Cargando...'}</div>
-                            <div className="text-center d-flex justify-content-center gap-2">
-                                <button className="btn-bs btn-warning btn-sm" onClick={() => prepararEdicion(c)}><i className="fa-solid fa-pen"></i></button>
-                                <button className="btn-bs btn-danger btn-sm" onClick={() => eliminar(c.idCaracteristica)}><i className="fa-solid fa-trash"></i></button>
+
+                    {caracteristicas.length > 0 ? (
+                        caracteristicas.map(c => (
+                            /* FILAS CON ALINEACIÓN PERFECTA E INTERSECCIONES */
+                            <div key={c.idCaracteristica} style={{ 
+                                display: 'grid', 
+                                gridTemplateColumns: '0.8fr 3fr 1.5fr 1.2fr', 
+                                gap: '15px', 
+                                alignItems: 'center', 
+                                padding: '15px',
+                                borderBottom: '1px solid #eee',
+                                minWidth: '600px',
+                                background: 'var(--white)',
+                                transition: '0.2s'
+                            }}>
+                                <div style={{ color: '#7e8299' }}>#{c.idCaracteristica}</div>
+                                <div style={{ whiteSpace: 'normal', display: '-webkit-box', WebkitLineClamp: '2', WebkitBoxOrient: 'vertical', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-dark)' }} title={c.descripcion}>
+                                    {c.descripcion}
+                                </div>
+                                <div className="fw-bold" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--primary)' }}>
+                                    {c.moto?.modelo || 'S/M'}
+                                </div>
+                                <div className="text-center">
+                                    <button className="btn-bs btn-primary btn-sm" style={{ padding: '6px 12px' }} onClick={() => prepararEdicion(c)}>
+                                        <i className="fa-solid fa-pen"></i>
+                                    </button>
+                                    <button className="btn-bs btn-danger btn-sm" style={{ padding: '6px 12px' }} onClick={() => eliminar(c.idCaracteristica)}>
+                                        <i className="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))
+                    ) : (
+                        <div className="p-4 text-center text-muted">No hay especificaciones o detalles técnicos registrados.</div>
+                    )}
                 </div>
             </div>
         </div>

@@ -4,7 +4,6 @@ import '../global.css';
 const Mecanico = () => {
     const [mecanicos, setMecanicos] = useState([]); 
     const [busqueda, setBusqueda] = useState(""); 
-    // Inicializamos con strings vacíos para evitar el error de "controlled input" de tu imagen
     const [nuevoMecanico, setNuevoMecanico] = useState({ 
         nombre: "", 
         especialidad: "", 
@@ -14,12 +13,8 @@ const Mecanico = () => {
 
     const API_URL = "http://localhost:8080/api/mecanicos";
 
-    useEffect(() => {
-        cargarMecanicos();
-    }, []);
-
     const cargarMecanicos = async () => {
-        const token = localStorage.getItem('token'); // Recuperar token actualizado
+        const token = localStorage.getItem('token'); 
         try {
             const url = busqueda ? `${API_URL}?search=${busqueda}` : API_URL;
             const response = await fetch(url, {
@@ -39,12 +34,14 @@ const Mecanico = () => {
         }
     };
 
+    useEffect(() => {
+        cargarMecanicos();
+    }, []);
+
     const handleGuardar = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('token');
         const metodo = editMode ? 'PUT' : 'POST';
-        
-        // IMPORTANTE: Asegurar que tomamos id_mecanico
         const idActual = nuevoMecanico.idMecanico;
         const url = editMode ? `${API_URL}/${idActual}` : API_URL;
 
@@ -59,21 +56,29 @@ const Mecanico = () => {
             });
 
             if (response.ok) {
-                alert(editMode ? "¡Mecánico actualizado!" : "¡Mecánico guardado!");
+                alert(editMode ? "✅ ¡Mecánico actualizado con éxito!" : "✅ ¡Mecánico guardado con éxito!");
                 setNuevoMecanico({ nombre: "", especialidad: "", telefono: "" });
                 setEditMode(false);
                 cargarMecanicos();
+            } else {
+                alert("❌ Ocurrió un inconveniente al procesar la solicitud.");
             }
         } catch (error) {
             console.log("Error en la solicitud:", error);
         }
     };
 
+    const iniciarEdicion = (mecanico) => {
+        setEditMode(true);
+        setNuevoMecanico(mecanico);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     const handleEliminar = async (id) => {
         if (!id) return;
         const token = localStorage.getItem('token');
 
-        if (window.confirm("¿Eliminar este mecánico?")) {
+        if (window.confirm("¿Estás seguro de eliminar este mecánico?")) {
             try {
                 const response = await fetch(`${API_URL}/${id}`, {
                     method: 'DELETE',
@@ -82,7 +87,9 @@ const Mecanico = () => {
                 
                 if (response.ok) {
                     setMecanicos(mecanicos.filter(m => m.idMecanico !== id));
-                    alert("Eliminado con éxito");
+                    alert("✅ Registro eliminado con éxito.");
+                } else {
+                    alert("No se pudo eliminar el registro seleccionado.");
                 }
             } catch (error) {
                 console.log("Error al eliminar", error);
@@ -91,59 +98,125 @@ const Mecanico = () => {
     };
 
     return (
-        <div className="container mt-4">
-            <h2 className="text-primary">Gestión de Mecánicos</h2>
+        <div className="main-content-inner">
+            {/* PANEL DEL FORMULARIO DE REGISTRO/EDICIÓN */}
             <div className="card-panel">
+                <h3 className="text-primary mb-4">
+                    {editMode ? '📝 Editar Información de Mecánico' : '👨‍🔧 Registrar Nuevo Mecánico'}
+                </h3>
                 <form onSubmit={handleGuardar}>
-                    <input
-                        className="input-bs"
-                        placeholder="Nombre"
-                        value={nuevoMecanico.nombre || ""} 
-                        onChange={e => setNuevoMecanico({ ...nuevoMecanico, nombre: e.target.value })}
-                        required
-                    />
-                    <input
-                        className="input-bs"
-                        placeholder="Especialidad"
-                        value={nuevoMecanico.especialidad || ""}
-                        onChange={e => setNuevoMecanico({ ...nuevoMecanico, especialidad: e.target.value })}
-                        required
-                    />
-                    <input
-                        className="input-bs"
-                        placeholder="Teléfono"
-                        value={nuevoMecanico.telefono || ""}
-                        onChange={e => setNuevoMecanico({ ...nuevoMecanico, telefono: e.target.value })}
-                    />
-                    <button type="submit" className="btn-bs btn-primary w-100 mt-2">
-                        {editMode ? 'Actualizar' : 'Registrar'}
-                    </button>
+                    <div className="mb-3">
+                        <label className="form-label fw-bold">Nombre Completo</label>
+                        <input
+                            type="text"
+                            className="input-bs"
+                            placeholder="Ej: Juan Carlos Pérez"
+                            value={nuevoMecanico.nombre || ""} 
+                            onChange={e => setNuevoMecanico({ ...nuevoMecanico, nombre: e.target.value })}
+                            required
+                        />
+                    </div>
+
+                    <div className="mb-3">
+                        <label className="form-label fw-bold">Especialidad técnica</label>
+                        <input
+                            type="text"
+                            className="input-bs"
+                            placeholder="Ej: Inyección Electrónica / Motores 4T"
+                            value={nuevoMecanico.especialidad || ""}
+                            onChange={e => setNuevoMecanico({ ...nuevoMecanico, especialidad: e.target.value })}
+                            required
+                        />
+                    </div>
+
+                    <div className="mb-3">
+                        <label className="form-label fw-bold">Número de Teléfono</label>
+                        <input
+                            type="tel"
+                            className="input-bs"
+                            placeholder="Ej: 3001234567"
+                            value={nuevoMecanico.telefono || ""}
+                            onChange={e => setNuevoMecanico({ ...nuevoMecanico, telefono: e.target.value })}
+                        />
+                    </div>
+
+                    <div className="d-flex gap-2 mt-2">
+                        <button type="submit" className="btn-bs w-100 btn-primary">
+                            {editMode ? 'Actualizar Cambios' : 'Registrar Mecánico'}
+                        </button>
+                        {editMode && (
+                            <button
+                                type="button"
+                                className="btn-bs btn-danger"
+                                onClick={() => {
+                                    setEditMode(false);
+                                    setNuevoMecanico({ nombre: "", especialidad: "", telefono: "" });
+                                }}
+                            >
+                                Cancelar
+                            </button>
+                        )}
+                    </div>
                 </form>
             </div>
 
+            {/* PANEL DE LA LISTA / TABLA DE REGISTROS */}
             <div className="card-panel mt-4">
-                <div className="custom-table-container">
-                    <div className="custom-table-header">
+                <div style={{ width: '100%', overflowX: 'auto', background: 'var(--white)', borderRadius: '10px', border: '1px solid #dee2e6' }}>
+                    
+                    {/* CABECERA CON GRID DISPUESTA EN PROPORCIONES EXACTAS: 2fr | 2fr | 1.5fr | 1fr */}
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: '2fr 2fr 1.5fr 1fr', 
+                        gap: '15px', 
+                        alignItems: 'center', 
+                        padding: '15px',
+                        background: 'var(--header-table)',
+                        color: 'var(--white)',
+                        fontWeight: 'bold',
+                        minWidth: '700px'
+                    }}>
                         <div>Nombre</div>
                         <div>Especialidad</div>
                         <div>Teléfono</div>
-                        <div className="text-center">Acciones</div>
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>Acciones</div>
                     </div>
-                    {mecanicos.map(m => (
-                        <div className="custom-table-row" key={m.idMecanico}>
-                            <div>{m.nombre}</div>
-                            <div>{m.especialidad}</div>
-                            <div>{m.telefono}</div>
-                            <div className="text-center">
-                                <button className="btn-bs btn-success btn-sm" onClick={() => { setEditMode(true); setNuevoMecanico(m); }}>
-                                    <i className="fa-solid fa-pen"></i>
-                                </button>
-                                <button className="btn-bs btn-danger btn-sm" onClick={() => handleEliminar(m.idMecanico)}>
-                                    <i className="fa-solid fa-trash"></i>
-                                </button>
+
+                    {/* CUERPO DINÁMICO DE LA TABLA */}
+                    {mecanicos.length > 0 ? (
+                        mecanicos.map(m => (
+                            <div key={m.idMecanico} style={{ 
+                                display: 'grid', 
+                                gridTemplateColumns: '2fr 2fr 1.5fr 1fr', 
+                                gap: '15px', 
+                                alignItems: 'center', 
+                                padding: '15px',
+                                borderBottom: '1px solid #eee',
+                                minWidth: '700px',
+                                background: 'var(--white)'
+                            }}>
+                                <div className="fw-bold" style={{ color: 'var(--text-dark)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {m.nombre}
+                                </div>
+                                <div style={{ color: '#4b5563', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                    {m.especialidad}
+                                </div>
+                                <div style={{ color: '#4b5563' }}>
+                                    {m.telefono || <span className="text-muted italic">No asignado</span>}
+                                </div>
+                                <div className="text-center d-flex justify-content-center gap-2">
+                                    <button className="btn-bs btn-primary btn-sm" style={{ padding: '6px 12px' }} onClick={() => iniciarEdicion(m)}>
+                                        <i className="fa-solid fa-pen"></i>
+                                    </button>
+                                    <button className="btn-bs btn-danger btn-sm" style={{ padding: '6px 12px' }} onClick={() => handleEliminar(m.idMecanico)}>
+                                        <i className="fa-solid fa-trash"></i>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))
+                    ) : (
+                        <div className="p-4 text-center text-muted">No se encontraron mecánicos registrados en el sistema.</div>
+                    )}
                 </div>
             </div>
         </div>

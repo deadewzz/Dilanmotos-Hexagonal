@@ -9,7 +9,6 @@ export default function Productos() {
         nombre: '', descripcion: '', precio: '', idMarca: '', idCategoria: '', imagenUrl: '' 
     });
     
-    // Estados para la edición
     const [editMode, setEditMode] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
 
@@ -35,19 +34,21 @@ export default function Productos() {
         }
     };
 
-    useEffect(() => { cargarDatos(); }, []);
+    useEffect(() => { 
+        cargarDatos(); 
+    }, []);
 
     const prepararEdicion = (prod) => {
         setEditMode(true);
         setSelectedId(prod.idProducto);
+        
         setNuevo({
-            nombre: prod.nombre,
-            descripcion: prod.descripcion,
-            precio: prod.precio,
-            imagenUrl: prod.imagenUrl,
-            idMarca: prod.idMarca || '',
-            idCategoria: prod.idCategoria || ''
-            
+            nombre: prod.nombre || '',
+            descripcion: prod.descripcion || '',
+            precio: prod.precio || '',
+            imagenUrl: prod.imagenUrl || '',
+            idMarca: prod.marca?.idMarca || prod.idMarca || '',
+            idCategoria: prod.categoria?.idCategoria || prod.idCategoria || ''
         });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -63,14 +64,13 @@ export default function Productos() {
         
         const url = editMode ? `${API_URL}/${selectedId}` : API_URL;
         
-        // El payload debe enviar IDs planos para que ProductoRequestDTO los reciba bien
         const payload = {
             nombre: nuevo.nombre,
             descripcion: nuevo.descripcion,
             precio: parseFloat(nuevo.precio),
             imagenUrl: nuevo.imagenUrl,
-            idMarca: parseInt(nuevo.idMarca),
-            idCategoria: parseInt(nuevo.idCategoria)
+            marca: { idMarca: parseInt(nuevo.idMarca) },
+            categoria: { idCategoria: parseInt(nuevo.idCategoria) }
         };
 
         try {
@@ -117,54 +117,96 @@ export default function Productos() {
     return (
         <div className="main-content-inner">
             <div className="card-panel">
-                <h3 className="text-primary">
+                <h3 className="text-primary mb-4">
                     {editMode ? '📝 Editar Producto' : '📦 Registro de Productos'}
                 </h3>
                 <form onSubmit={guardar}>
                     <div className="row">
                         <div className="col-md-6 mb-3">
                             <label className="form-label">Nombre del Producto</label>
-                            <input className="input-bs" placeholder="Ej: Kit de Arrastre" value={nuevo.nombre} onChange={e => setNuevo({...nuevo, nombre: e.target.value})} required />
+                            <input 
+                                className="input-bs" 
+                                placeholder="Ej: Kit de Arrastre" 
+                                value={nuevo.nombre} 
+                                onChange={e => setNuevo({...nuevo, nombre: e.target.value})} 
+                                required 
+                            />
                         </div>
                         <div className="col-md-6 mb-3">
                             <label className="form-label">Precio ($)</label>
-                            <input className="input-bs" type="number" placeholder="0.00" value={nuevo.precio} onChange={e => setNuevo({...nuevo, precio: e.target.value})} required />
+                            <input 
+                                className="input-bs" 
+                                type="number" 
+                                step="any"
+                                placeholder="0.00" 
+                                value={nuevo.precio} 
+                                onChange={e => setNuevo({...nuevo, precio: e.target.value})} 
+                                required 
+                            />
                         </div>
                     </div>
 
                     <div className="mb-3">
                         <label className="form-label">Descripción</label>
-                        <textarea className="input-bs" rows="2" placeholder="Detalles del producto..." value={nuevo.descripcion} onChange={e => setNuevo({...nuevo, descripcion: e.target.value})} required />
+                        <textarea 
+                            className="input-bs" 
+                            rows="2" 
+                            placeholder="Detalles del producto..." 
+                            value={nuevo.descripcion} 
+                            onChange={e => setNuevo({...nuevo, descripcion: e.target.value})} 
+                            required 
+                        />
                     </div>
 
                     <div className="mb-3">
                         <label className="form-label">URL de la imagen</label>
-                        <textarea className="input-bs" rows="2" placeholder="ingresa la url..." value={nuevo.imagenUrl} onChange={e => setNuevo({...nuevo, imagenUrl: e.target.value})} required />
+                        <textarea 
+                            className="input-bs" 
+                            rows="2" 
+                            placeholder="ingresa la url..." 
+                            value={nuevo.imagenUrl} 
+                            onChange={e => setNuevo({...nuevo, imagenUrl: e.target.value})} 
+                            required 
+                        />
                     </div>
                     
                     <div className="row mb-3">
-                        <div className="col-md-6">
+                        <div className="col-md-6 mb-3 mb-md-0">
                             <label className="form-label">Marca</label>
-                            <select className="input-bs" value={nuevo.idMarca} onChange={e => setNuevo({...nuevo, idMarca: e.target.value})} required>
+                            <select 
+                                className="input-bs" 
+                                value={nuevo.idMarca} 
+                                onChange={e => setNuevo({...nuevo, idMarca: e.target.value})} 
+                                required
+                            >
                                 <option value="">Seleccione marca...</option>
-                                {marcas.map(m => <option key={m.idMarca} value={m.idMarca}>{m.nombre}</option>)}
+                                {marcas.map(m => (
+                                    <option key={m.idMarca} value={m.idMarca}>{m.nombre}</option>
+                                ))}
                             </select>
                         </div>
                         <div className="col-md-6">
                             <label className="form-label">Categoría</label>
-                            <select className="input-bs" value={nuevo.idCategoria} onChange={e => setNuevo({...nuevo, idCategoria: e.target.value})} required>
+                            <select 
+                                className="input-bs" 
+                                value={nuevo.idCategoria} 
+                                onChange={e => setNuevo({...nuevo, idCategoria: e.target.value})} 
+                                required
+                            >
                                 <option value="">Seleccione categoría...</option>
-                                {categorias.map(c => <option key={c.idCategoria} value={c.idCategoria}>{c.nombre}</option>)}
+                                {categorias.map(c => (
+                                    <option key={c.idCategoria} value={c.idCategoria}>{c.nombre}</option>
+                                ))}
                             </select>
                         </div>
                     </div>
 
-                    <div className="d-flex gap-2">
+                    <div className="d-flex gap-2 mt-2">
                         <button type="submit" className={`btn-bs w-100 ${editMode ? 'btn-warning' : 'btn-primary'}`}>
                             {editMode ? 'Actualizar Cambios' : 'Registrar Producto'}
                         </button>
                         {editMode && (
-                            <button type="button" className="btn-bs btn-secondary" onClick={cancelarEdicion}>
+                            <button type="button" className="btn-bs btn-danger" onClick={cancelarEdicion}>
                                 Cancelar
                             </button>
                         )}
@@ -173,29 +215,62 @@ export default function Productos() {
             </div>
 
             <div className="card-panel mt-4">
-                <div className="custom-table-container">
-                    <div className="custom-table-header">
-                        <div>Producto</div><div>Marca</div><div>Precio</div><div className="text-center">Acciones</div>
+                {/* Contenedor con bordes y radio unificados de tu CSS */}
+                <div style={{ width: '100%', overflowX: 'auto', background: 'var(--white)', borderRadius: '10px', border: '1px solid #dee2e6' }}>
+                    
+                    {/* CABECERA CON COLOR DEL CSS (--header-table) Y ALINEACIÓN PERFECTA */}
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: '3fr 1.5fr 1.2fr 1.3fr', 
+                        gap: '15px', 
+                        alignItems: 'center', 
+                        padding: '15px',
+                        background: 'var(--header-table)',
+                        color: 'var(--white)',
+                        fontWeight: 'bold',
+                        minWidth: '600px'
+                    }}>
+                        <div>Producto</div>
+                        <div>Marca</div>
+                        <div>Precio</div>
+                        <div style={{ display: 'flex', justifyContent: 'center' }}>Acciones</div>
                     </div>
+
                     {productos.length > 0 ? (
                         productos.map(p => (
-                            <div className="custom-table-row" key={p.idProducto}>
-                                <div className="fw-bold">{p.nombre}</div>
-                                {/* Gracias al ajuste en el Backend UC, ahora m.marca?.nombre funcionará */}
-                                <div>{p.marca?.nombre || 'S/M'}</div>
-                                <div className="text-success fw-bold">${p.precio}</div>
-                                <div className="text-center d-flex justify-content-center gap-2">
-                                    <button className="btn-bs btn-warning btn-sm" onClick={() => prepararEdicion(p)}>
+                            /* FILA ALINEADA CON HOVER E INTERSECCIONES DEL CSS */
+                            <div key={p.idProducto} className="table-row-hover-effect" style={{ 
+                                display: 'grid', 
+                                gridTemplateColumns: '3fr 1.5fr 1.2fr 1.3fr', 
+                                gap: '15px', 
+                                alignItems: 'center', 
+                                padding: '15px',
+                                borderBottom: '1px solid #eee',
+                                minWidth: '600px',
+                                background: 'var(--white)',
+                                transition: '0.2s'
+                            }}>
+                                <div className="fw-bold" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-dark)' }} title={p.nombre}>
+                                    {p.nombre}
+                                </div>
+                                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#7e8299' }} title={p.marca?.nombre || 'S/M'}>
+                                    {p.marca?.nombre || 'S/M'}
+                                </div>
+                                <div className="fw-bold" style={{ whiteSpace: 'nowrap', color: 'var(--success)' }}>
+                                    ${p.precio}
+                                </div>
+                                <div className="text-center">
+                                    <button className="btn-bs btn-primary btn-sm" style={{ padding: '6px 12px' }} onClick={() => prepararEdicion(p)}>
                                         <i className="fa-solid fa-pen"></i>
                                     </button>
-                                    <button className="btn-bs btn-danger btn-sm" onClick={() => eliminarProducto(p.idProducto)}>
+                                    <button className="btn-bs btn-danger btn-sm" style={{ padding: '6px 12px' }} onClick={() => eliminarProducto(p.idProducto)}>
                                         <i className="fa-solid fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <div className="p-3 text-center text-muted">No hay productos registrados.</div>
+                        <div className="p-4 text-center text-muted">No hay productos registrados.</div>
                     )}
                 </div>
             </div>

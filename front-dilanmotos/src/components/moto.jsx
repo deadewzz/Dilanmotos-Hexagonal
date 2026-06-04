@@ -20,14 +20,14 @@ export default function Motos() {
 
     const cargarDatos = async () => {
         try {
-            const [resM, resMa, resTs] = await Promise.all([  // ✅ Agregamos resTs
+            const [resM, resMa, resTs] = await Promise.all([
                 fetch(API_URL, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }),
                 fetch(MARCAS_URL, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }),
-                fetch(TIPOS_SERVICIO_URL, {  // ✅ Cargar tipos de servicio
+                fetch(TIPOS_SERVICIO_URL, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
             ]);
@@ -66,7 +66,6 @@ export default function Motos() {
         
         const url = editMode ? `${API_URL}/${selectedId}` : API_URL;
         
-     
         const payload = {
             idUsuario: 1,
             idMarca: parseInt(nuevo.idMarca),
@@ -86,7 +85,7 @@ export default function Motos() {
             });
 
             if (res.ok) {
-                alert(editMode ? " Moto actualizada!" : " Moto guardada!");
+                alert(editMode ? "¡Moto actualizada!" : "¡Moto guardada!");
                 cancelarEdicion();
                 await cargarDatos();
             } else {
@@ -120,12 +119,43 @@ export default function Motos() {
         setNuevo({ modelo: '', cilindraje: '', idMarca: '', idTipoServicio: '' });
     };
 
+    // Estilos inline de fuerza bruta aplicados a la estructura y tabla de Motos
+    const containerForzado = {
+        width: '100%',
+        maxWidth: '100%',
+        display: 'block',
+        boxSizing: 'border-box'
+    };
+
+    const panelForzado = {
+        width: '100%',
+        maxWidth: '100%',
+        background: '#ffffff',
+        borderRadius: '12px',
+        padding: '25px',
+        boxSizing: 'border-box',
+        marginBottom: '20px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.05)'
+    };
+
+    // Grid personalizado de 5 columnas para los datos de Motos
+    const gridLayoutTabla = {
+        display: 'grid',
+        gridTemplateColumns: '2fr 2fr 1.5fr 2fr 150px', // Distribución proporcional robusta
+        alignItems: 'center',
+        padding: '12px 15px',
+        minWidth: '850px', // Previene el colapso horizontal entre los textos
+        boxSizing: 'border-box'
+    };
+
     return (
-        <div className="main-content-inner">
-            <div className="card-panel">
-                <h3 className="text-primary">
-                    {editMode ? ' Editar Moto' : ' Registro de Motos'}
+        <div style={containerForzado}>
+            {/* PANEL DEL FORMULARIO DE REGISTRO */}
+            <div style={panelForzado}>
+                <h3 className="text-primary" style={{ margin: '0 0 15px 0', color: '#0d6efd' }}>
+                    {editMode ? 'Editar Moto' : 'Registro de Motos'}
                 </h3>
+                <hr style={{ border: '0', borderTop: '1px solid #eee', marginBottom: '15px' }} />
                 <form onSubmit={guardar}>
                     <div className="row">
                         <div className="col-md-6 mb-3">
@@ -198,44 +228,58 @@ export default function Motos() {
                 </form>
             </div>
 
-            <div className="card-panel mt-4">
-                <div className="custom-table-container">
-                    <div className="custom-table-header">
+            {/* PANEL DE LA LISTA / TABLA */}
+            <div style={panelForzado}>
+                {/* Contenedor responsivo con scroll de seguridad */}
+                <div style={{ width: '100%', overflowX: 'auto', border: '1px solid #dee2e6', borderRadius: '8px', background: '#fff' }}>
+                    
+                    {/* ENCABEZADO DE LA TABLA */}
+                    <div style={{ ...gridLayoutTabla, backgroundColor: '#343a40', color: '#ffffff', fontWeight: 'bold' }}>
                         <div>Marca</div>
                         <div>Modelo</div>
                         <div>Cilindraje</div>
-                        <div>Tipo Servicio</div>  {/*  Nueva columna */}
-                        <div className="text-center">Acciones</div>
+                        <div>Tipo Servicio</div>
+                        <div style={{ textAlign: 'center', display: 'block', width: '100%' }}>Acciones</div>
                     </div>
+
+                    {/* CUERPO DE LA TABLA */}
                     {motos.length > 0 ? (
                         motos.map(m => (
-                            <div className="custom-table-row" key={m.idMoto}>
-                                <div className="fw-bold">
+                            <div style={{ ...gridLayoutTabla, borderBottom: '1px solid #f1f1f1' }} key={m.idMoto}>
+                                <div style={{ fontWeight: '600', color: '#212529' }}>
                                     {m.marca?.nombre || 'S/M'}
                                 </div>
-                                <div>{m.modelo}</div>
-                                <div>{m.cilindraje}cc</div>
-                                <div>{m.tipoServicio?.nombre || 'No especificado'}</div>  {/*  Mostrar nombre del servicio */}
-                                <div className="text-center d-flex justify-content-center gap-2">
+                                <div style={{ color: '#495057' }}>{m.modelo}</div>
+                                <div>
+                                    <span style={{ backgroundColor: '#e9ecef', color: '#495057', padding: '3px 8px', borderRadius: '4px', fontSize: '13px' }}>
+                                        {m.cilindraje}cc
+                                    </span>
+                                </div>
+                                <div style={{ color: '#495057' }}>{m.tipoServicio?.nombre || 'No especificado'}</div>
+                                <div style={{ display: 'flex', justifyContent: 'center', gap: '6px' }}>
                                     <button 
                                         className="btn-bs btn-warning btn-sm" 
+                                        style={{ padding: '4px 8px', height: 'auto' }}
                                         onClick={() => prepararEdicion(m)}
                                         title="Editar"
                                     >
-                                        <i className="fa-solid fa-pen"></i>
+                                        <i className="fa-solid fa-pen" style={{ fontSize: '12px' }}></i>
                                     </button>
                                     <button 
                                         className="btn-bs btn-danger btn-sm" 
+                                        style={{ padding: '4px 8px', height: 'auto' }}
                                         onClick={() => eliminarMoto(m.idMoto)}
                                         title="Eliminar"
                                     >
-                                        <i className="fa-solid fa-trash"></i>
+                                        <i className="fa-solid fa-trash" style={{ fontSize: '12px' }}></i>
                                     </button>
                                 </div>
                             </div>
                         ))
                     ) : (
-                        <div className="p-3 text-center text-muted">No hay motos registradas.</div>
+                        <div style={{ padding: '20px', textAlign: 'center', color: '#6c757d' }}>
+                            No hay motos registradas.
+                        </div>
                     )}
                 </div>
             </div>

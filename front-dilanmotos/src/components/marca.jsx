@@ -9,7 +9,7 @@ const Marca = () => {
     const token = localStorage.getItem('token');
 
     const [marcas, setMarcas] = useState([]);
-    const [nueva, setNueva] = useState({  nombre: ''});
+    const [nueva, setNueva] = useState({ nombre: '' });
     const [editMode, setEditMode] = useState(false);
     const [mensaje, setMensaje] = useState('');
     
@@ -53,19 +53,23 @@ const Marca = () => {
             });
 
             if (response.ok) {
-                alert(editMode ? "Marca actualizada!" : "Marca guardada con éxito!!");
+                setMensaje(editMode ? "¡Marca actualizada con éxito!" : "¡Marca guardada con éxito!");
                 setNueva({ nombre: "" });
                 setEditMode(false);
                 cargarMarcas();
+            } else {
+                setMensaje("Error al guardar la marca");
             }
         } catch (error) {
             console.log("Error al procesar la solicitud:", error);
+            setMensaje("Error de conexión con el servidor");
         }
     };
 
     const iniciarEdicion = (marca) => {
         setNueva(marca);
         setEditMode(true);
+        setMensaje(''); // Limpia mensajes previos al editar
     };
 
     const eliminar = async (id) => {
@@ -78,39 +82,38 @@ const Marca = () => {
             try {
                 const response = await fetch(`${API_URL}/${id}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 
+                        'Content-Type': 'application/json', // Añadido para estandarizar cabeceras
+                        'Authorization': `Bearer ${token}`  // Asegura el pase del JWT en arquitectura hexagonal
+                    }
                 });
                
                 if (response.status === 204 || response.ok) {
                     setMarcas(marcas.filter(m => m.idMarca !== id));
-                    alert("Registro eliminado con éxito!");
+                    setMensaje("¡Registro eliminado con éxito!");
                 } else {
-                    alert("No se pudo eliminar el registro seleccionado");
+                    setMensaje("No se pudo eliminar el registro seleccionado");
                 }
             } catch (error) {
                 console.log("Error al eliminar", error);
+                setMensaje("Error al intentar conectar para eliminar");
             }
         }
     };
+
     const resetForm = () => {
-        setNueva({
-            nombre: ''
-        });
+        setNueva({ nombre: '' });
         setEditMode(false);
+        setMensaje('');
     };
 
     return (
-
         <div className="main-content-inner">
 
             {/* FORMULARIO */}
-
             <div className="card-panel">
-
                 <h3 className="text-primary">
-                    {editMode
-                        ? 'Editar Marca'
-                        : 'Nueva Marca'}
+                    {editMode ? 'Editar Marca' : 'Nueva Marca'}
                 </h3>
                 <hr />
 
@@ -121,13 +124,10 @@ const Marca = () => {
                 )}
 
                 <form onSubmit={guardar}>
-
                     <div className="mb-3">
-
                         <label className="fw-bold">
                             Nombre de la Marca
                         </label>
-
                         <input
                             className="input-bs"
                             type="text"
@@ -142,20 +142,11 @@ const Marca = () => {
                         />
                     </div>
                     <div className="d-flex gap-2 mt-4">
-                        <button
-                            type="submit"
-                            className="btn-bs btn-primary"
-                        >
-                            {editMode
-                                ? 'Guardar Cambios'
-                                : 'Crear marca'}
+                        <button type="submit" className="btn-bs btn-primary">
+                            {editMode ? 'Guardar Cambios' : 'Crear marca'}
                         </button>
                         {editMode && (
-                            <button
-                                type="button"
-                                className="btn-bs btn-secondary"
-                                onClick={resetForm}
-                            >
+                            <button type="button" className="btn-bs btn-secondary" onClick={resetForm}>
                                 Cancelar
                             </button>
                         )}
@@ -164,17 +155,12 @@ const Marca = () => {
             </div>
 
             {/* TABLA */}
-
             <div className="card-panel mt-4">
-
-                <h4 className="mb-4">
-                    Listado General de Marcas
-                </h4>
+                <h4 className="mb-4">Listado General de Marcas</h4>
 
                 <div className="custom-table-container">
 
                     {/* HEADER */}
-
                     <div
                         className="custom-table-header"
                         style={{
@@ -185,56 +171,46 @@ const Marca = () => {
                     >
                         <div>ID</div>
                         <div>Nombre</div>
-                        <div className="text-center">
-                            Acciones
-                        </div>
+                        <div className="text-center">Acciones</div>
                     </div>
 
-                    {/* FILAS */}
-
-                    {marcas.map(m => (
-
-                        <div
-                            key={m.idMarca}
-                            className="custom-table-row"
-                            style={{
-                                display: 'grid',
-                                gridTemplateColumns: '1fr 3fr 2fr',
-                                alignItems: 'center'
-                            }}
-                        >
-
-                            <div className="fw-bold">
-                                {m.idMarca}
-                            </div>
-
-                            <div>
-                                {m.nombre}
-                            </div>
-
+                    {/* FILAS O MENSAJE DE CONTROL VACÍO */}
+                    {marcas.length === 0 ? (
+                        <div className="text-center p-3 text-muted">No hay marcas registradas</div>
+                    ) : (
+                        marcas.map(m => (
                             <div
-                                className="text-center d-flex gap-2 justify-content-center"
+                                key={m.idMarca}
+                                className="custom-table-row"
+                                style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: '1fr 3fr 2fr',
+                                    alignItems: 'center'
+                                }}
                             >
-
-                                <button
-                                    className="btn-bs btn-success btn-sm"
-                                    onClick={() => iniciarEdicion(m)}
-                                >
-                                    Editar
-                                </button>
-
-                                <button
-                                    className="btn-bs btn-danger btn-sm"
-                                    onClick={() => eliminar(m.idMarca)}
-                                >
-                                    Borrar
-                                </button>
+                                <div className="fw-bold">{m.idMarca}</div>
+                                <div>{m.nombre}</div>
+                                <div className="text-center d-flex gap-2 justify-content-center">
+                                    <button
+                                        className="btn-bs btn-success btn-sm"
+                                        onClick={() => iniciarEdicion(m)}
+                                    >
+                                        Editar
+                                    </button>
+                                    <button
+                                        className="btn-bs btn-danger btn-sm"
+                                        onClick={() => eliminar(m.idMarca)}
+                                    >
+                                        Borrar
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))
+                    )}
                 </div>
             </div>
         </div>
     );
 };
+
 export default Marca;

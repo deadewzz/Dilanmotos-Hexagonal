@@ -9,7 +9,7 @@ const Categoria = () => {
     const token = localStorage.getItem('token');
 
     const [categorias, setCategorias] = useState([]);
-    const [nueva, setNueva] = useState({  nombre: ''});
+    const [nueva, setNueva] = useState({ nombre: '' });
     const [editMode, setEditMode] = useState(false);
     const [mensaje, setMensaje] = useState('');
     
@@ -37,11 +37,8 @@ const Categoria = () => {
     };
 
     const guardar = async (e) => {
-
         e.preventDefault();
-
         try {
-
             const response = await fetch(
                 editMode
                     ? `${API_URL}/${nueva.idCategoria}`
@@ -57,20 +54,16 @@ const Categoria = () => {
             );
 
             if(response.ok) {
-
                 setMensaje(
                     editMode
                         ? 'Categoría actualizada correctamente'
                         : 'Categoría creada correctamente'
                 );
-
                 resetForm();
                 cargarCategorias();
-
             } else {
                 setMensaje('Error al guardar');
             }
-
         } catch (error) {
             console.error(error);
             setMensaje('Error de conexión');
@@ -94,30 +87,23 @@ const Categoria = () => {
                 });
                 cargarCategorias();
             } catch (error) {
-
                 console.error(error);
             }
         }
     };
+
     const resetForm = () => {
-        setNueva({
-            nombre: ''
-        });
+        setNueva({ nombre: '' });
         setEditMode(false);
     };
 
     return (
-
         <div className="main-content-inner">
 
-            {/* FORMULARIO */}
-
+            {/* FORMULARIO ESTILIZADO */}
             <div className="card-panel">
-
                 <h3 className="text-primary">
-                    {editMode
-                        ? 'Editar Categoría'
-                        : 'Nueva Categoría'}
+                    {editMode ? 'Editar Categoría' : 'Nueva Categoría'}
                 </h3>
                 <hr />
 
@@ -128,13 +114,8 @@ const Categoria = () => {
                 )}
 
                 <form onSubmit={guardar}>
-
                     <div className="mb-3">
-
-                        <label className="fw-bold">
-                            Nombre de la Categoría
-                        </label>
-
+                        <label className="fw-bold">Nombre de la Categoría</label>
                         <input
                             className="input-bs"
                             type="text"
@@ -149,20 +130,11 @@ const Categoria = () => {
                         />
                     </div>
                     <div className="d-flex gap-2 mt-4">
-                        <button
-                            type="submit"
-                            className="btn-bs btn-primary"
-                        >
-                            {editMode
-                                ? 'Guardar Cambios'
-                                : 'Crear Categoría'}
+                        <button type="submit" className="btn-bs btn-primary">
+                            {editMode ? 'Guardar Cambios' : 'Crear Categoría'}
                         </button>
                         {editMode && (
-                            <button
-                                type="button"
-                                className="btn-bs btn-secondary"
-                                onClick={resetForm}
-                            >
+                            <button type="button" className="btn-bs btn-secondary" onClick={resetForm}>
                                 Cancelar
                             </button>
                         )}
@@ -170,18 +142,13 @@ const Categoria = () => {
                 </form>
             </div>
 
-            {/* TABLA */}
-
+            {/* TABLA REESTRUCTURADA CON TU DISEÑO DE GRILLA INTERNA */}
             <div className="card-panel mt-4">
-
-                <h4 className="mb-4">
-                    Listado General de Categorías
-                </h4>
+                <h4 className="mb-4">Listado General de Categorías</h4>
 
                 <div className="custom-table-container">
-
-                    {/* HEADER */}
-
+                    
+                    {/* ENCABEZADO DE LA TABLA (Distribución de columnas 1fr, 3fr, 2fr) */}
                     <div
                         className="custom-table-header"
                         style={{
@@ -191,57 +158,48 @@ const Categoria = () => {
                         }}
                     >
                         <div>ID</div>
-                        <div>Nombre</div>
-                        <div className="text-center">
-                            Acciones
-                        </div>
+                        <div>Nombre de Categoría</div>
+                        <div className="text-center">Acciones</div>
                     </div>
 
-                    {/* FILAS */}
-
-                    {categorias.map(c => (
-
-                        <div
-                            key={c.idCategoria}
-                            className="custom-table-row"
-                            style={{
-                                display: 'grid',
-                                gridTemplateColumns: '1fr 3fr 2fr',
-                                alignItems: 'center'
-                            }}
-                        >
-
-                            <div className="fw-bold">
-                                {c.idCategoria}
-                            </div>
-
-                            <div>
-                                {c.nombre}
-                            </div>
-
+                    {/* FILAS DE DATOS */}
+                    {categorias.length === 0 ? (
+                        <div className="text-center p-3 text-muted">No hay categorías registradas</div>
+                    ) : (
+                        categorias.map(c => (
                             <div
-                                className="text-center d-flex gap-2 justify-content-center"
+                                key={c.idCategoria}
+                                className="custom-table-row"
+                                style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: '1fr 3fr 2fr',
+                                    alignItems: 'center'
+                                }}
                             >
-
-                                <button
-                                    className="btn-bs btn-success btn-sm"
-                                    onClick={() => iniciarEdicion(c)}
-                                >
-                                    Editar
-                                </button>
-
-                                <button
-                                    className="btn-bs btn-danger btn-sm"
-                                    onClick={() => eliminar(c.idCategoria)}
-                                >
-                                    Borrar
-                                </button>
+                                <div className="fw-bold">{c.idCategoria}</div>
+                                <div>{c.nombre}</div>
+                                <div className="text-center d-flex gap-2 justify-content-center">
+                                    <button
+                                        className="btn-bs btn-success btn-sm"
+                                        onClick={() => iniciarEdicion(c)}
+                                    >
+                                        Editar
+                                    </button>
+                                    <button
+                                        className="btn-bs btn-danger btn-sm"
+                                        onClick={() => eliminar(c.idCategoria)}
+                                    >
+                                        Borrar
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        ))
+                    )}
+
                 </div>
             </div>
         </div>
     );
 };
+
 export default Categoria;

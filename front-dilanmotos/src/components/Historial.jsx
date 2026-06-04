@@ -117,59 +117,59 @@ const Historial = () => {
                             )}
 
                             {/* --- SECCIÓN SERVICIOS --- */}
-                                {tab === 'servicios' && (
-                                    <div key="tabla-servicios">
-                                        <div style={{
+                            {tab === 'servicios' && (
+                                <div key="tabla-servicios">
+                                    <div style={{
+                                        display: 'flex',
+                                        background: '#2c3e50',
+                                        color: 'white',
+                                        padding: '18px 15px',
+                                        fontSize: '0.85rem',
+                                        textTransform: 'uppercase',
+                                        letterSpacing: '1px',
+                                        fontWeight: 'bold',
+                                        minWidth: '700px'
+                                    }}>
+                                        <div style={{ flex: 1.5 }}>Servicio</div>
+                                        <div style={{ flex: 1 }}>Estado</div>
+                                        <div style={{ flex: 1 }}>Mecánico</div>
+                                        <div style={{ flex: 1.5 }}>Comentarios</div>
+                                        <div style={{ flex: 1 }}>Fecha</div>
+                                        <div style={{ flex: 1 }}>Puntuación</div>
+                                    </div>
+                                    {datos.length > 0 ? datos.map((s) => (
+                                        <div key={`serv-${s.idServicio}`} style={{
                                             display: 'flex',
-                                            background: '#2c3e50',
-                                            color: 'white',
-                                            padding: '18px 15px',
-                                            fontSize: '0.85rem',
-                                            textTransform: 'uppercase',
-                                            letterSpacing: '1px',
-                                            fontWeight: 'bold',
+                                            alignItems: 'center',
+                                            minHeight: '65px',
+                                            padding: '12px 15px',
+                                            borderBottom: '1px solid #f1f1f1',
                                             minWidth: '700px'
                                         }}>
-                                            <div style={{ flex: 1.5 }}>Servicio</div>
-                                            <div style={{ flex: 1 }}>Estado</div>
-                                            <div style={{ flex: 1 }}>Mecánico</div>
-                                            <div style={{ flex: 1.5 }}>Comentarios</div>
-                                            <div style={{ flex: 1 }}>Fecha</div>
-                                            <div style={{ flex: 1 }}>Puntuación</div>
-                                        </div>
-                                        {datos.length > 0 ? datos.map((s) => (
-                                            <div key={`serv-${s.idServicio}`} style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                minHeight: '65px',
-                                                padding: '12px 15px',
-                                                borderBottom: '1px solid #f1f1f1',
-                                                minWidth: '700px'
-                                            }}>
-                                                <div style={{ flex: 1.5, padding: '0 8px', fontWeight: 'bold' }}>
-                                                    {s.nombreServicio || "Servicio General"}
-                                                </div>
-                                                <div style={{ flex: 1, padding: '0 8px' }}>
-                                                    <span className={`status-pill ${s.estadoServicio?.toLowerCase().replace(' ', '-')}`}>
-                                                        {s.estadoServicio || "Sin estado"}
-                                                    </span>
-                                                </div>
-                                                <div style={{ flex: 1, padding: '0 8px' }}>
-                                                    {s.nombreMecanico || "Por asignar"}
-                                                </div>
-                                                <div style={{ flex: 1.5, padding: '0 8px', whiteSpace: 'normal', wordWrap: 'break-word' }}>
-                                                    {s.comentario || "Sin observaciones."}
-                                                </div>
-                                                <div style={{ flex: 1, padding: '0 8px' }}>
-                                                    {s.fechaServicio?.substring(0, 10)}
-                                                </div>
-                                                <div style={{ flex: 1, padding: '0 8px', color: '#4e54c8', fontWeight: 'bold' }}>
-                                                    {s.puntuacion ? '★'.repeat(s.puntuacion) : 'N/A'}
-                                                </div>
+                                            <div style={{ flex: 1.5, padding: '0 8px', fontWeight: 'bold' }}>
+                                                {s.nombreServicio || "Servicio General"}
                                             </div>
-                                        )) : <div className="p-5 text-center text-muted">No se encontraron servicios realizados.</div>}
-                                    </div>
-                                )}
+                                            <div style={{ flex: 1, padding: '0 8px' }}>
+                                                <span className={`status-pill ${s.estadoServicio?.toLowerCase().replace(' ', '-')}`}>
+                                                    {s.estadoServicio || "Sin estado"}
+                                                </span>
+                                            </div>
+                                            <div style={{ flex: 1, padding: '0 8px' }}>
+                                                {s.nombreMecanico || "Por asignar"}
+                                            </div>
+                                            <div style={{ flex: 1.5, padding: '0 8px', whiteSpace: 'normal', wordWrap: 'break-word' }}>
+                                                {s.comentario || "Sin observaciones."}
+                                            </div>
+                                            <div style={{ flex: 1, padding: '0 8px' }}>
+                                                {s.fechaServicio?.substring(0, 10)}
+                                            </div>
+                                            <div style={{ flex: 1, padding: '0 8px', color: '#4e54c8', fontWeight: 'bold' }}>
+                                                {s.puntuacion ? '★'.repeat(s.puntuacion) : 'N/A'}
+                                            </div>
+                                        </div>
+                                    )) : <div className="p-5 text-center text-muted">No se encontraron servicios realizados.</div>}
+                                </div>
+                            )}
 
                             {/* --- SECCIÓN COTIZACIONES --- */}
                             {tab === 'cotizaciones' && (
@@ -180,6 +180,7 @@ const Historial = () => {
                                         <div style={{ flex: 0.8 }}>Cantidad</div>
                                         <div style={{ flex: 1 }}>Precio Unit.</div>
                                         <div style={{ flex: 1 }}>Subtotal</div>
+                                        <div style={{ flex: 1 }}>Estado</div> {/* Nueva Columna de Estado */}
                                     </div>
                                     {datos.length > 0 ? datos.map((c) => (
                                         <div className="custom-table-row" key={`cotizacion-${c.idCotizacion}`} style={{ ...rowStyle, display: 'flex' }}>
@@ -197,6 +198,12 @@ const Historial = () => {
                                             </div>
                                             <div style={{ flex: 1, padding: '0 10px', color: '#198754', fontWeight: 'bold' }}>
                                                 ${(c.precioUnitario * c.cantidad)?.toFixed(2)}
+                                            </div>
+                                            {/* Renderizado Dinámico del Estado de la Cotización */}
+                                            <div style={{ flex: 1, padding: '0 10px' }}>
+                                                <span className={`status-pill ${(c.estado || 'PENDIENTE').toLowerCase().replace(' ', '-')}`}>
+                                                    {c.estado || 'PENDIENTE'}
+                                                </span>
                                             </div>
                                         </div>
                                     )) : <div className="p-5 text-center text-muted">No se encontraron cotizaciones.</div>}
