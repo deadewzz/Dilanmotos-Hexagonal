@@ -10,6 +10,9 @@ import com.dilanmotos.infrastructure.dto.CotizacionResponseDTO;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -38,6 +41,7 @@ public class CotizacionUC {
                     dto.setProducto(entity.getProducto());
                     dto.setCantidad(entity.getCantidad());
                     dto.setPrecioUnitario(entity.getPrecioUnitario());
+                    // Convertir Date a Date (la entity ya viene con Date)
                     dto.setFecha(entity.getFecha());
                     dto.setProducto_agregado(entity.getProducto_agregado());
                     return dto;
@@ -115,7 +119,12 @@ public class CotizacionUC {
         c.setProducto(dto.getProducto());
         c.setCantidad(dto.getCantidad());
         c.setPrecioUnitario(dto.getPrecioUnitario());
-        c.setFecha(dto.getFecha());
+        // Convertir Date a LocalDate
+        if (dto.getFecha() != null) {
+            c.setFecha(dto.getFecha().toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate());
+        }
         c.setProducto_agregado(dto.getProducto_agregado());
         return c;
     }
@@ -128,7 +137,12 @@ public class CotizacionUC {
         dto.setProducto(c.getProducto());
         dto.setCantidad(c.getCantidad());
         dto.setPrecioUnitario(c.getPrecioUnitario());
-        dto.setFecha(c.getFecha());
+        // Convertir LocalDate a Date
+        if (c.getFecha() != null) {
+            dto.setFecha(Date.from(c.getFecha()
+                    .atStartOfDay(ZoneId.systemDefault())
+                    .toInstant()));
+        }
         dto.setProducto_agregado(c.getProducto_agregado());
         return dto;
     }

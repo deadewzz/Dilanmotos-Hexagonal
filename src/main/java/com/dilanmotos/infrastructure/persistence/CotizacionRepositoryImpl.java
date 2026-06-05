@@ -4,6 +4,9 @@ import com.dilanmotos.domain.model.Cotizacion;
 import com.dilanmotos.domain.repository.CotizacionRepository;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -48,7 +51,12 @@ public class CotizacionRepositoryImpl implements CotizacionRepository {
             entity.setProducto(cotizacion.getProducto());
             entity.setCantidad(cotizacion.getCantidad());
             entity.setPrecioUnitario(cotizacion.getPrecioUnitario());
-            entity.setFecha(cotizacion.getFecha());
+            // Convertir LocalDate a Date
+            if (cotizacion.getFecha() != null) {
+                entity.setFecha(Date.from(cotizacion.getFecha()
+                        .atStartOfDay(ZoneId.systemDefault())
+                        .toInstant()));
+            }
             entity.setProducto_agregado(cotizacion.getProducto_agregado());
             return toModel(jpa.save(entity));
         }).orElseThrow(() -> new RuntimeException("Error al actualizar: Cotización no encontrada"));
@@ -69,7 +77,12 @@ public class CotizacionRepositoryImpl implements CotizacionRepository {
         c.setProducto(entity.getProducto());
         c.setCantidad(entity.getCantidad());
         c.setPrecioUnitario(entity.getPrecioUnitario());
-        c.setFecha(entity.getFecha());
+        // Convertir Date a LocalDate
+        if (entity.getFecha() != null) {
+            c.setFecha(entity.getFecha().toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate());
+        }
         c.setProducto_agregado(entity.getProducto_agregado());
         return c;
     }
@@ -83,7 +96,12 @@ public class CotizacionRepositoryImpl implements CotizacionRepository {
         entity.setProducto(c.getProducto());
         entity.setCantidad(c.getCantidad());
         entity.setPrecioUnitario(c.getPrecioUnitario());
-        entity.setFecha(c.getFecha());
+        // Convertir LocalDate a Date
+        if (c.getFecha() != null) {
+            entity.setFecha(Date.from(c.getFecha()
+                    .atStartOfDay(ZoneId.systemDefault())
+                    .toInstant()));
+        }
         entity.setProducto_agregado(c.getProducto_agregado());
         return entity;
     }

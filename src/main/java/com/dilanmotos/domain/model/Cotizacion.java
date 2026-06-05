@@ -1,6 +1,6 @@
 package com.dilanmotos.domain.model;
 
-import java.util.Date;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,7 +15,7 @@ public class Cotizacion {
     private String producto;
     private Integer cantidad;
     private double precioUnitario;
-    private Date fecha;
+    private LocalDate fecha; 
     // true = AGREGADO/COMPRADO, false = PENDIENTE
     private Boolean producto_agregado;
 }
