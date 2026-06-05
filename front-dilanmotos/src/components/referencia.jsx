@@ -35,9 +35,10 @@ const Referencia = () => {
         cargarTodo(); 
     }, []);
 
+    // Corregido: El backend envía 'idMarca' directamente en la raíz de la referencia
     const referenciasFiltradas = filtroMarca === '' 
         ? todasLasReferencias 
-        : todasLasReferencias.filter(ref => (ref.marca?.idMarca || ref.idMarca) === parseInt(filtroMarca));
+        : todasLasReferencias.filter(ref => parseInt(ref.idMarca) === parseInt(filtroMarca));
 
     const prepararEdicion = (ref) => {
         setEditMode(true);
@@ -45,7 +46,7 @@ const Referencia = () => {
         setFormData({
             nombre: ref.nombre || '',
             cilindraje: ref.cilindraje || '',
-            idMarca: ref.marca?.idMarca || ref.idMarca || ''
+            idMarca: ref.idMarca || '' // Mapeo directo y limpio
         });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -57,10 +58,11 @@ const Referencia = () => {
             ? `http://localhost:8080/api/referencias/${selectedId}` 
             : "http://localhost:8080/api/referencias";
         
+        // Payload estructurado plano como lo requiere tu API
         const payload = {
             nombre: formData.nombre,
-            cilindraje: parseFloat(formData.cilindraje),
-            marca: { idMarca: parseInt(formData.idMarca) }
+            cilindraje: formData.cilindraje ? parseFloat(formData.cilindraje) : 0,
+            idMarca: parseInt(formData.idMarca)
         };
 
         try {
@@ -79,7 +81,7 @@ const Referencia = () => {
                 setEditMode(false);
                 cargarTodo();
             } else {
-                alert("❌ Error en servidor: " + res.status);
+                alert("❌ Error en servidor: " + res.status + " (Verifica los campos en el Backend)");
             }
         } catch (err) {
             console.error(err);
@@ -122,16 +124,16 @@ const Referencia = () => {
                         <input 
                             className="input-bs" 
                             type="number" 
+                            step="any" 
                             value={formData.cilindraje} 
                             onChange={e => setFormData({...formData, cilindraje: e.target.value})} 
                             required 
                         />
                     </div>
 
-                    {/* SECCIÓN DE BOTONES EN VERTICAL CON COLORES VERDE Y ROJO EN MODO EDICIÓN */}
                     <div className="col-12" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '15px' }}>
                         <button 
-                            className={`btn-bs w-100 ${editMode ? 'btn-success' : 'btn-success'}`} 
+                            className="btn-bs w-100 btn-success" 
                             type="submit"
                             style={{ padding: '12px', fontSize: '1rem' }}
                         >
@@ -171,10 +173,7 @@ const Referencia = () => {
                     </div>
                 </div>
 
-                {/* Contenedor con bordes y radio unificados de tu CSS */}
                 <div style={{ width: '100%', overflowX: 'auto', background: 'var(--white)', borderRadius: '10px', border: '1px solid #dee2e6' }}>
-                    
-                    {/* CABECERA CON COLOR DEL CSS (--header-table) Y ALINEACIÓN PERFECTA */}
                     <div style={{ 
                         display: 'grid', 
                         gridTemplateColumns: '1.5fr 2.5fr 1.2fr 1.3fr', 
@@ -192,9 +191,8 @@ const Referencia = () => {
                         <div style={{ display: 'flex', justifyContent: 'center' }}>Acciones</div>
                     </div>
 
-                    {/* CUERPO DE LAS FILAS */}
                     {referenciasFiltradas.length > 0 ? (
-                        referenciasFiltradas.map(ref => (
+                        referenciasFiltradas.map((ref) => (
                             <div key={ref.idReferencia} style={{ 
                                 display: 'grid', 
                                 gridTemplateColumns: '1.5fr 2.5fr 1.2fr 1.3fr', 
@@ -206,17 +204,21 @@ const Referencia = () => {
                                 background: 'var(--white)',
                                 transition: '0.2s'
                             }}>
-                                <div className="fw-bold" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-dark)' }} title={ref.marca?.nombre || 'S/M'}>
-                                    {ref.marca?.nombre || 'S/M'}
+                                <div 
+                                    className="fw-bold" 
+                                    style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-dark)' }} 
+                                    title={marcas.find(m => m.idMarca === ref.idMarca)?.nombre || 'S/M'}
+                                >   
+                                    {marcas.find(m => m.idMarca === ref.idMarca)?.nombre || 'S/M'}
                                 </div>
                                 <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#7e8299' }} title={ref.nombre}>
                                     {ref.nombre}
                                 </div>
                                 <div style={{ color: 'var(--text-dark)' }}>
-                                    {ref.cilindraje} cc
+                                    {ref.cilindraje ? `${ref.cilindraje} cc` : 'N/A'}
                                 </div>
                                 <div className="text-center">
-                                    <button className="btn-bs btn-success btn-sm" style={{ padding: '6px 12px' }} onClick={() => prepararEdicion(ref)}>
+                                    <button className="btn-bs btn-success btn-sm" style={{ padding: '6px 12px', marginRight: '5px' }} onClick={() => prepararEdicion(ref)}>
                                         <i className="fa-solid fa-pen"></i>
                                     </button>
                                     <button 

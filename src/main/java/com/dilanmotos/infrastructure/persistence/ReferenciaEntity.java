@@ -20,7 +20,7 @@ public class ReferenciaEntity {
     private String nombre;
 
     @Column(name = "cilindraje")
-    private Double cilindraje; // ✅ nuevo campo
+    private Double cilindraje; 
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_marca")

@@ -39,7 +39,7 @@ public class ReferenciaMotoUC {
         return referenciaRepository.obtenerPorMarca(idMarca).stream()
             .map(this::mapToDTO)
             .collect(Collectors.toList());
-}
+    }
 
     public ReferenciaMotoResponseDTO actualizar(Integer id, ReferenciaMotoRequestDTO request) {
         // Buscamos la existencia en el repositorio
@@ -59,12 +59,15 @@ public class ReferenciaMotoUC {
         referenciaRepository.eliminarPorId(id);
     }
 
-    // --- MAPPERS MANUALES ---
+    // --- MAPPERS MANUALES CORREGIDOS ---
+// --- MAPPERS MANUALES CON CONTROL DE NULOS ---
 
     private ReferenciaMoto mapToModel(ReferenciaMotoRequestDTO dto) {
         ReferenciaMoto r = new ReferenciaMoto();
         r.setNombre(dto.getNombre());
         r.setIdMarca(dto.getIdMarca());
+        // Si por alguna razón el frontend manda nulo, le ponemos 0.0
+        r.setCilindraje(dto.getCilindraje() != null ? dto.getCilindraje() : 0.0); 
         return r;
     }
 
@@ -73,6 +76,8 @@ public class ReferenciaMotoUC {
         dto.setIdReferencia(r.getIdReferencia());
         dto.setNombre(r.getNombre());
         dto.setIdMarca(r.getIdMarca());
+        // ¡ESTA ES LA LÍNEA SALVADORA!: Si en la BD es null, mapea 0.0 para que no bote Error 500
+        dto.setCilindraje(r.getCilindraje() != null ? r.getCilindraje() : 0.0); 
         return dto;
     }
 }

@@ -9,5 +9,5 @@ public class ReferenciaMoto {
     private Integer idReferencia;
     private String nombre;
     private Integer idMarca;
-    private Double cilindraje; // ✅ nuevo campo
+    private Double cilindraje; 
 }
