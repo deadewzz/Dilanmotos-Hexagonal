@@ -16,4 +16,10 @@ public interface UsuarioService {
     void eliminar(int id);
 
     Usuario actualizar(int id, Usuario usuario);
+
+    void cambiarContrasena(Integer idUsuario, String contrasenaActual, String contrasenaNueva);
+
+    void solicitarRecuperacion(String correo);
+    
+    void resetearContrasena(String token, String nuevaContrasena);
 }

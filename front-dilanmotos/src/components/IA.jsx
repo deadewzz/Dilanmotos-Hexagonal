@@ -75,9 +75,8 @@ const AsistenteMotos = () => {
                     'Authorization': `Bearer ${token}` 
                 },
                 body: JSON.stringify({ 
-                    motor: motoActual || modeloSeleccionado,
-                    falla: texto,
-                    historial: mensajes 
+                    idUsuario: parseInt(idLogueado),
+                    falla: texto
                 })
             });
 

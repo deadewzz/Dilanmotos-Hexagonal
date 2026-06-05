@@ -22,23 +22,20 @@ public class ChatController {
             return ResponseEntity.badRequest().build();
         }
 
-        String mensaje = """
-                El cliente tiene la siguiente moto: %s.
-                Pregunta del cliente: %s
-                """.formatted(
-                    request.getMotor() != null ? request.getMotor() : "moto no especificada",
-                    request.getFalla()
-                );
+        if (request.getIdUsuario() == null) {
+            return ResponseEntity.badRequest().build();
+        }
 
-        return ResponseEntity.ok(chatUseCase.execute(mensaje));
+        // ← ya no construyes el String "mensaje" aquí, solo pasas falla e idUsuario
+        return ResponseEntity.ok(chatUseCase.execute(request.getFalla(), request.getIdUsuario()));
     }
 
     static class ConsultaRequest {
-        private String motor;
+        private Integer idUsuario;
         private String falla;
 
-        public String getMotor() { return motor; }
-        public void setMotor(String motor) { this.motor = motor; }
+        public Integer getIdUsuario() { return idUsuario; }
+        public void setIdUsuario(Integer idUsuario) { this.idUsuario = idUsuario; }
         public String getFalla() { return falla; }
         public void setFalla(String falla) { this.falla = falla; }
     }

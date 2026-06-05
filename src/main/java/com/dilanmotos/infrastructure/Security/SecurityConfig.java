@@ -19,7 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 
 @Configuration
-@EnableWebSecurity
+@EnableWebSecurity  
 public class SecurityConfig {
 
     private final JwtRequestFilter jwtRequestFilter;
@@ -58,6 +58,8 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html")
                         .permitAll()
+                        .requestMatchers("/api/usuarios/recuperar-contrasena").permitAll()
+                        .requestMatchers("/api/usuarios/resetear-contrasena").permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {

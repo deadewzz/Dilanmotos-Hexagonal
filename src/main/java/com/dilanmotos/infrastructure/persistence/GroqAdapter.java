@@ -1,11 +1,15 @@
 package com.dilanmotos.infrastructure.persistence;
 
 import com.dilanmotos.domain.model.ChatResponse;
+import com.dilanmotos.domain.model.Producto;
+import com.dilanmotos.domain.repository.ProductoRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
-import java.util.Map;
+
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class GroqAdapter implements ChatExternalPort {
@@ -14,40 +18,29 @@ public class GroqAdapter implements ChatExternalPort {
     private String apiKey;
 
     private final RestTemplate restTemplate = new RestTemplate();
+    private final ProductoRepository productoRepository;
+
+    public GroqAdapter(ProductoRepository productoRepository) {
+        this.productoRepository = productoRepository;
+    }
 
     @Override
-    public ChatResponse getAiAnswer(String question) {
+    public ChatResponse getAiAnswer(String question, String nombreMarca,
+                                    String modelo, double cilindraje) {
+
+        // 1. Traer todos los productos de la BD
+        List<Producto> productos = productoRepository.obtenerTodos();
+
+        // 2. Construir el catálogo como texto
+        String catalogo = buildCatalogo(productos);
+
+        // 3. Construir el prompt con moto + catálogo
+        String systemPrompt = buildSystemPrompt(catalogo, nombreMarca, modelo, cilindraje);
+
         String url = "https://api.groq.com/openai/v1/chat/completions";
 
-        String systemPrompt = "Eres el mecánico jefe de Dilan Motos, un taller en Bogotá, Colombia. " +
-            "Solo manejamos tres categorías de productos: aceites/lubricantes, llantas y kits de arrastre. " +
-            "No hables de nada que no tenga que ver con motos o estos productos.\n\n" +
-
-            "FORMATO: Usa tablas Markdown cuando compares precios o repuestos:\n" +
-            "| Producto | Precio |\n" +
-            "| :--- | :--- |\n\n" +
-
-            "PRECIOS:\n" +
-            "- NUNCA inventes precios. Si no sabes el precio real, di claramente que no lo tienes.\n" +
-            "- En Colombia 220 significa 220.000 pesos.\n" +
-            "- Verifica precios reales en Pirelli, Michelin, Corsa, Motul, Castrol, etc.\n" +
-            "- Da precios específicos para el modelo de moto del cliente, no precios genéricos.\n" +
-            "- Si no tenemos el producto, avisa y da un precio aproximado aclarando que puede variar.\n\n" +
-
-            "PRODUCTOS:\n" +
-            "- Llantas: usa marcas como Michelin, Pirelli, Corsa, IRC. NO uses el nombre de la marca de la moto.\n" +
-            "- Kits de arrastre: usa DID, RK, Regina, Vortex, JT Sprockets. NO menciones escapes ni frenos.\n" +
-            "- Aceites: Motul, Castrol, Shell Advance, Mobil. Si la marca de la moto tiene aceite oficial, menciónalo primero.\n" +
-            "- Siempre da 3 opciones por categoría con nombre real y precio real.\n\n" +
-
-            "INFORMACIÓN DE MOTO:\n" +
-            "- Cuando el cliente pregunte qué moto tiene, da modelo, cilindraje y marca completos.\n" +
-            "- Siempre adapta las recomendaciones al modelo específico del cliente.\n\n" +
-
-            "TONO: Habla como mecánico colombiano, cercano y directo. Usa 'parcero' ocasionalmente.";
-
         var body = Map.of(
-            "model", "llama-3.3-70b-versatile", // ✅ modelo más capaz
+            "model", "llama-3.3-70b-versatile",
             "messages", List.of(
                 Map.of("role", "system", "content", systemPrompt),
                 Map.of("role", "user", "content", question)
@@ -70,4 +63,58 @@ public class GroqAdapter implements ChatExternalPort {
             return new ChatResponse("Error: El mecánico jefe no pudo responder. Intenta de nuevo.");
         }
     }
-}   
+
+    private String buildCatalogo(List<Producto> productos) {
+    if (productos.isEmpty()) {
+        return "No hay productos disponibles en el inventario.";
+    }
+
+    Map<String, List<Producto>> porCategoria = productos.stream()
+        .collect(Collectors.groupingBy(p ->
+            p.getNombreCategoria() != null ? p.getNombreCategoria() : "General"
+        ));
+
+    StringBuilder sb = new StringBuilder();
+    porCategoria.forEach((categoria, items) -> {
+        sb.append("\n[").append(categoria.toUpperCase()).append("]\n");
+        items.forEach(p -> sb.append(String.format(
+            "  • %s | Precio: $%,.0f COP | %s\n",
+            p.getNombre(),
+            p.getPrecio(),
+            p.getDescripcion() != null ? p.getDescripcion() : ""
+        )));
+    });
+
+    return sb.toString();
+}
+
+    private String buildSystemPrompt(String catalogo, String marca,
+                                     String modelo, double cilindraje) {
+        return String.format("""
+            Eres el mecánico jefe de Dilan Motos, un taller en Bogotá, Colombia.
+            El cliente tiene una %s %s de %.0fcc.
+
+            ╔══════════════════════════════════════════════╗
+            REGLA ABSOLUTA: SOLO puedes recomendar productos
+            que estén en el INVENTARIO que aparece abajo.
+            NO inventes productos ni precios.
+            Si no hay opciones en alguna categoría, dilo claramente.
+            ╚══════════════════════════════════════════════╝
+
+            INVENTARIO ACTUAL DE DILAN MOTOS:
+            %s
+
+            INSTRUCCIONES:
+            - Recomienda máximo 3 productos por categoría, los más adecuados para la moto del cliente.
+            - Usa SIEMPRE el precio exacto del inventario.
+            - Usa tablas Markdown para comparar:
+              | Producto |  Precio |
+              | :--- | :--- | 
+            - Si el cliente pregunta por algo que no está en el inventario,
+              dile que no lo tienes disponible actualmente.
+
+            TONO: Mecánico colombiano, cercano y directo. Usa 'parcero' ocasionalmente.
+            Solo responde sobre motos, aceites, llantas y kits de arrastre.
+            """, marca, modelo, cilindraje, catalogo);
+    }
+}

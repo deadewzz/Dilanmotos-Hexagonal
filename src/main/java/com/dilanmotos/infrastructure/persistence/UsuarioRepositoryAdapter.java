@@ -5,6 +5,7 @@ import com.dilanmotos.domain.model.Usuario;
 import com.dilanmotos.domain.repository.UsuarioRepository;
 import org.springframework.stereotype.Component;
 import java.util.Optional;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,6 +34,37 @@ public class UsuarioRepositoryAdapter implements UsuarioRepository {
 
         UsuarioEntity saved = jpaRepository.save(entity);
         return toDomain(saved);
+    }
+
+    @Override
+    public void actualizarContrasena(Integer idUsuario, String contrasenaNueva) {
+    jpaRepository.findById(idUsuario).ifPresent(entity -> {
+        entity.setContrasena(contrasenaNueva);
+        jpaRepository.save(entity);
+    });
+}
+
+    @Override
+    public void guardarToken(String correo, String token, LocalDateTime expiracion) {
+        jpaRepository.findByCorreo(correo).ifPresent(entity -> {
+            entity.setResetToken(token);
+            entity.setTokenExpiracion(expiracion);
+            jpaRepository.save(entity);
+        });
+    }
+
+    @Override
+    public Optional<Usuario> buscarPorToken(String token) {
+        return jpaRepository.findByResetToken(token).map(this::toDomain);
+    }
+
+    @Override
+    public void limpiarToken(Integer idUsuario) {
+        jpaRepository.findById(idUsuario).ifPresent(entity -> {
+            entity.setResetToken(null);
+            entity.setTokenExpiracion(null);
+            jpaRepository.save(entity);
+        });
     }
 
     @Override
