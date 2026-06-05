@@ -11,4 +11,5 @@ public class ReferenciaMotoResponseDTO {
     private Integer idReferencia;
     private String nombre;
     private Integer idMarca;
+    private double cilindraje;
 }

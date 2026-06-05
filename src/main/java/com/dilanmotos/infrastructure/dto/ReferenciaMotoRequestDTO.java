@@ -14,4 +14,9 @@ public class ReferenciaMotoRequestDTO {
 
     @NotNull(message = "El ID de la marca es obligatorio")
     private Integer idMarca;
+
+    // ¡Agregamos el cilindraje para que no te vuelva a tirar Error 400!
+    @NotNull(message = "El cilindraje es obligatorio")
+    @Positive(message = "El cilindraje debe ser un número positivo")
+    private Double cilindraje;
 }
