@@ -168,6 +168,7 @@ export default function HacerCotizacion() {
 		for (const item of items) {
 			const payload = {
 				idUsuario: Number(idUsuario),
+				idProducto: Number(item.id) || null,
 				producto: item.nombre,
 				cantidad: item.cantidad,
 				precioUnitario: item.precio,

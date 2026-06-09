@@ -11,6 +11,7 @@ const Cotizacion = () => {
     const [cotizacion, setCotizacion] = useState({ 
         idCotizacion: null, 
         idUsuario: '', 
+        idProducto: '',
         producto: '', 
         cantidad: '', 
         precioUnitario: '', 
@@ -64,7 +65,11 @@ const Cotizacion = () => {
             });
             if (!response.ok) throw new Error('Error al obtener cotizaciones');
             const data = await response.json();
-            setCotizaciones(data);
+            const normalized = Array.isArray(data) ? data.map(item => ({
+                ...item,
+                productoAgregado: item.productoAgregado ?? item.producto_agregado ?? false
+            })) : [];
+            setCotizaciones(normalized);
         } catch (error) {
             console.error(error);
             setMensaje('No se pudieron cargar las cotizaciones');
@@ -84,11 +89,12 @@ const Cotizacion = () => {
         if (selectedProducto) {
             setCotizacion({
                 ...cotizacion,
+                idProducto: selectedProducto.idProducto,
                 producto: selectedProducto.nombre,
                 precioUnitario: selectedProducto.precio
             });
         } else {
-            setCotizacion({ ...cotizacion, producto: '', precioUnitario: '' });
+            setCotizacion({ ...cotizacion, idProducto: '', producto: '', precioUnitario: '' });
         }
     };
 
@@ -107,7 +113,8 @@ const Cotizacion = () => {
             const payload = {
                 ...cotizacion,
                 idCotizacion: idReal,
-                id: idReal
+                id: idReal,
+                producto_agregado: cotizacion.productoAgregado === true || cotizacion.productoAgregado === 'true'
             };
 
             const response = await fetch(url, {
@@ -126,6 +133,7 @@ const Cotizacion = () => {
                 setCotizacion({
                     idCotizacion: null,
                     idUsuario: localStorage.getItem('idUsuario'),
+                    idProducto: '',
                     producto: '',
                     cantidad: '',
                     precioUnitario: '',
@@ -149,11 +157,12 @@ const Cotizacion = () => {
             idCotizacion: idReal,
             id: idReal, 
             idUsuario: c.idUsuario,
+            idProducto: c.idProducto ?? '',
             producto: c.producto,
             cantidad: c.cantidad,
             precioUnitario: c.precioUnitario,
             fecha: c.fecha,
-            productoAgregado: c.productoAgregado
+            productoAgregado: c.productoAgregado ?? c.producto_agregado ?? false
         });
     };
 
@@ -162,6 +171,7 @@ const Cotizacion = () => {
         setCotizacion({
             idCotizacion: null,
             idUsuario: localStorage.getItem('idUsuario'),
+            idProducto: '',
             producto: '',
             cantidad: '',
             precioUnitario: '',
@@ -251,9 +261,11 @@ const Cotizacion = () => {
                                 name="precioUnitario"
                                 placeholder="0.00"
                                 value={cotizacion.precioUnitario}
-                                onChange={handleChange}
+                                readOnly
+                                disabled
                                 required
                             />
+                            <small className="text-muted">Se toma automáticamente del producto seleccionado.</small>
                         </div>
                     </div>
 

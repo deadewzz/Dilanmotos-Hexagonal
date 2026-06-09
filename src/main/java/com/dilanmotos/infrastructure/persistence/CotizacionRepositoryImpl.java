@@ -48,6 +48,7 @@ public class CotizacionRepositoryImpl implements CotizacionRepository {
         Integer id = cotizacion.getIdCotizacion();
         return jpa.findById(id).map(entity -> {
             entity.setIdUsuario(cotizacion.getIdUsuario());
+            entity.setIdProducto(cotizacion.getIdProducto());
             entity.setProducto(cotizacion.getProducto());
             entity.setCantidad(cotizacion.getCantidad());
             entity.setPrecioUnitario(cotizacion.getPrecioUnitario());

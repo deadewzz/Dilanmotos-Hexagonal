@@ -35,22 +35,25 @@ public class CotizacionUC {
     public List<CotizacionResponseDTO> listarPorUsuario(Integer idUsuario) {
         return cotizacionRepository.findByIdUsuario(idUsuario).stream()
                 .map(entity -> {
-                    CotizacionResponseDTO dto = new CotizacionResponseDTO();
-                    dto.setIdCotizacion(entity.getIdCotizacion());
-                    dto.setIdUsuario(entity.getIdUsuario());
-                    dto.setProducto(entity.getProducto());
-                    dto.setCantidad(entity.getCantidad());
-                    dto.setPrecioUnitario(entity.getPrecioUnitario());
-                    // Convertir Date a Date (la entity ya viene con Date)
-                    dto.setFecha(entity.getFecha());
-                    dto.setProducto_agregado(entity.getProducto_agregado());
-                    return dto;
+                    Cotizacion cotizacion = new Cotizacion();
+                    cotizacion.setIdCotizacion(entity.getIdCotizacion());
+                    cotizacion.setIdUsuario(entity.getIdUsuario());
+                    cotizacion.setIdProducto(entity.getIdProducto());
+                    cotizacion.setProducto(entity.getProducto());
+                    cotizacion.setCantidad(entity.getCantidad());
+                    cotizacion.setPrecioUnitario(entity.getPrecioUnitario());
+                    cotizacion.setFecha(entity.getFecha() != null
+                            ? entity.getFecha().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+                            : null);
+                    cotizacion.setProducto_agregado(entity.getProducto_agregado());
+                    return mapToDTO(cotizacion);
                 })
                 .collect(Collectors.toList());
     }
 
     public CotizacionResponseDTO crear(CotizacionRequestDTO request) {
         Cotizacion cotizacion = mapToModel(request);
+        enrichFromProducto(cotizacion);
         return mapToDTO(cotizacionRepository.guardar(cotizacion));
     }
 
@@ -67,6 +70,7 @@ public class CotizacionUC {
 
         Cotizacion cotizacion = mapToModel(request);
         cotizacion.setIdCotizacion(id);
+        enrichFromProducto(cotizacion);
         return mapToDTO(cotizacionRepository.actualizar(cotizacion));
     }
 
@@ -112,6 +116,21 @@ public class CotizacionUC {
         cotizacionRepository.eliminar(id);
     }
 
+    private void enrichFromProducto(Cotizacion cotizacion) {
+        if (cotizacion.getIdProducto() == null) {
+            return;
+        }
+
+        productoRepository.buscarPorId(cotizacion.getIdProducto()).ifPresent(producto -> {
+            if (producto.getNombre() != null && !producto.getNombre().isBlank()) {
+                cotizacion.setProducto(producto.getNombre());
+            }
+            if (producto.getPrecio() != null && cotizacion.getPrecioUnitario() <= 0) {
+                cotizacion.setPrecioUnitario(producto.getPrecio());
+            }
+        });
+    }
+
     private Cotizacion mapToModel(CotizacionRequestDTO dto) {
         Cotizacion c = new Cotizacion();
         c.setIdUsuario(dto.getIdUsuario());
@@ -130,6 +149,8 @@ public class CotizacionUC {
     }
 
     private CotizacionResponseDTO mapToDTO(Cotizacion c) {
+        enrichFromProducto(c);
+
         CotizacionResponseDTO dto = new CotizacionResponseDTO();
         dto.setIdCotizacion(c.getIdCotizacion());
         dto.setIdUsuario(c.getIdUsuario());
