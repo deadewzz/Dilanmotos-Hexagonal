@@ -80,7 +80,7 @@ const Dashboard = () => {
                     <h1 style={{marginBottom: '20px', fontWeight: '800'}}>Mantenimiento Inteligente</h1>
                     
                     {/* El banner de IA puede ser público, pero el asistente real pedirá login */}
-                    <Link to="/asistente" className="promo-banner">
+                    <Link to="/recomendaciones" className="promo-banner">
                         Ver Recomendaciones de la IA
                     </Link>
                 </div>

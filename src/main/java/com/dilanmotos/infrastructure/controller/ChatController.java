@@ -18,25 +18,51 @@ public class ChatController {
 
     @PostMapping("/consultar")
     public ResponseEntity<ChatResponse> consultar(@RequestBody ConsultaRequest request) {
+        // 1. Validamos que el cuerpo o la falla no vengan vacíos
         if (request == null || request.getFalla() == null || request.getFalla().isBlank()) {
             return ResponseEntity.badRequest().build();
         }
 
+        // 2. Validamos que el idUsuario esté presente para cumplir con las reglas del UseCase
         if (request.getIdUsuario() == null) {
             return ResponseEntity.badRequest().build();
         }
 
-        // ← ya no construyes el String "mensaje" aquí, solo pasas falla e idUsuario
-        return ResponseEntity.ok(chatUseCase.execute(request.getFalla(), request.getIdUsuario()));
+        // 3. Ejecutamos el caso de uso pasando la falla y el idUsuario
+        ChatResponse response = chatUseCase.execute(request.getFalla(), request.getIdUsuario());
+        
+        return ResponseEntity.ok(response);
     }
 
+    // Clase estática (DTO) corregida para soportar el Payload completo de tu Frontend
     static class ConsultaRequest {
         private Integer idUsuario;
+        private String motor; // Añadido para hacer match con el "motor" enviado en el JSON de React
         private String falla;
 
-        public Integer getIdUsuario() { return idUsuario; }
-        public void setIdUsuario(Integer idUsuario) { this.idUsuario = idUsuario; }
-        public String getFalla() { return falla; }
-        public void setFalla(String falla) { this.falla = falla; }
+        // Getters y Setters
+        public Integer getIdUsuario() { 
+            return idUsuario; 
+        }
+        
+        public void setIdUsuario(Integer idUsuario) { 
+            this.idUsuario = idUsuario; 
+        }
+
+        public String getMotor() {
+            return motor;
+        }
+
+        public void setMotor(String motor) {
+            this.motor = motor;
+        }
+
+        public String getFalla() { 
+            return falla; 
+        }
+        
+        public void setFalla(String falla) { 
+            this.falla = falla; 
+        }
     }
 }
