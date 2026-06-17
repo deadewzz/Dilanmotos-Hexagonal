@@ -33,55 +33,42 @@ public class SecurityConfig {
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // 1. MÉTODOS Y RUTAS COMPLETAMENTE PÚBLICOS
+
+                        // 1. MÉTODOS OPTIONS SIEMPRE PÚBLICOS (preflight CORS)
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
+                        // 2. AUTENTICACIÓN Y RECUPERACIÓN
                         .requestMatchers("/api/usuarios/login").permitAll()
                         .requestMatchers("/api/usuarios/recuperar-contrasena").permitAll()
                         .requestMatchers("/api/usuarios/resetear-contrasena").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll() // Registro de usuario
-                        .requestMatchers("/api/productos/**").permitAll() // Catálogo de repuestos público
-                        .requestMatchers("/error").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/usuarios").permitAll()
 
-                        // 2. Listas de marcas/motos públicas SOLO para lectura (GET)
-                        .requestMatchers(HttpMethod.GET, "/api/marcas/**").permitAll() // Cualquiera lee las marcas
-                        .requestMatchers(HttpMethod.GET, "/api/referencias/**").permitAll() // Cualquiera lee las
-                                                                                            // referencias
-                        .requestMatchers(HttpMethod.GET, "/api/categorias/**").permitAll() // Cualquiera lee las
-                                                                                           // categorías
+                        // 3. CATÁLOGO PÚBLICO (solo lectura GET)
+                        .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/marcas/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/motos/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/referencias/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/categorias/**").permitAll()
 
-                        // 3. DOCUMENTACIÓN DE SWAGGER PÚBLICA
+                        // 4. SWAGGER PÚBLICO
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html")
+                                "/swagger-ui.html",
+                                "/error")
                         .permitAll()
 
-                        // 4. RUTAS BLINDADAS (Exigen Token obligatoriamente)
-                        // Nota que quitamos los 'GET' de marcas/categorías de aquí porque ya se manejan
-                        // arriba.
-                        // Las peticiones POST, PUT, DELETE para marcas/categorías caerán
-                        // automáticamente aquí.
-                        .requestMatchers(
-                                "/api/usuarios/**",
-                                "/api/marcas/**", // Modificar Marcas pide token
-                                "/api/referencias/**", // Modificar Referencias pide token
-                                "/api/categorias/**", // Modificar Categorías pide token
-                                "/api/motos/**",
-                                "/api/IA/**",
-                                "/api/tipoServicio/**",
-                                "/api/servicios/**",
-                                "/api/pqrs/**",
-                                "/api/mecanicos/**",
-                                "/api/caracteristicas/**",
-                                "/api/cotizaciones/**")
-                        .authenticated()
-
+                        // 5. TODO LO DEMÁS REQUIERE TOKEN
                         .anyRequest().authenticated())
+
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {
-                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "No autorizado");
+                            response.sendError(
+                                    HttpServletResponse.SC_UNAUTHORIZED,
+                                    "No autorizado");
                         }))
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
@@ -95,18 +82,31 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration
-                .setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://10.0.2.2:8000", "http://10.0.2.2"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
 
-        // ESTA ES LA LÍNEA CLAVE PARA QUITAR EL 401:
-        // Debemos permitir explícitamente "Authorization" y "Content-Type"
-        configuration.setAllowedHeaders(
-                Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With", "Cache-Control"));
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:5173",      // React web
+                "http://localhost:8080",      // Backend local
+                "http://10.0.2.2",            // Emulador Android Studio → PC
+                "http://10.0.2.2:8080",       // Emulador con puerto
+                "http://192.168.56.1",        // VirtualBox
+                "http://192.168.56.1:8080",   // VirtualBox con puerto
+                "http://10.1.196.118",        // IP LAN SENA
+                "http://10.1.196.118:8080"    // IP LAN SENA con puerto
+        ));
 
-        // Esto permite que el navegador vea el token en la respuesta
+        configuration.setAllowedMethods(Arrays.asList(
+                "GET", "POST", "PUT", "DELETE", "OPTIONS"
+        ));
+
+        configuration.setAllowedHeaders(Arrays.asList(
+                "Authorization",
+                "Content-Type",
+                "Accept",
+                "X-Requested-With",
+                "Cache-Control"
+        ));
+
         configuration.setExposedHeaders(Arrays.asList("Authorization"));
-
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -115,7 +115,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+    public AuthenticationManager authenticationManager(
+            AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 }
