@@ -45,6 +45,11 @@ public class CotizacionUC {
                     cotizacion.setFecha(entity.getFecha() != null
                             ? entity.getFecha().toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
                             : null);
+                    
+                    if (entity.getUsuario() != null) {
+                        cotizacion.setNombreUsuario(entity.getUsuario().getNombre());
+                    }
+                    
                     cotizacion.setProducto_agregado(entity.getProducto_agregado());
                     return mapToDTO(cotizacion);
                 })
@@ -83,7 +88,6 @@ public class CotizacionUC {
             throw new RuntimeException("Esta cotización ya fue procesada como una venta.");
         }
 
-        // Buscar producto asociado para descontar el stock
         if (cotizacion.getIdProducto() != null) {
             Producto producto = productoRepository.buscarPorId(cotizacion.getIdProducto())
                     .orElseThrow(() -> new RuntimeException("El producto asociado a esta cotización ya no existe."));
@@ -92,11 +96,9 @@ public class CotizacionUC {
                 throw new RuntimeException("No hay stock suficiente. Unidades disponibles: " + producto.getStock());
             }
 
-            // Restar stock
             int nuevoStock = producto.getStock() - cotizacion.getCantidad();
             producto.setStock(nuevoStock);
 
-            // Si el stock llega a cero, el producto ya no está disponible
             if (nuevoStock <= 0) {
                 producto.setDisponible(false);
             }
@@ -104,7 +106,6 @@ public class CotizacionUC {
             productoRepository.actualizar(producto.getIdProducto(), producto);
         }
 
-        // Cambiar estado de la cotización a AGREGADO (Comprado)
         cotizacion.setProducto_agregado(true);
         return mapToDTO(cotizacionRepository.actualizar(cotizacion));
     }
@@ -138,7 +139,6 @@ public class CotizacionUC {
         c.setProducto(dto.getProducto());
         c.setCantidad(dto.getCantidad());
         c.setPrecioUnitario(dto.getPrecioUnitario());
-        // Convertir Date a LocalDate
         if (dto.getFecha() != null) {
             c.setFecha(dto.getFecha().toInstant()
                     .atZone(ZoneId.systemDefault())
@@ -154,11 +154,13 @@ public class CotizacionUC {
         CotizacionResponseDTO dto = new CotizacionResponseDTO();
         dto.setIdCotizacion(c.getIdCotizacion());
         dto.setIdUsuario(c.getIdUsuario());
+        
+        dto.setNombreUsuario(c.getNombreUsuario()); 
+        
         dto.setIdProducto(c.getIdProducto());
         dto.setProducto(c.getProducto());
         dto.setCantidad(c.getCantidad());
         dto.setPrecioUnitario(c.getPrecioUnitario());
-        // Convertir LocalDate a Date
         if (c.getFecha() != null) {
             dto.setFecha(Date.from(c.getFecha()
                     .atStartOfDay(ZoneId.systemDefault())

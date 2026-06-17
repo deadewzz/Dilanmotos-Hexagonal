@@ -21,6 +21,10 @@ public class CotizacionEntity {
     @Column(name = "id_producto")
     private Integer idProducto;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_usuario", insertable = false, updatable = false)
+    private UsuarioEntity usuario;
+
     @Column(name = "producto")
     private String producto;
 

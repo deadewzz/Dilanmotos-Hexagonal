@@ -22,9 +22,13 @@ public class CotizacionRepositoryImpl implements CotizacionRepository {
 
     @Override
     public Cotizacion guardar(Cotizacion cotizacion) {
-        CotizacionEntity entity = toEntity(cotizacion);
-        return toModel(jpa.save(entity));
-    }
+    CotizacionEntity entity = toEntity(cotizacion);
+    CotizacionEntity guardado = jpa.save(entity);
+
+    return jpa.findById(guardado.getIdCotizacion())
+            .map(this::toModel)
+            .orElse(toModel(guardado));
+}
 
     @Override
     public List<CotizacionEntity> findByIdUsuario(Integer idUsuario) {
@@ -33,7 +37,7 @@ public class CotizacionRepositoryImpl implements CotizacionRepository {
 
     @Override
     public List<Cotizacion> obtenerTodas() {
-        return jpa.findAll().stream()
+        return jpa.findAllWithUsuario().stream()
                 .map(this::toModel)
                 .collect(Collectors.toList());
     }
@@ -45,23 +49,26 @@ public class CotizacionRepositoryImpl implements CotizacionRepository {
 
     @Override
     public Cotizacion actualizar(Cotizacion cotizacion) {
-        Integer id = cotizacion.getIdCotizacion();
-        return jpa.findById(id).map(entity -> {
-            entity.setIdUsuario(cotizacion.getIdUsuario());
-            entity.setIdProducto(cotizacion.getIdProducto());
-            entity.setProducto(cotizacion.getProducto());
-            entity.setCantidad(cotizacion.getCantidad());
-            entity.setPrecioUnitario(cotizacion.getPrecioUnitario());
-            // Convertir LocalDate a Date
-            if (cotizacion.getFecha() != null) {
-                entity.setFecha(Date.from(cotizacion.getFecha()
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant()));
-            }
-            entity.setProducto_agregado(cotizacion.getProducto_agregado());
-            return toModel(jpa.save(entity));
-        }).orElseThrow(() -> new RuntimeException("Error al actualizar: Cotización no encontrada"));
-    }
+    Integer id = cotizacion.getIdCotizacion();
+    return jpa.findById(id).map(entity -> {
+        entity.setIdUsuario(cotizacion.getIdUsuario());
+        entity.setIdProducto(cotizacion.getIdProducto());
+        entity.setProducto(cotizacion.getProducto());
+        entity.setCantidad(cotizacion.getCantidad());
+        entity.setPrecioUnitario(cotizacion.getPrecioUnitario());
+        if (cotizacion.getFecha() != null) {
+            entity.setFecha(Date.from(cotizacion.getFecha()
+                    .atStartOfDay(ZoneId.systemDefault())
+                    .toInstant()));
+        }
+        entity.setProducto_agregado(cotizacion.getProducto_agregado());
+        
+        jpa.save(entity);
+        
+        return jpa.findById(id).map(this::toModel).orElseThrow();
+        
+    }).orElseThrow(() -> new RuntimeException("Error al actualizar: Cotización no encontrada"));
+}
 
     @Override
     public void eliminar(Integer id) {
@@ -78,15 +85,18 @@ public class CotizacionRepositoryImpl implements CotizacionRepository {
         c.setProducto(entity.getProducto());
         c.setCantidad(entity.getCantidad());
         c.setPrecioUnitario(entity.getPrecioUnitario());
-        // Convertir Date a LocalDate
         if (entity.getFecha() != null) {
-            c.setFecha(entity.getFecha().toInstant()
-                    .atZone(ZoneId.systemDefault())
-                    .toLocalDate());
-        }
-        c.setProducto_agregado(entity.getProducto_agregado());
-        return c;
+        c.setFecha(entity.getFecha().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate());
     }
+    if (entity.getUsuario() != null) {
+        c.setNombreUsuario(entity.getUsuario().getNombre());
+    }
+
+    c.setProducto_agregado(entity.getProducto_agregado());
+    return c;
+}
 
     // MAPPERS INTERNOS
     private CotizacionEntity toEntity(Cotizacion c) {

@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Cotizacion {
+    private String nombreUsuario;
     private Integer idCotizacion;
     private Integer idUsuario;
     private Integer idProducto;

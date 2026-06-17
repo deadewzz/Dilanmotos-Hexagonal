@@ -198,12 +198,12 @@ const Cotizacion = () => {
     };
 
     const gridStyle = {
-        display: 'grid',
-        gridTemplateColumns: '2fr 1fr 1fr 1fr 1.5fr 1.5fr 2fr', 
-        gap: '15px',
-        alignItems: 'center',
-        padding: '15px',
-        minWidth: '850px'
+    display: 'grid',
+    gridTemplateColumns: '2fr 2fr 1fr 1fr 1.5fr 1.5fr 2fr 2fr',
+    gap: '15px',
+    alignItems: 'center',
+    padding: '15px',
+    minWidth: '950px'
     };
 
     return (
@@ -345,6 +345,7 @@ const Cotizacion = () => {
                         color: 'var(--white)',
                         fontWeight: 'bold'
                     }}>
+                        <div>Cliente</div>
                         <div>Producto</div>
                         <div>Cantidad</div>
                         <div>Precio</div>
@@ -363,6 +364,7 @@ const Cotizacion = () => {
                                 background: 'var(--white)',
                                 transition: '0.2s'
                             }} key={c.id || c.idCotizacion}>
+                                <div style={{ color: '#4b5563' }}> {c.nombreUsuario ?? c.usuario?.nombre ?? 'Sin nombre'} </div>
                                 <div className="fw-bold" style={{ color: 'var(--text-dark)' }}>{c.producto}</div>
                                 <div style={{ color: '#4b5563' }}>{c.cantidad}</div>
                                 <div style={{ color: '#4b5563' }}>${c.precioUnitario}</div>
