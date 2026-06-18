@@ -154,9 +154,7 @@ public class CotizacionUC {
         CotizacionResponseDTO dto = new CotizacionResponseDTO();
         dto.setIdCotizacion(c.getIdCotizacion());
         dto.setIdUsuario(c.getIdUsuario());
-        
-        dto.setNombreUsuario(c.getNombreUsuario()); 
-        
+        dto.setNombreUsuario(c.getNombreUsuario()); // Mapeo del nombre corregido
         dto.setIdProducto(c.getIdProducto());
         dto.setProducto(c.getProducto());
         dto.setCantidad(c.getCantidad());

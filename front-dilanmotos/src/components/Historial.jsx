@@ -180,7 +180,7 @@ const Historial = () => {
                                         <div style={{ flex: 0.8 }}>Cantidad</div>
                                         <div style={{ flex: 1 }}>Precio Unit.</div>
                                         <div style={{ flex: 1 }}>Subtotal</div>
-                                        <div style={{ flex: 1 }}>Estado</div> {/* Nueva Columna de Estado */}
+                                        <div style={{ flex: 1 }}>Estado</div>
                                     </div>
                                     {datos.length > 0 ? datos.map((c) => (
                                         <div className="custom-table-row" key={`cotizacion-${c.idCotizacion}`} style={{ ...rowStyle, display: 'flex' }}>
@@ -199,10 +199,10 @@ const Historial = () => {
                                             <div style={{ flex: 1, padding: '0 10px', color: '#198754', fontWeight: 'bold' }}>
                                                 ${(c.precioUnitario * c.cantidad)?.toFixed(2)}
                                             </div>
-                                            {/* Renderizado Dinámico del Estado de la Cotización */}
+                                            {/* Renderizado Dinámico Corregido utilizando el booleano 'producto_agregado' */}
                                             <div style={{ flex: 1, padding: '0 10px' }}>
-                                                <span className={`status-pill ${(c.estado || 'PENDIENTE').toLowerCase().replace(' ', '-')}`}>
-                                                    {c.estado || 'PENDIENTE'}
+                                                <span className={`status-pill ${c.producto_agregado ? 'agregado' : 'pendiente'}`}>
+                                                    {c.producto_agregado ? 'AGREGADO' : 'PENDIENTE'}
                                                 </span>
                                             </div>
                                         </div>
