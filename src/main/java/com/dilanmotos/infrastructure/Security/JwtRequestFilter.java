@@ -27,7 +27,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         final String authorizationHeader = request.getHeader("Authorization");
         String username = null;
-        String jwt = null;
+        String jwt = null; 
 
         // 1. Si no hay Header de Authorization o no empieza con Bearer,
         // simplemente pasamos al siguiente filtro. Spring Security decidirá
