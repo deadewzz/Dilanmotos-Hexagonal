@@ -101,6 +101,8 @@
     border: 1px solid #ffeeba;
 }
 
+/* CORRECCIÓN: Se agrega clase dinámica para que 'agregado' use la estética verde */
+.status-pill.agregado,
 .status-pill.respondida,
 .status-pill.finalizado,
 .status-pill.completado {

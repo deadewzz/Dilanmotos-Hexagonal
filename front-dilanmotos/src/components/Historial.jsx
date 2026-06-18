@@ -138,7 +138,7 @@ const Historial = () => {
                                         <div style={{ flex: 1 }}>Puntuación</div>
                                     </div>
                                     {datos.length > 0 ? datos.map((s) => (
-                                        <div key={`serv-${s.idServicio}`} style={{
+                                        <div key={`serv-${s.idService || s.idServicio}`} style={{
                                             display: 'flex',
                                             alignItems: 'center',
                                             minHeight: '65px',
@@ -199,7 +199,6 @@ const Historial = () => {
                                             <div style={{ flex: 1, padding: '0 10px', color: '#198754', fontWeight: 'bold' }}>
                                                 ${(c.precioUnitario * c.cantidad)?.toFixed(2)}
                                             </div>
-                                            {/* Renderizado Dinámico Corregido utilizando el booleano 'producto_agregado' */}
                                             <div style={{ flex: 1, padding: '0 10px' }}>
                                                 <span className={`status-pill ${c.producto_agregado ? 'agregado' : 'pendiente'}`}>
                                                     {c.producto_agregado ? 'AGREGADO' : 'PENDIENTE'}

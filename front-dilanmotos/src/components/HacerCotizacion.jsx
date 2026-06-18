@@ -173,7 +173,7 @@ export default function HacerCotizacion() {
 				cantidad: item.cantidad,
 				precioUnitario: item.precio,
 				fecha,
-				producto_agregado: true,
+				producto_agregado: false,
 			}
 
 			const response = await fetch('http://localhost:8080/api/cotizaciones', {

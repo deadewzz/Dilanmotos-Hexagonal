@@ -59,6 +59,7 @@ public class CotizacionUC {
     public CotizacionResponseDTO crear(CotizacionRequestDTO request) {
         Cotizacion cotizacion = mapToModel(request);
         enrichFromProducto(cotizacion);
+        cotizacion.setProducto_agregado(false);
         return mapToDTO(cotizacionRepository.guardar(cotizacion));
     }
 

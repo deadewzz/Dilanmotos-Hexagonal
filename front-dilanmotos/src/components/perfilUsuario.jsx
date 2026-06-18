@@ -7,6 +7,9 @@ const PerfilUsuario = () => {
     const [usuario, setUsuario] = useState(null);
     const [cargando, setCargando] = useState(true);
 
+    // Estado para controlar si la sección de seguridad está abierta o cerrada
+    const [seguridadAbierto, setSeguridadAbierto] = useState(false);
+
     // Estado exclusivo para cambiar contraseña
     const [claves, setClaves] = useState({
         contrasenaActual: '',
@@ -78,8 +81,8 @@ const PerfilUsuario = () => {
 
             if (response.ok) {
                 alert(data.mensaje || "Contraseña cambiada exitosamente.");
-                // Limpiamos los inputs
                 setClaves({ contrasenaActual: '', contrasenaNueva: '', confirmarNueva: '' });
+                setSeguridadAbierto(false); // Cierra el menú tras un cambio exitoso
             } else {
                 alert(data.error || "Ocurrió un error al cambiar la contraseña.");
             }
@@ -117,36 +120,55 @@ const PerfilUsuario = () => {
                     </div>
                 </div>
 
-                {/* ── NUEVA SECCIÓN: SEGURIDAD Y CONFIGURACIÓN ── */}
+                {/* ── SECCIÓN MODIFICADA: SEGURIDAD Y CONFIGURACIÓN (DESPLEGABLE) ── */}
                 <div className="motos-section" style={{ marginTop: '30px' }}>
-                    <h2 className="section-title">
-                        <i className="fa-solid fa-lock"></i> Seguridad de la Cuenta
-                    </h2>
-                    <div className="perfil-card" style={{ padding: '20px', background: '#fff', borderRadius: '12px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
-                        <h3 style={{ marginBottom: '15px', fontSize: '1.1rem', color: '#333' }}>Cambiar Contraseña</h3>
-                        
-                        <form onSubmit={handleCambiarContrasena} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                                <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#555' }}>Contraseña Actual</label>
-                                <input type="password" name="contrasenaActual" value={claves.contrasenaActual} onChange={handleClaveChange} required style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} />
-                            </div>
-                            
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#555' }}>Nueva Contraseña</label>
-                                    <input type="password" name="contrasenaNueva" value={claves.contrasenaNueva} onChange={handleClaveChange} required style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} />
-                                </div>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#555' }}>Confirmar Nueva Contraseña</label>
-                                    <input type="password" name="confirmarNueva" value={claves.confirmarNueva} onChange={handleClaveChange} required style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} />
-                                </div>
-                            </div>
-
-                            <button type="submit" style={{ alignSelf: 'flex-start', background: '#ec5e2a', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', marginTop: '5px' }}>
-                                Actualizar Contraseña
-                            </button>
-                        </form>
+                    <div 
+                        onClick={() => setSeguridadAbierto(!seguridadAbierto)}
+                        style={{ 
+                            display: 'flex', 
+                            justifyContent: 'space-between', 
+                            alignItems: 'center', 
+                            cursor: 'pointer',
+                            userSelect: 'none'
+                        }}
+                    >
+                        <h2 className="section-title" style={{ margin: 0 }}>
+                            <i className="fa-solid fa-lock"></i> Seguridad de la Cuenta
+                        </h2>
+                        <i 
+                            className={`fa-solid ${seguridadAbierto ? 'fa-chevron-up' : 'fa-chevron-down'}`} 
+                            style={{ fontSize: '1.2rem', color: '#666', transition: 'transform 0.2s' }}
+                        ></i>
                     </div>
+                    
+                    {/* Renderizado condicional: Solo se muestra si seguridadAbierto es true */}
+                    {seguridadAbierto && (
+                        <div className="perfil-card" style={{ padding: '20px', background: '#fff', borderRadius: '12px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)', marginTop: '15px' }}>
+                            <h3 style={{ marginBottom: '15px', fontSize: '1.1rem', color: '#333' }}>Cambiar Contraseña</h3>
+                            
+                            <form onSubmit={handleCambiarContrasena} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#555' }}>Contraseña Actual</label>
+                                    <input type="password" name="contrasenaActual" value={claves.contrasenaActual} onChange={handleClaveChange} required style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} />
+                                </div>
+                                
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                                        <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#555' }}>Nueva Contraseña</label>
+                                        <input type="password" name="contrasenaNueva" value={claves.contrasenaNueva} onChange={handleClaveChange} required style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} />
+                                    </div>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                                        <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#555' }}>Confirmar Nueva Contraseña</label>
+                                        <input type="password" name="confirmarNueva" value={claves.confirmarNueva} onChange={handleClaveChange} required style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} />
+                                    </div>
+                                </div>
+
+                                <button type="submit" style={{ alignSelf: 'flex-start', background: '#ec5e2a', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', marginTop: '5px' }}>
+                                    Actualizar Contraseña
+                                </button>
+                            </form>
+                        </div>
+                    )}
                 </div>
 
                 <div className="motos-section">
