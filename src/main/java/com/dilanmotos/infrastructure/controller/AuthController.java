@@ -12,10 +12,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/api/usuarios")
-@CrossOrigin(origins = "http://localhost:5173")
+// AJUSTE: Agregamos el origen de Android Studio a nivel de controlador también
+@CrossOrigin(origins = {"http://localhost:5173", "http://10.0.2.2:8080", "http://10.0.2.2"})
 public class AuthController {
 
     private final AuthenticationManager authManager;
@@ -48,7 +50,7 @@ public class AuthController {
 
         Map<String, Object> response = new HashMap<>();
         response.put("token", token);
-        response.put("id_usuario", user.getIdUsuario());
+        response.put("id_usuario", user.getIdUsuario()); // Mapeado melo con id_usuario
         response.put("nombre", user.getNombre());
         response.put("rol", user.getRol());
         return response;
@@ -71,18 +73,33 @@ public class AuthController {
         }
     }
 
-    // ── Solicitar recuperación (manda el correo) ───────────
+    // ── Solicitar recuperación (ASÍNCRONO / LIBRE DE BLOQUEO) ──
     @PostMapping("/recuperar-contrasena")
     public ResponseEntity<Map<String, String>> solicitarRecuperacion(
             @RequestBody Map<String, String> request) {
 
         String correo = request.get("correo");
+
+        if (correo == null || correo.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "El correo es obligatorio"));
+        }
+
         try {
-            usuarioService.solicitarRecuperacion(correo);
+
+            CompletableFuture.runAsync(() -> {
+                try {
+                    usuarioService.solicitarRecuperacion(correo);
+                    System.out.println("DEBUG ASYNC: Correo de recuperación procesado para: " + correo);
+                } catch (Exception ex) {
+                    System.err.println("DEBUG ASYNC ERROR: Falló el envío en segundo plano: " + ex.getMessage());
+                }
+            });
+
             return ResponseEntity.ok(Map.of(
                 "mensaje", "Si el correo existe, recibirás las instrucciones"
             ));
-        } catch (RuntimeException e) {
+
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
