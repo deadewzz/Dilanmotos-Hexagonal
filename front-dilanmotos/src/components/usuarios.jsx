@@ -45,8 +45,8 @@ export default function Usuarios() {
         // VALIDACIÓN DE CONTRASEÑA (Mínimo 6 caracteres)
         // En registro siempre es obligatoria. En edición solo se valida si el usuario escribió algo.
         if (!editMode || nuevo.contrasena.length > 0) {
-            if (nuevo.contrasena.length < 6) {
-                setMensaje("❌ La contraseña debe tener al menos 6 caracteres.");
+            if (nuevo.contrasena.length < 6 || nuevo.contrasena.length > 20) {
+                setMensaje("❌ La contraseña debe tener al menos 6 caracteres y maximo 20.");
                 return false;
             }
         }

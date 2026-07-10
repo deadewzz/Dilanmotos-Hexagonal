@@ -15,6 +15,8 @@ const Register = () => {
         idReferencia: ''
     });
 
+    const [errorMensaje, setErrorMensaje] = useState(''); 
+
     // 1. Cargar marcas al montar
     useEffect(() => {
         fetch("http://localhost:8080/api/marcas")
@@ -47,10 +49,12 @@ const Register = () => {
     };
 
     // 3. Enviar formulario
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setErrorMensaje('');
 
-        // ✅ Convertir idReferencia a número antes de enviar
         const payload = {
             ...formData,
             idReferencia: formData.idReferencia ? parseInt(formData.idReferencia) : null
@@ -66,6 +70,9 @@ const Register = () => {
             if (res.ok) {
                 alert("¡Bienvenido a Dilan Motos! Registro exitoso.");
                 navigate("/login");
+            } else if (res.status === 409) {
+                const data = await res.json();
+                setErrorMensaje(data.mensaje || "Correo ya existente, inicia sesión");
             } else {
                 const errorData = await res.text();
                 alert("Error al registrarse: " + errorData);
@@ -112,9 +119,15 @@ const Register = () => {
                         <input
                             className="auth-input"
                             type="password"
-                            placeholder="Mínimo 6 caracteres"
+                            placeholder="Asigne una contraseña segura (mín. 6, máx. 20 caracteres)"
                             value={formData.contrasena}
-                            onChange={e => setFormData({ ...formData, contrasena: e.target.value })}
+                            onChange={e => {
+                                const valor = e.target.value.slice(0, 20);
+                                setFormData({ ...formData, contrasena: valor });
+                            }}
+                            minLength={6}
+                            maxLength={20}
+                            title="La contraseña debe tener entre 6 y 20 caracteres."
                             required
                         />
                     </div>
@@ -153,6 +166,24 @@ const Register = () => {
                             ))}
                         </select>
                     </div>
+
+{errorMensaje && (
+    <p style={{ color: '#c0392b', textAlign: 'center', fontSize: '0.9rem', marginBottom: '10px' }}>
+        {errorMensaje.includes('inicia sesión') ? (
+            <>
+                Correo ya existente,{' '}
+                <span
+                    onClick={() => navigate('/login')}
+                    style={{ color: '#3b46d8', cursor: 'pointer', fontWeight: 'bold', textDecoration: 'underline' }}
+                >
+                    inicia sesión
+                </span>
+            </>
+        ) : (
+            errorMensaje
+        )}
+    </p>
+)}
 
                     <button type="submit" className="auth-btn-primary">
                         Completar Registro

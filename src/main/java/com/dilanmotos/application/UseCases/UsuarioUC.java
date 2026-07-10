@@ -35,25 +35,33 @@ public class UsuarioUC implements UsuarioService {
     // ... todos tus métodos existentes sin cambios ...
 
     @Override
-    public Usuario registrar(Usuario usuario) {
-        usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
-        if (usuario.getRol() == null || usuario.getRol().isEmpty()) {
-            usuario.setRol("USER");
-        }
-        Usuario guardado = usuarioRepository.guardar(usuario);
-        if (usuario.getIdReferencia() != null) {
-            referenciaRepository.buscarPorId(usuario.getIdReferencia())
-                .ifPresent(ref -> {
-                    Moto moto = new Moto();
-                    moto.setIdUsuario(guardado.getIdUsuario());
-                    moto.setIdMarca(ref.getIdMarca());
-                    moto.setModelo(ref.getNombre());
-                    moto.setCilindraje(ref.getCilindraje() != null ? ref.getCilindraje() : 0.0);
-                    motoRepository.guardar(moto);
-                });
-        }
-        return guardado;
+public Usuario registrar(Usuario usuario) {
+    if (usuarioRepository.buscarPorCorreo(usuario.getCorreo()).isPresent()) {
+        throw new IllegalStateException("El correo ya está registrado");
     }
+
+    if (usuario.getContrasena() == null || usuario.getContrasena().length() < 6 || usuario.getContrasena().length() > 20) {
+    throw new IllegalArgumentException("La contraseña debe tener entre 6 y 20 caracteres");
+}
+
+    usuario.setContrasena(passwordEncoder.encode(usuario.getContrasena()));
+    if (usuario.getRol() == null || usuario.getRol().isEmpty()) {
+        usuario.setRol("USER");
+    }
+    Usuario guardado = usuarioRepository.guardar(usuario);
+    if (usuario.getIdReferencia() != null) {
+        referenciaRepository.buscarPorId(usuario.getIdReferencia())
+            .ifPresent(ref -> {
+                Moto moto = new Moto();
+                moto.setIdUsuario(guardado.getIdUsuario());
+                moto.setIdMarca(ref.getIdMarca());
+                moto.setModelo(ref.getNombre());
+                moto.setCilindraje(ref.getCilindraje() != null ? ref.getCilindraje() : 0.0);
+                motoRepository.guardar(moto);
+            });
+    }
+    return guardado;
+}
 
     @Override
     public Usuario buscarPorCorreo(String correo) {

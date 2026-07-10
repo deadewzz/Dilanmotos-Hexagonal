@@ -9,6 +9,8 @@ import com.dilanmotos.domain.model.Usuario;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import org.springframework.http.HttpStatus;
+import java.util.Map;
 
 /*
 Documentacion Swagger:
@@ -29,12 +31,22 @@ public class UsuarioController {
     @Operation(summary = "Registrar un nuevo usuario")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Usuario registrado exitosamente"),
+            @ApiResponse(responseCode = "409", description = "El correo ya está registrado"),
             @ApiResponse(responseCode = "400", description = "Solicitud inválida")
     })
     @PostMapping
-    public ResponseEntity<Usuario> registar(@RequestBody Usuario usuario) {
-        return ResponseEntity.ok(usuarioService.registrar(usuario));
-
+    public ResponseEntity<?> registar(@RequestBody Usuario usuario) {
+        try {
+            Usuario nuevoUsuario = usuarioService.registrar(usuario);
+            return ResponseEntity.ok(nuevoUsuario);
+        } catch (IllegalStateException e) {
+            // Esta excepción la lanzamos nosotros cuando el correo ya existe
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(Map.of("error", "correo_existente", "mensaje", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "validacion", "mensaje", e.getMessage()));
+        }
     }
 
     @Operation(summary = "Listar todos los usuarios")
@@ -44,7 +56,6 @@ public class UsuarioController {
     @GetMapping
     public ResponseEntity<List<Usuario>> listar() {
         return ResponseEntity.ok(usuarioService.listar());
-
     }
 
     @Operation(summary = "Obtener un usuario por su ID")
@@ -55,7 +66,6 @@ public class UsuarioController {
     @GetMapping("/{id}")
     public ResponseEntity<Usuario> obtener(@PathVariable int id) {
         return ResponseEntity.ok(usuarioService.obtenerPorId(id));
-
     }
 
     @Operation(summary = "Actualizar un usuario")

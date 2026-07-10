@@ -4,6 +4,7 @@ import '../auth.css';
 
 const Login = () => {
     const navigate = useNavigate();
+    const [errorMensaje, setErrorMensaje] = useState('');
     const [vista, setVista] = useState('login'); // Vistas posibles: 'login', 'solicitar', 'resetear'
     
     // Estados de los formularios
@@ -23,39 +24,45 @@ const Login = () => {
 
     // ── 1. Login Normal ───────────────────────────────────
     const handleLogin = async (e) => {
-        e.preventDefault(); 
-        try {
-            const response = await fetch("http://localhost:8080/api/usuarios/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(credenciales)
-            });
+    e.preventDefault(); 
+    setErrorMensaje('');
+    try {
+        const response = await fetch("http://localhost:8080/api/usuarios/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(credenciales)
+        });
 
-            if (response.ok) {
-                const usuario = await response.json();
-                console.log("Respuesta completa del servidor:", usuario);
-                
-                const idFinal = usuario.idUsuario || usuario.id || usuario.id_usuario;
+        if (response.ok) {
+            const usuario = await response.json();
+            console.log("Respuesta completa del servidor:", usuario);
+            
+            const idFinal = usuario.idUsuario || usuario.id || usuario.id_usuario;
 
-                if (!idFinal) {
-                    console.error("ERROR: El backend no envió un ID de usuario válido.");
-                }
-
-                localStorage.setItem('isAuthenticated', 'true'); 
-                localStorage.setItem("idUsuario", idFinal); 
-                localStorage.setItem("nombreUsuario", usuario.nombre);
-                localStorage.setItem("correoUsuario", usuario.correo || usuario.email || credenciales.correo || '');
-                localStorage.setItem('token', usuario.token); 
-                localStorage.setItem("rolUsuario", usuario.rol || 'USER'); 
-                
-                window.location.href = "/dashboard"; 
-            } else {
-                alert("Correo o contraseña incorrectos.");
+            if (!idFinal) {
+                console.error("ERROR: El backend no envió un ID de usuario válido.");
             }
-        } catch (error) {
-            alert("Error de conexión. Revisa que el servidor esté activo.");
+
+            localStorage.setItem('isAuthenticated', 'true'); 
+            localStorage.setItem("idUsuario", idFinal); 
+            localStorage.setItem("nombreUsuario", usuario.nombre);
+            localStorage.setItem("correoUsuario", usuario.correo || usuario.email || credenciales.correo || '');
+            localStorage.setItem('token', usuario.token); 
+            localStorage.setItem("rolUsuario", usuario.rol || 'USER'); 
+            
+            window.location.href = "/dashboard"; 
+        } else if (response.status === 404) {
+            const data = await response.json();
+            setErrorMensaje(data.mensaje || "Ese correo no está registrado");
+        } else if (response.status === 401) {
+            setErrorMensaje("Correo o contraseña incorrectos.");
+        } else {
+            setErrorMensaje("Ocurrió un error al iniciar sesión.");
         }
-    };
+    } catch (error) {
+        alert("Error de conexión. Revisa que el servidor esté activo.");
+    }
+};
 
     // ── 2. Enviar Correo de Recuperación ──────────────────
     const handleSolicitarRecuperacion = async (e) => {
@@ -122,6 +129,25 @@ const Login = () => {
                                 <label>Contraseña</label>
                                 <input className="auth-input" type="password" name="contrasena" value={credenciales.contrasena} onChange={handleChangeLogin} required />
                             </div>
+
+                                {errorMensaje && (
+                                    <p style={{ color: '#c0392b', textAlign: 'center', fontSize: '0.9rem', marginBottom: '10px' }}>
+                                        {errorMensaje.includes('no está registrado') ? (
+                                            <>
+                                                Ese correo no está registrado,{' '}
+                                                <span
+                                                    onClick={() => navigate('/register')}
+                                                    style={{ color: '#3b46d8', cursor: 'pointer', fontWeight: 'bold', textDecoration: 'underline' }}
+                                                >
+                                                    regístrate aquí
+                                                </span>
+                                            </>
+                                        ) : (
+                                            errorMensaje
+                                        )}
+                                    </p>
+                                )}
+
                             <button type="submit" className="auth-btn-primary">Entrar al Sistema</button>
                             
                             <div style={{ marginTop: '15px', textAlign: 'center', fontSize: '0.85rem' }}>
