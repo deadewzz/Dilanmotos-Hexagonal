@@ -49,6 +49,7 @@ public class SecurityConfig {
                         // 3. CATÁLOGO PÚBLICO (solo lectura GET)
                         .requestMatchers(HttpMethod.GET, "/api/productos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/marcas/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/tipoServicio/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/motos/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/referencias/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categorias/**").permitAll()

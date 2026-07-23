@@ -3,12 +3,10 @@ import { useEffect, useState } from "react";
 export default function Motos() {
     const [motos, setMotos] = useState([]);
     const [marcas, setMarcas] = useState([]);
-    const [tiposServicio, setTiposServicio] = useState([]); 
     const [nuevo, setNuevo] = useState({ 
         modelo: '', 
         cilindraje: '', 
-        idMarca: '', 
-        idTipoServicio: ''  
+        idMarca: ''
     });
     const [editMode, setEditMode] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
@@ -16,29 +14,23 @@ export default function Motos() {
     const token = localStorage.getItem('token');
     const API_URL = 'http://localhost:8080/api/motos';
     const MARCAS_URL = 'http://localhost:8080/api/marcas';
-    const TIPOS_SERVICIO_URL = 'http://localhost:8080/api/tipoServicio';
 
     const cargarDatos = async () => {
         try {
-            const [resM, resMa, resTs] = await Promise.all([
+            const [resM, resMa] = await Promise.all([
                 fetch(API_URL, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }),
                 fetch(MARCAS_URL, {
                     headers: { 'Authorization': `Bearer ${token}` }
-                }),
-                fetch(TIPOS_SERVICIO_URL, {
-                    headers: { 'Authorization': `Bearer ${token}` }
                 })
             ]);
 
-            if (resM.ok && resMa.ok && resTs.ok) {
+            if (resM.ok && resMa.ok) {
                 const dataMotos = await resM.json();
                 const dataMarcas = await resMa.json();
-                const dataTiposServicio = await resTs.json();
                 setMotos(Array.isArray(dataMotos) ? dataMotos : []);
                 setMarcas(Array.isArray(dataMarcas) ? dataMarcas : []);
-                setTiposServicio(Array.isArray(dataTiposServicio) ? dataTiposServicio : []);
             }
         } catch (error) {
             console.error("Error cargando datos:", error);
@@ -55,8 +47,7 @@ export default function Motos() {
         setNuevo({
             modelo: moto.modelo,
             cilindraje: moto.cilindraje,
-            idMarca: moto.idMarca || '',
-            idTipoServicio: moto.idTipoServicio || '' 
+            idMarca: moto.idMarca || ''
         });
         window.scrollTo({ top: 0, behavior: 'smooth' }); 
     };
@@ -66,12 +57,18 @@ export default function Motos() {
         
         const url = editMode ? `${API_URL}/${selectedId}` : API_URL;
         
+        // Validar cilindraje antes de enviar
+        const cilindrajeNum = parseFloat(nuevo.cilindraje);
+        if (isNaN(cilindrajeNum) || cilindrajeNum < 125 || cilindrajeNum > 1400) {
+            alert("El cilindraje debe ser un número entre 125 y 1400 cc");
+            return;
+        }
+
         const payload = {
             idUsuario: 1,
             idMarca: parseInt(nuevo.idMarca),
             modelo: nuevo.modelo,
-            cilindraje: parseFloat(nuevo.cilindraje),
-            idTipoServicio: parseInt(nuevo.idTipoServicio)  
+            cilindraje: cilindrajeNum
         };
 
         try {
@@ -116,7 +113,7 @@ export default function Motos() {
     const cancelarEdicion = () => {
         setEditMode(false);
         setSelectedId(null);
-        setNuevo({ modelo: '', cilindraje: '', idMarca: '', idTipoServicio: '' });
+        setNuevo({ modelo: '', cilindraje: '', idMarca: '' });
     };
 
     // Estilos inline de fuerza bruta aplicados a la estructura y tabla de Motos
@@ -141,10 +138,10 @@ export default function Motos() {
     // Grid personalizado de 5 columnas para los datos de Motos
     const gridLayoutTabla = {
         display: 'grid',
-        gridTemplateColumns: '2fr 2fr 1.5fr 2fr 150px', 
+        gridTemplateColumns: '2fr 2fr 1.5fr 150px', 
         alignItems: 'center',
         padding: '12px 15px',
-        minWidth: '850px', 
+        minWidth: '650px', 
         boxSizing: 'border-box'
     };
 
@@ -195,24 +192,12 @@ export default function Motos() {
                                 value={nuevo.cilindraje} 
                                 onChange={e => setNuevo({...nuevo, cilindraje: e.target.value})} 
                                 required 
+                                min="125"
+                                max="1400"
+                                step="1"
                             />
                         </div>
-                        <div className="col-md-6 mb-3">
-                            <label className="form-label">Tipo de Servicio</label>
-                            <select
-                                className="input-bs"
-                                value={nuevo.idTipoServicio}
-                                onChange={e => setNuevo({...nuevo, idTipoServicio: e.target.value})}
-                                required
-                            >
-                                <option value="">Seleccione un tipo de servicio</option>
-                                {tiposServicio.map(t => (
-                                    <option key={t.idTipoServicio} value={t.idTipoServicio}>
-                                        {t.nombre}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
+                        
                     </div>
 
                     {/* SECCIÓN DE BOTONES CONFIGURADOS EN VERTICAL CON SUS RESPECTIVOS COLORES */}
@@ -248,7 +233,6 @@ export default function Motos() {
                         <div>Marca</div>
                         <div>Modelo</div>
                         <div>Cilindraje</div>
-                        <div>Tipo Servicio</div>
                         <div style={{ textAlign: 'center', display: 'block', width: '100%' }}>Acciones</div>
                     </div>
 
@@ -265,7 +249,6 @@ export default function Motos() {
                                         {m.cilindraje}cc
                                     </span>
                                 </div>
-                                <div style={{ color: '#495057' }}>{m.tipoServicio?.nombre || 'No especificado'}</div>
                                 <div style={{ display: 'flex', justifyContent: 'center', gap: '6px' }}>
                                     <button 
                                         className="btn-bs btn-success btn-sm" 

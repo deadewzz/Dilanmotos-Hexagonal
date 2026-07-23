@@ -3,7 +3,10 @@ import '../global.css';
 
 export default function Usuarios() {
     const [usuarios, setUsuarios] = useState([]);
-    const [nuevo, setNuevo] = useState({ nombre: '', correo: '', contrasena: '', idReferencia: 1 });
+    const [marcas, setMarcas] = useState([]);
+    const [referencias, setReferencias] = useState([]);
+    const [tiposServicio, setTiposServicio] = useState([]);
+    const [nuevo, setNuevo] = useState({ nombre: '', correo: '', contrasena: '', idReferencia: '', idMarca: '', cilindraje: '', idTipoServicio: '' });
     const [editMode, setEditMode] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
     const [mensaje, setMensaje] = useState('');
@@ -25,7 +28,30 @@ export default function Usuarios() {
 
     useEffect(() => { 
         cargar(); 
+        // cargar marcas y tipos de servicio para el formulario
+        fetch('http://localhost:8080/api/marcas')
+            .then(r => r.ok ? r.json() : [])
+            .then(d => setMarcas(Array.isArray(d) ? d : []))
+            .catch(() => setMarcas([]));
+
+        fetch('http://localhost:8080/api/tipoServicio')
+            .then(r => r.ok ? r.json() : [])
+            .then(d => setTiposServicio(Array.isArray(d) ? d : []))
+            .catch(() => setTiposServicio([]));
     }, []);
+
+    const handleMarcaChange = (e) => {
+        const idMarca = e.target.value;
+        setReferencias([]);
+        setNuevo(prev => ({ ...prev, idReferencia: '' , idMarca }));
+
+        if (idMarca) {
+            fetch(`http://localhost:8080/api/referencias?marcaId=${idMarca}`)
+                .then(res => res.ok ? res.json() : [])
+                .then(data => setReferencias(Array.isArray(data) ? data : []))
+                .catch(() => setReferencias([]));
+        }
+    };
 
     // FUNCIÓN DE VALIDACIÓN MANUAL EN JS
     const validarFormulario = () => {
@@ -75,7 +101,11 @@ export default function Usuarios() {
                 body: JSON.stringify({
                     ...nuevo,
                     nombre: nuevo.nombre.trim(),
-                    correo: nuevo.correo.trim().toLowerCase()
+                    correo: nuevo.correo.trim().toLowerCase(),
+                    idReferencia: nuevo.idReferencia ? parseInt(nuevo.idReferencia) : null,
+                    idTipoServicio: nuevo.idTipoServicio && nuevo.idTipoServicio !== '0' ? parseInt(nuevo.idTipoServicio) : null,
+                    cilindraje: nuevo.cilindraje ? parseFloat(nuevo.cilindraje) : null,
+                    idMarca: nuevo.idMarca ? parseInt(nuevo.idMarca) : null
                 })
             });
             
@@ -96,7 +126,22 @@ export default function Usuarios() {
         const id = u.idUsuario || u.id_usuario;
         setEditMode(true);
         setSelectedId(id);
-        setNuevo({ nombre: u.nombre, correo: u.correo, contrasena: '', idReferencia: 1 });
+        setNuevo({ 
+            nombre: u.nombre, 
+            correo: u.correo, 
+            contrasena: '', 
+            idReferencia: u.idReferencia ?? u.id_referencia ?? '',
+            idMarca: u.idMarca ?? u.id_marca ?? '',
+            cilindraje: u.cilindraje ?? '',
+            idTipoServicio: u.idTipoServicio ?? u.id_tipo_servicio ?? ''
+        });
+        // si tiene marca, cargar referencias para mostrar el select correctamente
+        if (u.idMarca) {
+            fetch(`http://localhost:8080/api/referencias?marcaId=${u.idMarca}`)
+                .then(res => res.ok ? res.json() : [])
+                .then(data => setReferencias(Array.isArray(data) ? data : []))
+                .catch(() => setReferencias([]));
+        }
         setMensaje('');
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -122,7 +167,7 @@ export default function Usuarios() {
     };
 
     const resetForm = () => {
-        setNuevo({ nombre: '', correo: '', contrasena: '', idReferencia: 1 });
+        setNuevo({ nombre: '', correo: '', contrasena: '', idReferencia: '', idMarca: '', cilindraje: '', idTipoServicio: '' });
         setEditMode(false);
         setSelectedId(null);
     };
@@ -193,6 +238,66 @@ export default function Usuarios() {
                             title="La contraseña debe tener un mínimo de 6 caracteres."
                             required={!editMode} 
                         />
+                    </div>
+                    <hr />
+                    <h5 className="mb-3">Información de tu Moto</h5>
+
+                    <div className="mb-3">
+                        <label className="form-label fw-bold">Marca de tu moto</label>
+                        <select className="input-bs" value={nuevo.idMarca} onChange={handleMarcaChange} required>
+                            <option value="">-- Selecciona una marca --</option>
+                            {marcas.map(m => (
+                                <option key={m.idMarca} value={m.idMarca}>{m.nombre}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="mb-3">
+                        <label className="form-label fw-bold">Modelo (de nuestro catálogo)</label>
+                        <select
+                            className="input-bs"
+                            value={nuevo.idReferencia}
+                            onChange={e => setNuevo({ ...nuevo, idReferencia: e.target.value })}
+                            disabled={referencias.length === 0}
+                            required
+                        >
+                            <option value="">{referencias.length === 0 ? "Primero elige una marca" : "-- Elige el modelo --"}</option>
+                            {referencias.map(ref => (
+                                <option key={ref.idReferencia} value={ref.idReferencia}>{ref.nombre}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    <div className="mb-3">
+                        <label className="form-label fw-bold">Cilindraje (cc)</label>
+                        <input
+                            className="input-bs"
+                            type="number"
+                            value={nuevo.cilindraje}
+                            onChange={e => setNuevo({ ...nuevo, cilindraje: e.target.value })}
+                            min={125}
+                            max={1400}
+                            step={1}
+                            required
+                        />
+                    </div>
+
+                    <div className="mb-3">
+                        <label className="form-label fw-bold">Tipo de Servicio</label>
+                        <select
+                            className="input-bs"
+                            value={nuevo.idTipoServicio}
+                            onChange={e => setNuevo({ ...nuevo, idTipoServicio: e.target.value })}
+                            required
+                        >
+                            <option value="">-- Selecciona un tipo de servicio --</option>
+                            <option value="0">N/A</option>
+                            {tiposServicio.map(t => (
+                                <option key={(t.idTipoServicio ?? t.idTipo ?? t.id_tipo_servicio)} value={(t.idTipoServicio ?? t.idTipo ?? t.id_tipo_servicio)}>
+                                    {t.nombre}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }} className="mt-4">
