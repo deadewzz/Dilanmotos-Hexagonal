@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
 
-// ---  IMPORTACIÓN DE COMPONENTES ---
+// --- IMPORTACIÓN DE COMPONENTES ---
 import Login from './components/login';
 import Register from './components/register'; 
 import Dashboard from './components/dashboard';
@@ -28,11 +28,12 @@ import Mecanico from './components/mecanico';
 import Cotizacion from './components/cotizacion';
 import Categoria from './components/categoria';
 import Marca from './components/marca';
+import MarcaProducto from './components/MarcaProducto'; // 👈 NUEVO COMPONENTE IMPORTADO
 import HacerCotizacion from './components/HacerCotizacion';
 
 import './global.css';
 
-// ---  PROTECCIÓN POR ROL ---
+// --- PROTECCIÓN POR ROL ---
 
 const PrivateRoute = ({ children, requireAdmin = false }) => {
     const auth = localStorage.getItem('isAuthenticated');
@@ -44,8 +45,7 @@ const PrivateRoute = ({ children, requireAdmin = false }) => {
     return children;
 };
 
-// ---  LAYOUT ADMIN (Sidebar con Hamburger Responsivo) ---
-// Este se aplica solo a las rutas de gestión para no ensuciar la vista del socio
+// --- LAYOUT ADMIN ---
 const AdminLayout = ({ children }) => {
     const location = useLocation();
     const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -57,14 +57,12 @@ const AdminLayout = ({ children }) => {
 
     const activeClass = (path) => location.pathname === path ? 'active' : '';
 
-    // Cerrar sidebar al navegar en móvil
     const handleNavClick = () => {
         setSidebarOpen(false);
     };
 
     return (
         <div className="app-container">
-            {/* Botón Hamburger (visible solo en móvil) */}
             <button 
                 className="hamburger-btn" 
                 onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -73,7 +71,6 @@ const AdminLayout = ({ children }) => {
                 <i className={`fa-solid ${sidebarOpen ? 'fa-xmark' : 'fa-bars'}`}></i>
             </button>
 
-            {/* Overlay para cerrar sidebar al hacer click fuera */}
             <div 
                 className={`sidebar-overlay ${sidebarOpen ? 'active' : ''}`} 
                 onClick={() => setSidebarOpen(false)}
@@ -111,7 +108,7 @@ const AdminLayout = ({ children }) => {
                         <i className="fa-solid fa-gear me-2"></i> Tipos de Servicio
                     </Link>
                     <Link to="/mecanico" className={`nav-link ${activeClass('/mecanico')}`} onClick={handleNavClick}>
-                        <i className="fa-solid fa-gear me-2"></i> Mecanicos
+                        <i className="fa-solid fa-user-gear me-2"></i> Mecánicos
                     </Link>
 
                     <Link to="/pqrs" className={`nav-link ${activeClass('/pqrs')}`} onClick={handleNavClick}>
@@ -119,14 +116,19 @@ const AdminLayout = ({ children }) => {
                     </Link>
 
                     <Link to="/cotizacion" className={`nav-link ${activeClass('/cotizacion')}`} onClick={handleNavClick}>
-                        <i className="fa-solid fa-comments me-2"></i> Cotización
+                        <i className="fa-solid fa-file-invoice-dollar me-2"></i> Cotización
                     </Link>
 
                     <Link to="/categoria" className={`nav-link ${activeClass('/categoria')}`} onClick={handleNavClick}>
-                        <i className="fa-solid fa-tags me-2"></i> Categorías
+                        <i className="fa-solid fa-folder me-2"></i> Categorías
                     </Link>
                     <Link to="/marca" className={`nav-link ${activeClass('/marca')}`} onClick={handleNavClick}>
-                    <i className="fa-solid fa-tags me-2"></i> Marcas
+                        <i className="fa-solid fa-copyright me-2"></i> Marcas
+                    </Link>
+                    
+                    {/* 👈 ENLACE AL NUEVO MÓDULO DE MARCAS DE PRODUCTO */}
+                    <Link to="/marca-producto" className={`nav-link ${activeClass('/marca-producto')}`} onClick={handleNavClick}>
+                        <i className="fa-solid fa-tag me-2"></i> Marcas de Producto
                     </Link>
                 </nav>
                 <div className="sidebar-footer">
@@ -142,13 +144,13 @@ const AdminLayout = ({ children }) => {
     );
 };
 
-// ---  COMPONENTE PRINCIPAL ---
+// --- COMPONENTE PRINCIPAL ---
 function App() {
     return (
         <Router>
             <Routes>
-         {/* RUTAS PÚBLICAS (Cualquiera puede entrar) */}
-                <Route path="/" element={<Navigate to="/dashboard" />} /> {/* se cambio esto para que lo primero que vean sea el Dashboard */}
+                {/* RUTAS PÚBLICAS */}
+                <Route path="/" element={<Navigate to="/dashboard" />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/catalogoKit" element={<CatalogoKit />} />
@@ -156,26 +158,22 @@ function App() {
                 <Route path="/catalogoLlantas" element={<CatalogoLlantas />} />
                 <Route path="/fichaTecnica/:id" element={<FichaTecnica />} />
                 <Route path="/hacer-cotizacion" element={<HacerCotizacion />} />
-
-                {/* ✅ DASHBOARD AHORA ES PÚBLICO */}
                 <Route path="/dashboard" element={<Dashboard />} /> 
 
-                {/* RUTAS DEL SOCIO (Privadas: solo con login) */}
+                {/* RUTAS PRIVADAS */}
                 <Route path="/historial" element={<PrivateRoute><Historial /></PrivateRoute>} />
                 <Route path="/nueva-pqrs" element={<PrivateRoute><CrearPqrs /></PrivateRoute>} />
                 <Route path="/perfil" element={<PrivateRoute><PerfilUsuario /></PrivateRoute>} />
                 <Route path="/asistente" element={<PrivateRoute><AsistenteMotos /></PrivateRoute>} />
                 <Route path="/recomendaciones" element={<PrivateRoute><Recomendaciones /></PrivateRoute>} />
 
-                {/* RUTAS ADMINISTRATIVAS (Con Sidebar y bloqueo de rol) */}
+                {/* RUTAS ADMINISTRATIVAS */}
                 <Route path="/usuarios" element={
                     <PrivateRoute requireAdmin><AdminLayout><Usuarios /></AdminLayout></PrivateRoute>
                 } />
-
                 <Route path="/servicios" element={
                     <PrivateRoute requireAdmin><AdminLayout><ServicioAdmin /></AdminLayout></PrivateRoute>
                 } />
-
                 <Route path="/referencias" element={
                     <PrivateRoute requireAdmin><AdminLayout><Referencia /></AdminLayout></PrivateRoute>
                 } />
@@ -197,17 +195,19 @@ function App() {
                 <Route path="/mecanico" element={
                     <PrivateRoute requireAdmin><AdminLayout><Mecanico /></AdminLayout></PrivateRoute>
                 } />
-
                 <Route path="/cotizacion" element={
                     <PrivateRoute requireAdmin><AdminLayout><Cotizacion /></AdminLayout></PrivateRoute>
                 } />
-
                 <Route path="/categoria" element={
                     <PrivateRoute requireAdmin><AdminLayout><Categoria /></AdminLayout></PrivateRoute>
                 } />
-
                 <Route path="/marca" element={
                     <PrivateRoute requireAdmin><AdminLayout><Marca /></AdminLayout></PrivateRoute>
+                } />
+
+                {/* 👈 NUEVA RUTA ADMIN PARA MARCAS DE PRODUCTO */}
+                <Route path="/marca-producto" element={
+                    <PrivateRoute requireAdmin><AdminLayout><MarcaProducto /></AdminLayout></PrivateRoute>
                 } />
 
                 {/* REDIRECCIÓN POR DEFECTO */}

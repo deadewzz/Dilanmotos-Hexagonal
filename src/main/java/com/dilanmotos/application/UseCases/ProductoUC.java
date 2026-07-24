@@ -1,12 +1,9 @@
 package com.dilanmotos.application.UseCases;
 
-import com.dilanmotos.infrastructure.dto.ProductoRequestDTO;
-import com.dilanmotos.infrastructure.dto.ProductoResponseDTO;
-import com.dilanmotos.infrastructure.dto.MarcaResponseDTO; // Asegúrate de importar esto
 import com.dilanmotos.domain.model.Producto;
 import com.dilanmotos.domain.repository.ProductoRepository;
-import com.dilanmotos.domain.repository.MarcaRepository; // Necesario para buscar el nombre
-import com.dilanmotos.domain.exception.ProductoNotFoundException;
+import com.dilanmotos.infrastructure.dto.ProductoRequestDTO;
+import com.dilanmotos.infrastructure.dto.ProductoResponseDTO;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,49 +13,41 @@ import java.util.stream.Collectors;
 public class ProductoUC {
 
     private final ProductoRepository productoRepository;
-    private final MarcaRepository marcaRepository; // Inyectamos el repo de marcas
 
-    public ProductoUC(ProductoRepository productoRepository, MarcaRepository marcaRepository) {
+    public ProductoUC(ProductoRepository productoRepository) {
         this.productoRepository = productoRepository;
-        this.marcaRepository = marcaRepository;
-    }
-
-    public ProductoResponseDTO crear(ProductoRequestDTO request) {
-        Producto producto = mapToModel(request);
-        return mapToDTO(productoRepository.guardar(producto));
     }
 
     public List<ProductoResponseDTO> listarTodos() {
         return productoRepository.obtenerTodos().stream()
-                .map(this::mapToDTO)
+                .map(this::toResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    public ProductoResponseDTO actualizar(Integer id, ProductoRequestDTO request) {
-        productoRepository.buscarPorId(id)
-                .orElseThrow(() -> new ProductoNotFoundException("No existe el producto con ID: " + id));
+    public ProductoResponseDTO buscarPorId(Integer id) {
+        return productoRepository.buscarPorId(id)
+                .map(this::toResponseDTO)
+                .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+    }
 
-        Producto producto = mapToModel(request);
-        // IMPORTANTE: Aquí no le estabas pasando el ID al objeto producto antes de
-        // actualizar
-        producto.setIdProducto(id);
-        return mapToDTO(productoRepository.actualizar(id, producto));
+    public ProductoResponseDTO crear(ProductoRequestDTO request) {
+        Producto p = toModel(request);
+        Producto guardado = productoRepository.guardar(p);
+        return toResponseDTO(guardado);
+    }
+
+    public ProductoResponseDTO actualizar(Integer id, ProductoRequestDTO request) {
+        Producto p = toModel(request);
+        Producto actualizado = productoRepository.actualizar(id, p);
+        return toResponseDTO(actualizado);
     }
 
     public void eliminar(Integer id) {
-        productoRepository.buscarPorId(id)
-                .orElseThrow(() -> new ProductoNotFoundException("No se puede eliminar, ID no encontrado: " + id));
         productoRepository.eliminar(id);
     }
 
-    public ProductoResponseDTO buscarPorId(Integer id) {
-      Producto producto = productoRepository.buscarPorId(id)
-               .orElseThrow(() -> new ProductoNotFoundException("No existe el producto con ID: " + id));
-    
-        return mapToDTO(producto);
-    }
-
-    private Producto mapToModel(ProductoRequestDTO dto) {
+    // Mapeador RequestDTO -> Model
+    private Producto toModel(ProductoRequestDTO dto) {
         Producto p = new Producto();
         p.setIdCategoria(dto.getIdCategoria());
         p.setIdMarca(dto.getIdMarca());
@@ -66,27 +55,29 @@ public class ProductoUC {
         p.setDescripcion(dto.getDescripcion());
         p.setPrecio(dto.getPrecio());
         p.setImagenUrl(dto.getImagenUrl());
+        p.setStock(dto.getStock() != null ? dto.getStock() : 0);
+        p.setDisponible(dto.getDisponible() != null ? dto.getDisponible() : true);
         return p;
     }
 
-private ProductoResponseDTO mapToDTO(Producto p) {
+    // Mapeador Model -> ResponseDTO (AQUÍ SE PASAN LOS NOMBRES)
+    private ProductoResponseDTO toResponseDTO(Producto p) {
     ProductoResponseDTO dto = new ProductoResponseDTO();
     dto.setIdProducto(p.getIdProducto());
+    dto.setIdCategoria(p.getIdCategoria());
+    dto.setIdMarca(p.getIdMarca()); // ← CORREGIDO (setIdMarca)
     dto.setNombre(p.getNombre());
-    dto.setPrecio(p.getPrecio());
     dto.setDescripcion(p.getDescripcion());
-    
-    // 🔴 AGREGA ESTA LÍNEA AQUÍ PARA PASAR LA URL RECTAMENTE A REACT:
+    dto.setPrecio(p.getPrecio());
     dto.setImagenUrl(p.getImagenUrl());
+    dto.setStock(p.getStock());
+    dto.setDisponible(p.getDisponible());
 
-    // Buscamos la marca en la base de datos para obtener el nombre
-    marcaRepository.buscarPorId(p.getIdMarca()).ifPresent(marca -> {
-        MarcaResponseDTO marcaDTO = new MarcaResponseDTO();
-        marcaDTO.setIdMarca(marca.getIdMarca());
-        marcaDTO.setNombre(marca.getNombre());
-        dto.setMarca(marcaDTO); 
-    });
+    // Nombres traídos desde el repositorio
+    dto.setNombreCategoria(p.getNombreCategoria());
+    dto.setNombreMarca(p.getNombreMarca());
 
     return dto;
 }
+    
 }

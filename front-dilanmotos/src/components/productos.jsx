@@ -1,220 +1,395 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
+import '../global.css';
 
-export default function Productos() {
-    const [productos, setProductos] = useState([]);
-    const [marcas, setMarcas] = useState([]);
-    const [categorias, setCategorias] = useState([]);
-    
-    const [nuevo, setNuevo] = useState({ 
-        nombre: '', descripcion: '', precio: '', idMarca: '', idCategoria: '', imagenUrl: '' 
-    });
-    
-    const [editMode, setEditMode] = useState(false);
-    const [selectedId, setSelectedId] = useState(null);
+const BASE_URL = 'http://localhost:8080/api';
 
+const Productos = () => {
     const token = localStorage.getItem('token');
-    const API_URL = 'http://localhost:8080/api/productos';
 
-    const cargarDatos = async () => {
-        try {
-            const headers = { 'Authorization': `Bearer ${token}` };
-            const fetchJson = (url) => fetch(url, { headers }).then(r => r.ok ? r.json() : []);
+    // Estados de listas
+    const [productos, setProductos] = useState([]);
+    const [categorias, setCategorias] = useState([]);
+    const [marcasProducto, setMarcasProducto] = useState([]);
+    const [marcasFiltradas, setMarcasFiltradas] = useState([]);
+
+    // Estado del formulario (Incluye Stock)
+    const [productoForm, setProductoForm] = useState({
+        idProducto: null,
+        nombre: '',
+        precio: '',
+        descripcion: '',
+        imagenUrl: '',
+        idCategoria: '',
+        idMarca: '',
+        stock: 0,
+        disponible: true
+    });
+
+    const [editMode, setEditMode] = useState(false);
+    const [mensaje, setMensaje] = useState('');
+
+    // Fetch con fallback
+    const fetchConFallback = async (endpoints) => {
+        const headersWithAuth = token 
+            ? { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' } 
+            : { 'Content-Type': 'application/json' };
+        const headersNoAuth = { 'Content-Type': 'application/json' };
+
+        for (const endpoint of endpoints) {
+            const url = `${BASE_URL}${endpoint}`;
             
-            const [dataP, dataM, dataC] = await Promise.all([
-                fetchJson(API_URL),
-                fetchJson('http://localhost:8080/api/marcas'),
-                fetchJson('http://localhost:8080/api/categorias')
-            ]);
+            try {
+                const res = await fetch(url, { headers: headersWithAuth });
+                if (res.ok) {
+                    const data = await res.json();
+                    return Array.isArray(data) ? data : (data.content || []);
+                }
+            } catch (e) {
+                console.warn(`Falló con auth en ${url}:`, e);
+            }
 
-            setProductos(dataP);
-            setMarcas(dataM);
-            setCategorias(dataC);
-        } catch (e) { 
-            console.error("Error cargando datos:", e); 
+            try {
+                const res = await fetch(url, { headers: headersNoAuth });
+                if (res.ok) {
+                    const data = await res.json();
+                    return Array.isArray(data) ? data : (data.content || []);
+                }
+            } catch (e) {
+                console.warn(`Falló pública en ${url}:`, e);
+            }
+        }
+        return null;
+    };
+
+    useEffect(() => {
+        cargarTodo();
+    }, []);
+
+    const cargarTodo = async () => {
+        setMensaje('');
+
+        // 1. Cargar Categorías de Producto
+        const resCat = await fetchConFallback(['/categorias-producto', '/categoria-producto', '/categorias']);
+        if (resCat) setCategorias(resCat);
+
+        // 2. Cargar MARCAS DE PRODUCTO (No las marcas de motos)
+        const resMarcas = await fetchConFallback(['/marcas-producto', '/marca-producto', '/marcas-productos']);
+        if (resMarcas) {
+            setMarcasProducto(resMarcas);
+        }
+
+        // 3. Cargar Productos
+        const resProds = await fetchConFallback(['/productos', '/producto']);
+        if (resProds) {
+            setProductos(resProds);
+        } else {
+            setMensaje('❌ No se pudieron cargar los productos registrados.');
         }
     };
 
-    useEffect(() => { 
-        cargarDatos(); 
-    }, []);
-
-    const prepararEdicion = (prod) => {
-        setEditMode(true);
-        setSelectedId(prod.idProducto);
+    // Manejador del cambio de categoría y filtrado dinámico de marcas
+    const handleCategoriaChange = (e) => {
+        const idCat = e.target.value;
         
-        setNuevo({
-            nombre: prod.nombre || '',
-            descripcion: prod.descripcion || '',
-            precio: prod.precio || '',
-            imagenUrl: prod.imagenUrl || '',
-            idMarca: prod.marca?.idMarca || prod.idMarca || '',
-            idCategoria: prod.categoria?.idCategoria || prod.idCategoria || ''
-        });
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        // Al cambiar de categoría, reiniciamos la marca seleccionada
+        setProductoForm(prev => ({
+            ...prev,
+            idCategoria: idCat,
+            idMarca: '' 
+        }));
+
+        if (!idCat) {
+            setMarcasFiltradas([]);
+        } else {
+            const idCatNum = Number(idCat);
+            const filtradas = marcasProducto.filter(m => {
+                const catId = m.idCategoria || m.categoria?.idCategoria || m.categoriaId;
+                return Number(catId) === idCatNum;
+            });
+            setMarcasFiltradas(filtradas);
+        }
     };
 
-    const cancelarEdicion = () => {
-        setEditMode(false);
-        setSelectedId(null);
-        setNuevo({ nombre: '', descripcion: '', precio: '', imagenUrl: '', idMarca: '', idCategoria: '' });
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setProductoForm(prev => ({ ...prev, [name]: value }));
     };
 
-    const guardar = async (e) => {
+    const guardarProducto = async (e) => {
         e.preventDefault();
-        
-        const url = editMode ? `${API_URL}/${selectedId}` : API_URL;
-        
+        setMensaje('');
+
+        if (!productoForm.nombre.trim()) return setMensaje('❌ Ingrese un nombre de producto.');
+        if (!productoForm.precio || Number(productoForm.precio) <= 0) return setMensaje('❌ Ingrese un precio válido.');
+        if (!productoForm.idCategoria) return setMensaje('❌ Seleccione primero una categoría.');
+        if (!productoForm.idMarca) return setMensaje('❌ Seleccione una marca de producto.');
+        if (productoForm.stock === '' || Number(productoForm.stock) < 0) return setMensaje('❌ Ingrese una cantidad de stock válida.');
+
+        const endpoint = editMode ? `/productos/${productoForm.idProducto}` : '/productos';
+        const url = `${BASE_URL}${endpoint}`;
+        const metodo = editMode ? 'PUT' : 'POST';
+
         const payload = {
-            nombre: nuevo.nombre,
-            descripcion: nuevo.descripcion,
-            precio: parseFloat(nuevo.precio),
-            imagenUrl: nuevo.imagenUrl,
-            marca: { idMarca: parseInt(nuevo.idMarca) },
-            categoria: { idCategoria: parseInt(nuevo.idCategoria) }
+            idProducto: productoForm.idProducto ? Number(productoForm.idProducto) : null,
+            idCategoria: Number(productoForm.idCategoria),
+            idMarca: Number(productoForm.idMarca),
+            nombre: productoForm.nombre.trim(),
+            descripcion: productoForm.descripcion.trim(),
+            precio: parseFloat(productoForm.precio),
+            imagenUrl: productoForm.imagenUrl.trim(),
+            stock: Number(productoForm.stock),
+            disponible: Number(productoForm.stock) > 0
         };
 
         try {
-            const res = await fetch(url, {
-                method: editMode ? 'PUT' : 'POST',
-                headers: { 
+            const response = await fetch(url, {
+                method: metodo,
+                headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}` 
+                    ...(token && { 'Authorization': `Bearer ${token}` })
                 },
                 body: JSON.stringify(payload)
             });
 
-            if (res.ok) {
-                alert(editMode ? "✅ Producto actualizado" : "✅ Producto guardado");
-                cancelarEdicion();
-                await cargarDatos();
+            if (response.ok) {
+                setMensaje(editMode ? '✅ ¡Producto actualizado con éxito!' : '✅ ¡Producto registrado con éxito!');
+                resetForm();
+                cargarTodo();
             } else {
-                alert("❌ Error al procesar: " + res.status);
+                setMensaje(`❌ Error (${response.status}): No se pudo guardar el producto.`);
             }
         } catch (error) {
-            console.error("Error en la petición:", error);
+            console.error('Error al guardar:', error);
+            setMensaje('❌ Error de conexión al guardar el producto.');
         }
     };
 
+    const iniciarEdicion = (p) => {
+        const catId = p.idCategoria || p.categoria?.idCategoria || '';
+        
+        // Al editar, también filtramos las marcas según la categoría del producto
+        if (catId) {
+            const filtradas = marcasProducto.filter(m => {
+                const cId = m.idCategoria || m.categoria?.idCategoria || m.categoriaId;
+                return Number(cId) === Number(catId);
+            });
+            setMarcasFiltradas(filtradas);
+        }
+
+        setProductoForm({
+            idProducto: p.idProducto || p.id,
+            nombre: p.nombre || '',
+            precio: p.precio || '',
+            descripcion: p.descripcion || '',
+            imagenUrl: p.imagenUrl || '',
+            idCategoria: catId,
+            idMarca: p.idMarca || p.marca?.idMarca || '',
+            stock: p.stock ?? 0,
+            disponible: p.disponible ?? true
+        });
+        setEditMode(true);
+        setMensaje('');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     const eliminarProducto = async (id) => {
-        if (window.confirm("¿Estás seguro de eliminar este producto?")) {
+        if (!id) return;
+        if (window.confirm('¿Desea eliminar este producto?')) {
             try {
-                const res = await fetch(`${API_URL}/${id}`, {
+                const response = await fetch(`${BASE_URL}/productos/${id}`, {
                     method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...(token && { 'Authorization': `Bearer ${token}` })
+                    }
                 });
 
-                if (res.ok) {
-                    await cargarDatos();
+                if (response.ok || response.status === 204) {
+                    setMensaje('✅ Producto eliminado.');
+                    cargarTodo();
                 } else {
-                    alert("No se pudo eliminar el producto.");
+                    setMensaje('❌ No se pudo eliminar el producto.');
                 }
             } catch (error) {
-                console.error("Error en DELETE:", error);
+                console.error(error);
+                setMensaje('❌ Error al eliminar el producto.');
             }
         }
+    };
+
+    const resetForm = () => {
+        setProductoForm({
+            idProducto: null,
+            nombre: '',
+            precio: '',
+            descripcion: '',
+            imagenUrl: '',
+            idCategoria: '',
+            idMarca: '',
+            stock: 0,
+            disponible: true
+        });
+        setMarcasFiltradas([]);
+        setEditMode(false);
+    };
+
+    // Estructura de la tabla (Incluye columna Stock)
+    const gridStyle = {
+        display: 'grid',
+        gridTemplateColumns: '0.6fr 2fr 1fr 0.8fr 1.3fr 1.3fr 1fr',
+        gap: '12px',
+        alignItems: 'center',
+        padding: '14px',
+        minWidth: '900px'
     };
 
     return (
         <div className="main-content-inner">
             <div className="card-panel">
                 <h3 className="text-primary mb-4">
-                    {editMode ? '✏️ Editar Producto' : '📦 Registro de Productos'}
+                    📦 {editMode ? 'Editar Producto' : 'Registro de Productos'}
                 </h3>
-                <form onSubmit={guardar}>
-                    <div className="row">
-                        <div className="col-md-6 mb-3">
-                            <label className="form-label">Nombre del Producto</label>
-                            <input 
-                                className="input-bs" 
-                                placeholder="Ej: Kit de Arrastre" 
-                                value={nuevo.nombre} 
-                                onChange={e => setNuevo({...nuevo, nombre: e.target.value})} 
-                                required 
+
+                {mensaje && (
+                    <div className="alert alert-info fw-bold mb-3">
+                        {mensaje}
+                    </div>
+                )}
+
+                <form onSubmit={guardarProducto}>
+                    <div className="mb-3">
+                        <label className="form-label fw-bold">Nombre del Producto</label>
+                        <input
+                            type="text"
+                            name="nombre"
+                            className="input-bs"
+                            placeholder="Ej: Kit de Arrastre, Aceite 10W40..."
+                            value={productoForm.nombre}
+                            onChange={handleChange}
+                            required
+                        />
+                    </div>
+
+                    <div className="row mb-3" style={{ display: 'flex', gap: '15px' }}>
+                        <div style={{ flex: 1 }}>
+                            <label className="form-label fw-bold">Precio ($)</label>
+                            <input
+                                type="number"
+                                step="0.01"
+                                name="precio"
+                                className="input-bs"
+                                placeholder="0.00"
+                                value={productoForm.precio}
+                                onChange={handleChange}
+                                required
                             />
                         </div>
-                        <div className="col-md-6 mb-3">
-                            <label className="form-label">Precio ($)</label>
-                            <input 
-                                className="input-bs" 
-                                type="number" 
-                                step="any"
-                                placeholder="0.00" 
-                                value={nuevo.precio} 
-                                onChange={e => setNuevo({...nuevo, precio: e.target.value})} 
-                                required 
+                        <div style={{ flex: 1 }}>
+                            <label className="form-label fw-bold">Stock (Cantidad)</label>
+                            <input
+                                type="number"
+                                name="stock"
+                                className="input-bs"
+                                placeholder="Ej: 15"
+                                value={productoForm.stock}
+                                onChange={handleChange}
+                                min="0"
+                                required
                             />
                         </div>
                     </div>
 
                     <div className="mb-3">
-                        <label className="form-label">Descripción</label>
-                        <textarea 
-                            className="input-bs" 
-                            rows="2" 
-                            placeholder="Detalles del producto..." 
-                            value={nuevo.descripcion} 
-                            onChange={e => setNuevo({...nuevo, descripcion: e.target.value})} 
-                            required 
-                        />
+                        <label className="form-label fw-bold">Descripción</label>
+                        <textarea
+                            name="descripcion"
+                            className="input-bs"
+                            rows="3"
+                            placeholder="Detalles del producto..."
+                            value={productoForm.descripcion}
+                            onChange={handleChange}
+                        ></textarea>
                     </div>
 
                     <div className="mb-3">
-                        <label className="form-label">URL de la imagen</label>
-                        <textarea 
-                            className="input-bs" 
-                            rows="2" 
-                            placeholder="ingresa la url..." 
-                            value={nuevo.imagenUrl} 
-                            onChange={e => setNuevo({...nuevo, imagenUrl: e.target.value})} 
-                            required 
-                        />
-                    </div>
-                    
-                    <div className="row mb-3">
-                        <div className="col-md-6 mb-3 mb-md-0">
-                            <label className="form-label">Marca</label>
-                            <select 
-                                className="input-bs" 
-                                value={nuevo.idMarca} 
-                                onChange={e => setNuevo({...nuevo, idMarca: e.target.value})} 
-                                required
-                            >
-                                <option value="">Seleccione marca...</option>
-                                {marcas.map(m => (
-                                    <option key={m.idMarca} value={m.idMarca}>{m.nombre}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="col-md-6">
-                            <label className="form-label">Categoría</label>
-                            <select 
-                                className="input-bs" 
-                                value={nuevo.idCategoria} 
-                                onChange={e => setNuevo({...nuevo, idCategoria: e.target.value})} 
-                                required
-                            >
-                                <option value="">Seleccione categoría...</option>
-                                {categorias.map(c => (
-                                    <option key={c.idCategoria} value={c.idCategoria}>{c.nombre}</option>
-                                ))}
-                            </select>
-                        </div>
+                        <label className="form-label fw-bold">URL de la imagen</label>
+                        <textarea
+                            name="imagenUrl"
+                            className="input-bs"
+                            rows="2"
+                            placeholder="ingresa la url..."
+                            value={productoForm.imagenUrl}
+                            onChange={handleChange}
+                        ></textarea>
                     </div>
 
-                    {/* SECCIÓN DE BOTONES ADAPTADA EN VERTICAL */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '15px' }}>
-                        <button 
-                            type="submit" 
-                            className={`btn-bs w-100 ${editMode ? 'btn-success' : 'btn-success'}`}
+                    {/* SELECTOR 1: CATEGORÍA */}
+                    <div className="mb-3">
+                        <label className="form-label fw-bold">1. Categoría</label>
+                        <select
+                            name="idCategoria"
+                            className="input-bs"
+                            value={productoForm.idCategoria}
+                            onChange={handleCategoriaChange}
+                            required
+                        >
+                            <option value="">Seleccione categoría...</option>
+                            {categorias.map(cat => {
+                                const idCat = cat.idCategoria || cat.id;
+                                return (
+                                    <option key={idCat} value={idCat}>
+                                        {cat.nombre}
+                                    </option>
+                                );
+                            })}
+                        </select>
+                    </div>
+
+                    {/* SELECTOR 2: MARCA (DESHABILITADO SI NO HAY CATEGORÍA SELECCIONADA) */}
+                    <div className="mb-3">
+                        <label className="form-label fw-bold">
+                            2. Marca del Producto {!productoForm.idCategoria && '(Seleccione una categoría primero)'}
+                        </label>
+                        <select
+                            name="idMarca"
+                            className="input-bs"
+                            value={productoForm.idMarca}
+                            onChange={handleChange}
+                            disabled={!productoForm.idCategoria}
+                            required
+                        >
+                            <option value="">
+                                {!productoForm.idCategoria 
+                                    ? "🔒 Primero debe seleccionar una categoría" 
+                                    : marcasFiltradas.length > 0 
+                                        ? "Seleccione marca de producto..." 
+                                        : "No hay marcas asociadas a esta categoría"}
+                            </option>
+                            {marcasFiltradas.map(m => {
+                                const idM = m.idMarca || m.idMarcaProducto || m.id;
+                                return (
+                                    <option key={idM} value={idM}>
+                                        {m.nombre}
+                                    </option>
+                                );
+                            })}
+                        </select>
+                    </div>
+
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }} className="mt-4">
+                        <button
+                            type="submit"
+                            className="btn-bs btn-success w-100"
                             style={{ padding: '12px', fontSize: '1rem' }}
                         >
-                            {editMode ? 'Actualizar Cambios' : 'Registrar Producto'}
+                            {editMode ? 'Actualizar Producto' : 'Registrar Producto'}
                         </button>
+
                         {editMode && (
-                            <button 
-                                type="button" 
-                                className="btn-bs btn-danger w-100" 
-                                onClick={cancelarEdicion}
+                            <button
+                                type="button"
+                                className="btn-bs btn-danger w-100"
+                                onClick={resetForm}
                                 style={{ padding: '12px', fontSize: '1rem' }}
                             >
                                 Cancelar Edición
@@ -224,72 +399,75 @@ export default function Productos() {
                 </form>
             </div>
 
+            {/* TABLA DE PRODUCTOS REGISTRADOS */}
             <div className="card-panel mt-4">
-                <div className="row align-items-center mb-3">
-                    <div className="col-md-6">
-                        <h4 className="text-muted m-0">📚 Productos Registrados</h4>
-                    </div>
-                </div>
+                <h4 className="mb-4">📋 Productos Registrados</h4>
 
-                {/* Contenedor con bordes y radio unificados de tu CSS */}
                 <div style={{ width: '100%', overflowX: 'auto', background: 'var(--white)', borderRadius: '10px', border: '1px solid #dee2e6' }}>
-                    
-                    {/* CABECERA CON COLOR DEL CSS (--header-table) Y ALINEACIÓN PERFECTA */}
-                    <div style={{ 
-                        display: 'grid', 
-                        gridTemplateColumns: '3fr 1.5fr 1.2fr 1.3fr', 
-                        gap: '15px', 
-                        alignItems: 'center', 
-                        padding: '15px',
-                        background: 'var(--header-table)',
-                        color: 'var(--white)',
-                        fontWeight: 'bold',
-                        minWidth: '600px'
-                    }}>
-                        <div>Producto</div>
-                        <div>Marca</div>
+                    <div style={{ ...gridStyle, background: 'var(--header-table)', color: 'var(--white)', fontWeight: 'bold' }}>
+                        <div>ID</div>
+                        <div>Nombre</div>
                         <div>Precio</div>
-                        <div style={{ display: 'flex', justifyContent: 'center' }}>Acciones</div>
+                        <div>Stock</div>
+                        <div>Categoría</div>
+                        <div>Marca Producto</div>
+                        <div style={{ textAlign: 'center' }}>Acciones</div>
                     </div>
 
-                    {/* CUERPO DE LAS FILAS */}
-                    {productos.length > 0 ? (
+                    {productos.length === 0 ? (
+                        <div className="p-4 text-center text-muted">
+                            No se encontraron productos registrados.
+                        </div>
+                    ) : (
                         productos.map(p => (
-                            <div key={p.idProducto} className="table-row-hover-effect" style={{ 
-                                display: 'grid', 
-                                gridTemplateColumns: '3fr 1.5fr 1.2fr 1.3fr', 
-                                gap: '15px', 
-                                alignItems: 'center', 
-                                padding: '15px',
-                                borderBottom: '1px solid #eee',
-                                minWidth: '600px',
-                                background: 'var(--white)',
-                                transition: '0.2s'
-                            }}>
-                                <div className="fw-bold" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: 'var(--text-dark)' }} title={p.nombre}>
+                            <div
+                                key={p.idProducto || p.id}
+                                className="table-row-hover-effect"
+                                style={{ ...gridStyle, borderBottom: '1px solid #eee', background: 'var(--white)' }}
+                            >
+                                <div className="fw-bold" style={{ color: 'var(--text-dark)' }}>
+                                    {p.idProducto || p.id}
+                                </div>
+                                <div style={{ color: '#4b5563', fontWeight: '500' }}>
                                     {p.nombre}
                                 </div>
-                                <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: '#7e8299' }} title={p.marca?.nombre || 'S/M'}>
-                                    {p.marca?.nombre || 'S/M'}
+                                <div style={{ color: '#10b981', fontWeight: 'bold' }}>
+                                    ${Number(p.precio).toLocaleString('es-CO')}
                                 </div>
-                                <div className="fw-bold" style={{ whiteSpace: 'nowrap', color: 'var(--success)' }}>
-                                    ${p.precio}
+                                <div>
+                                    <span className={`badge ${p.stock > 0 ? 'bg-success' : 'bg-danger'}`} style={{ padding: '5px 10px', borderRadius: '5px', fontSize: '0.85rem' }}>
+                                        {p.stock ?? 0} un.
+                                    </span>
                                 </div>
-                                <div className="text-center">
-                                    <button className="btn-bs btn-success btn-sm" style={{ padding: '6px 12px' }} onClick={() => prepararEdicion(p)}>
+                                <div style={{ color: '#4b5563' }}>
+                                    {p.nombreCategoria || p.categoria?.nombre || 'Sin Categoría'}
+                                </div>
+                                <div style={{ color: '#4b5563' }}>
+                                    {p.nombreMarca || p.marca?.nombre || 'Sin Marca'}
+                                </div>
+                                <div className="text-center d-flex justify-content-center gap-2">
+                                    <button
+                                        className="btn-bs btn-success btn-sm"
+                                        style={{ padding: '6px 12px' }}
+                                        onClick={() => iniciarEdicion(p)}
+                                    >
                                         <i className="fa-solid fa-pen"></i>
                                     </button>
-                                    <button className="btn-bs btn-danger btn-sm" style={{ padding: '6px 12px' }} onClick={() => eliminarProducto(p.idProducto)}>
+                                    <button
+                                        className="btn-bs btn-danger btn-sm"
+                                        style={{ padding: '6px 12px' }}
+                                        onClick={() => eliminarProducto(p.idProducto || p.id)}
+                                    >
                                         <i className="fa-solid fa-trash"></i>
                                     </button>
                                 </div>
                             </div>
                         ))
-                    ) : (
-                        <div className="p-4 text-center text-muted">No hay productos registrados.</div>
                     )}
                 </div>
             </div>
         </div>
     );
-}
+};
+
+export default Productos;

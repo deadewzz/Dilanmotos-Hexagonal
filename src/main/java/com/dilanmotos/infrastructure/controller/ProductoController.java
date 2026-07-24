@@ -26,9 +26,10 @@ public class ProductoController {
     }
 
     @Operation(summary = "Listar todos los productos")
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Productos listados exitosamente"),
-            @ApiResponse(responseCode = "404", description = "Productos no encontrados"),
-            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    @ApiResponses(value = { 
+        @ApiResponse(responseCode = "200", description = "Productos listados exitosamente"),
+        @ApiResponse(responseCode = "404", description = "Productos no encontrados"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     @GetMapping
     public ResponseEntity<List<ProductoResponseDTO>> listar() {
@@ -36,21 +37,21 @@ public class ProductoController {
     }
 
     @Operation(summary = "Obtener un producto por su ID")
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Producto obtenido exitosamente"),
-            @ApiResponse(responseCode = "404", description = "Producto no encontrado"),
-            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    @ApiResponses(value = { 
+        @ApiResponse(responseCode = "200", description = "Producto obtenido exitosamente"),
+        @ApiResponse(responseCode = "404", description = "Producto no encontrado"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     @GetMapping("/{id}")
     public ResponseEntity<ProductoResponseDTO> obtenerPorId(@PathVariable Integer id) {
-        // Nota: Asegúrate de que tu Caso de Uso (ProductoUC) tenga un método
-        // para buscar por ID (por ejemplo, obtenerPorId o buscarPorId)
         return ResponseEntity.ok(productoUC.buscarPorId(id));
     }
 
     @Operation(summary = "Crear un nuevo producto")
-    @ApiResponses(value = { @ApiResponse(responseCode = "201", description = "Producto creado exitosamente"),
-            @ApiResponse(responseCode = "404", description = "El producto no se ha creado correctamente"),
-            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    @ApiResponses(value = { 
+        @ApiResponse(responseCode = "201", description = "Producto creado exitosamente"),
+        @ApiResponse(responseCode = "400", description = "Datos de entrada inválidos"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     @PostMapping
     public ResponseEntity<ProductoResponseDTO> crear(@RequestBody ProductoRequestDTO request) {
@@ -59,9 +60,9 @@ public class ProductoController {
 
     @Operation(summary = "Actualizar un producto")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Producto actualizado exitosamente"),
-            @ApiResponse(responseCode = "404", description = "Producto no encontrado"),
-            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        @ApiResponse(responseCode = "200", description = "Producto actualizado exitosamente"),
+        @ApiResponse(responseCode = "404", description = "Producto no encontrado"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     @PutMapping("/{id}")
     public ResponseEntity<ProductoResponseDTO> actualizar(@PathVariable Integer id,
@@ -71,14 +72,13 @@ public class ProductoController {
 
     @Operation(summary = "Eliminar un producto")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Producto eliminado exitosamente"),
-            @ApiResponse(responseCode = "404", description = "Producto no encontrado"),
-            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+        @ApiResponse(responseCode = "204", description = "Producto eliminado exitosamente"),
+        @ApiResponse(responseCode = "404", description = "Producto no encontrado"),
+        @ApiResponse(responseCode = "500", description = "Error interno del servidor")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
         productoUC.eliminar(id);
         return ResponseEntity.noContent().build();
     }
-
 }

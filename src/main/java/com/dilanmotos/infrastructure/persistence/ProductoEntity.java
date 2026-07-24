@@ -36,10 +36,10 @@ public class ProductoEntity {
     @Column(name = "disponible", nullable = false, columnDefinition = "boolean default true")
     private Boolean disponible = true;
 
-    // ← Relaciones para obtener nombre de marca y categoría
+    // ← Apuntamos a MarcaProductoEntity usando la columna id_marca
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_marca", insertable = false, updatable = false)
-    private MarcaEntity marca;
+    private MarcaProductoEntity marca; 
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_categoria", insertable = false, updatable = false)

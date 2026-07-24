@@ -3,13 +3,15 @@ package com.dilanmotos.infrastructure.controller;
 import com.dilanmotos.application.UseCases.UsuarioService;
 import com.dilanmotos.domain.model.Usuario;
 import com.dilanmotos.infrastructure.Security.JwtUtil;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
-
+import org.springframework.security.core.AuthenticationException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -37,24 +39,44 @@ public class AuthController {
 
     // ── Login ──────────────────────────────────────────────
     @PostMapping("/login")
-    public Map<String, Object> login(@RequestBody Map<String, String> request) {
-        String correo = request.get("correo");
-        String clave = request.get("contrasena");
+public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
+    String correo = request.get("correo");
+    String clave = request.get("contrasena");
 
-        authManager.authenticate(new UsernamePasswordAuthenticationToken(correo, clave));
-
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(correo);
-        final String token = jwtUtil.generateToken(userDetails.getUsername());
-
-        Usuario user = usuarioService.buscarPorCorreo(correo);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("token", token);
-        response.put("id_usuario", user.getIdUsuario()); // Mapeado melo con id_usuario
-        response.put("nombre", user.getNombre());
-        response.put("rol", user.getRol());
-        return response;
+    // 1. Verificar primero si el correo existe
+    boolean existeUsuario;
+    try {
+        usuarioService.buscarPorCorreo(correo);
+        existeUsuario = true;
+    } catch (RuntimeException e) {
+        existeUsuario = false;
     }
+
+    if (!existeUsuario) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", "correo_no_registrado", "mensaje", "Ese correo no está registrado"));
+    }
+
+    // 2. El correo existe, intentar autenticar
+    try {
+        authManager.authenticate(new UsernamePasswordAuthenticationToken(correo, clave));
+    } catch (AuthenticationException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of("error", "credenciales_invalidas", "mensaje", "Contraseña incorrecta"));
+    }
+
+    final UserDetails userDetails = userDetailsService.loadUserByUsername(correo);
+    final String token = jwtUtil.generateToken(userDetails.getUsername());
+
+    Usuario user = usuarioService.buscarPorCorreo(correo);
+
+    Map<String, Object> response = new HashMap<>();
+    response.put("token", token);
+    response.put("id_usuario", user.getIdUsuario());
+    response.put("nombre", user.getNombre());
+    response.put("rol", user.getRol());
+    return ResponseEntity.ok(response);
+}
 
     // ── Cambiar contraseña (usuario logueado) ──────────────
     @PostMapping("/cambiar-contrasena")
