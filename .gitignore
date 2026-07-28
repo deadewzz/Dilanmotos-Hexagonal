@@ -32,4 +32,4 @@ build/
 ### VS Code ###
 .vscode/
 # Ignorar configuraciones con credenciales sensibles
-src/main/resources/application.properties
+.env
