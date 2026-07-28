@@ -1,55 +1,42 @@
-# DilanMotos - Sistema de Gestión de Inventario Inteligente
+Markdown
+# DilanMotos - Sistema de Gestión e Inventario Inteligente
 
-DilanMotos es una solución de software empresarial full-stack diseñada para optimizar la gestión de inventario, repuestos y servicios en talleres y almacenes de motocicletas. Este sistema combina una arquitectura backend robusta, desacoplada y escalable con una interfaz de usuario moderna, fluida e intuitiva, potenciada por integración de Inteligencia Artificial para la asistencia en la toma de decisiones.
+**DilanMotos** es un ecosistema full-stack (Web, Móvil y Backend) diseñado para la gestión operativa, control de inventarios, agendamiento de servicios mecánicos y ventas en talleres de motocicletas. 
 
-## Arquitectura y Tecnologías
-
-El proyecto está construido bajo los más altos estándares de desarrollo de software, priorizando el mantenimiento a largo plazo y la separación de responsabilidades.
-
-### Backend
-* **Lenguaje:** Java 17 / 21
-* **Framework Principal:** Spring Boot 3.x
-* **Diseño Arquitectónico:** Arquitectura Hexagonal (Ports & Adapters)
-    * Domain: Lógica de negocio pura, libre de dependencias externas.
-    * Ports: Interfaces que definen el comportamiento de entrada y salida.
-    * Adapters: Implementaciones tecnológicas específicas (REST APIs, JPA/Hibernate, servicios externos).
-* **Seguridad:** Spring Security & JWT (JSON Web Tokens)
-* **Base de Datos:** PostgreSQL (Entidades relacionales optimizadas para inventario técnico)
-
-### Frontend
-* **Framework:** React (Vite)
-* **Estilos:** Tailwind CSS (Diseño responsive, limpio y optimizado para entornos de trabajo rápido)
-* **Gestión de Estado / Consultas:** Axios / React Query
-
-### Componente de IA
-* **Integración:** Servicios de Inteligencia Artificial dedicados para la optimización de stock, predicción de demanda de repuestos y soporte técnico automatizado basado en el historial del inventario.
+Cuenta con una arquitectura modular desacoplada e integración con modelos de Inteligencia Artificial (Groq / Gemini) para la asistencia técnica automatizada.
 
 ---
 
-## Estructura del Proyecto (Backend)
+## Tecnologías Utilizadas
 
-El backend sigue estrictamente el patrón hexagonal para asegurar que las reglas de negocio estén completamente aisladas de la infraestructura:
+* **Backend:** Java 17 + Spring Boot 3.x (Spring Security, JWT, JPA/Hibernate, Java Mail).
+* **Base de Datos:** MySQL / MariaDB (Puerto default: `3308`).
+* **Frontend Web:** React + Tailwind CSS + Axios.
+* **App Móvil:** Kotlin / Android Studio + Retrofit.
+* **Inteligencia Artificial:** Groq API / Google Gemini API.
+
+---
+
+## Arquitectura del Backend
+
+El backend está desarrollado bajo **Arquitectura Hexagonal (Ports & Adapters)** para desacoplar las reglas del negocio de los frameworks y servicios externos:
 
 ```text
-📁 com.dilanmotos.backend
-├── 📁 domain          # Entidades de negocio y reglas puras
-├── 📁 ports           # Interfaces (Inbound/Outbound)
-│   ├── 📁 inbound     # Casos de uso (Use Cases)
-│   └── 📁 outbound    # Definición de persistencia, mensajería, etc.
-└── 📁 adapters        # Implementaciones tecnológicas
-    ├── 📁 inbound     # Controladores REST / APIs
-    └── 📁 outbound    # Repositorios JPA, Clientes de IA, Configuraciones
-```
+com.dilanmotos
+├── domain/          # Entidades y reglas de negocio puras
+├── application/     # Casos de uso (Use Cases)
+├── ports/           # Interfaces de entrada y salida (Inbound/Outbound)
+└── infrastructure/  # Adaptadores (Controladores REST, Repositorios JPA, Clientes IA)
 Requisitos Previos
-Antes de comenzar, asegúrate de tener instalado lo siguiente:
+Asegúrate de contar con lo siguiente instalado en tu entorno local:
 
 Java JDK 17 o superior
 
 Node.js (versión LTS)
 
-MySQL
+XAMPP / MySQL Server
 
-Tu IDE de preferencia (IntelliJ IDEA, VS Code)
+Android Studio (para la app móvil)
 
 Configuración e Instalación
 1. Clonar el repositorio
@@ -57,30 +44,38 @@ Bash
 git clone [https://github.com/tu-usuario/dilanmotos.git](https://github.com/tu-usuario/dilanmotos.git)
 cd dilanmotos
 2. Configurar el Backend
-Dirígete a la carpeta del backend.
+Crea un archivo .env en la raíz del proyecto backend (al mismo nivel de pom.xml) utilizando de plantilla las siguientes variables:
 
-Crea o edita el archivo src/main/resources/application.yml (o application.properties) con tus credenciales de PostgreSQL y las llaves necesarias (JWT, API Keys de IA).
+Fragmento de código
+# BASE DE DATOS
+DB_HOST=localhost
+DB_PORT=3308
+DB_NAME=dilanmotos
+DB_USER=root
+DB_PASSWORD=
 
-Ejecuta la aplicación:
+# SEGURIDAD Y SERVICIOS
+JWT_SECRET=TuClaveSecretaJWT
+GOOGLE_API_KEY=TuApiKeyGoogle
+GROQ_API_KEY=TuApiKeyGroq
+
+# SMTP MAIL
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=587
+MAIL_USERNAME=tu-correo@gmail.com
+MAIL_PASSWORD=tu-password-app
+Ejecuta el servidor de desarrollo:
 
 Bash
 ./mvnw spring-boot:run
-3. Configurar el Frontend
-Dirígete a la carpeta del frontend.
-
-Instala las dependencias:
-
+3. Configurar el Frontend (Web)
 Bash
+cd frontend
 npm install
-Inicia el servidor de desarrollo:
-
-Bash
 npm run dev
-Características Clave
-Gestión de Inventario en Tiempo Real: Control estricto de repuestos, compatibilidad por modelo de motocicleta y alertas de stock mínimo.
+Documentación de la API
+Con el backend en ejecución, puedes acceder a la documentación interactiva de Swagger en:
+http://localhost:8080/swagger-ui.html
 
-Arquitectura Desacoplada: Facilidad para cambiar la base de datos o herramientas externas sin tocar la lógica central del negocio.
-
-Módulo de IA: Análisis predictivo para evitar el desabastecimiento de piezas críticas en temporadas altas.
-
-Interfaz Ultra-Rápida: SPA (Single Page Application) diseñada con Tailwind CSS para un flujo de trabajo ágil en el taller.
+Licencia
+Este proyecto está desarrollado con fines académicos dentro del centro de formación CEET / SENA.
