@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, Link, useLocation } from 'react-router-dom';
+// 1. Agregamos NavLink a los imports de react-router-dom 👇
+import { BrowserRouter as Router, Routes, Route, Navigate, Link, NavLink, useLocation } from 'react-router-dom';
 
 // --- IMPORTACIÓN DE COMPONENTES ---
 import Login from './components/login';
@@ -28,8 +29,11 @@ import Mecanico from './components/mecanico';
 import Cotizacion from './components/cotizacion';
 import Categoria from './components/categoria';
 import Marca from './components/marca';
-import MarcaProducto from './components/MarcaProducto'; // 👈 NUEVO COMPONENTE IMPORTADO
+import MarcaProducto from './components/MarcaProducto'; 
 import HacerCotizacion from './components/HacerCotizacion';
+
+// NUEVA IMPORTACIÓN DEL COMPONENTE DE BACKUP 
+import { BackupView } from './components/BackupView';
 
 import './global.css';
 
@@ -126,10 +130,19 @@ const AdminLayout = ({ children }) => {
                         <i className="fa-solid fa-copyright me-2"></i> Marcas
                     </Link>
                     
-                    {/* 👈 ENLACE AL NUEVO MÓDULO DE MARCAS DE PRODUCTO */}
                     <Link to="/marca-producto" className={`nav-link ${activeClass('/marca-producto')}`} onClick={handleNavClick}>
                         <i className="fa-solid fa-tag me-2"></i> Marcas de Producto
                     </Link>
+
+                    <NavLink 
+                        to="/backup" 
+                        className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+                        onClick={handleNavClick}
+                    >
+                        <i className="fa-solid fa-database me-2"></i>
+                        <span>Copia de Seguridad</span>
+                    </NavLink>
+
                 </nav>
                 <div className="sidebar-footer">
                     <button onClick={handleLogout} className="btn-bs btn-danger w-100">
@@ -204,10 +217,13 @@ function App() {
                 <Route path="/marca" element={
                     <PrivateRoute requireAdmin><AdminLayout><Marca /></AdminLayout></PrivateRoute>
                 } />
-
-                {/* 👈 NUEVA RUTA ADMIN PARA MARCAS DE PRODUCTO */}
                 <Route path="/marca-producto" element={
                     <PrivateRoute requireAdmin><AdminLayout><MarcaProducto /></AdminLayout></PrivateRoute>
+                } />
+
+                {/* 2. AGREGAMOS LA RUTA PROTEGIDA DE BACKUP AQUÍ 👇 */}
+                <Route path="/backup" element={
+                    <PrivateRoute requireAdmin><AdminLayout><BackupView /></AdminLayout></PrivateRoute>
                 } />
 
                 {/* REDIRECCIÓN POR DEFECTO */}
