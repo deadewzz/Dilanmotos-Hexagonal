@@ -1,6 +1,5 @@
-package com.dilanmotos.application;
+package com.dilanmotos.application.UseCases;
 
-import com.dilanmotos.application.UseCases.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

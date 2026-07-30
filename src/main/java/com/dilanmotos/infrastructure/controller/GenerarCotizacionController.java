@@ -1,6 +1,6 @@
 package com.dilanmotos.infrastructure.controller;
 
-import com.dilanmotos.application.GenerarCotizacionUseCase;
+import com.dilanmotos.application.UseCases.GenerarCotizacionUseCase;
 import com.dilanmotos.infrastructure.dto.GenerarCotizacionRequestDTO;
 import lombok.RequiredArgsConstructor;
 import io.swagger.v3.oas.annotations.Operation;

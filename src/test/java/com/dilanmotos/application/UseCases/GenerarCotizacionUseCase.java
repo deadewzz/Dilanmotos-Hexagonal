@@ -1,21 +1,22 @@
-package com.dilanmotos.application;
+// //*package com.dilanmotos.application.UseCases;
 
-import com.dilanmotos.application.UseCases.EmailService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
+// import com.dilanmotos.application.UseCases.EmailService;
+// import lombok.RequiredArgsConstructor;
+// import org.springframework.stereotype.Service;
 
-@Service
-@RequiredArgsConstructor
-public class GenerarCotizacionUseCase {
+// @Service
+// @RequiredArgsConstructor
+// public class GenerarCotizacionUseCase {
 
-    private final EmailService emailService;
+//     private final EmailService emailService;
 
-    public void generarCotizacion(String correo, String nombre, String detalle, Double total) {
-        emailService.enviarCotizacion(
-                correo,
-                nombre,
-                detalle,
-                total
-        );
-    }
-}
+//     public void generarCotizacion(String correo, String nombre, String detalle, Double total) {
+//         emailService.enviarCotizacion(
+//                 correo,
+//                 nombre,
+//                 detalle,
+//                 total
+//         );
+//     }
+// }
+// //
