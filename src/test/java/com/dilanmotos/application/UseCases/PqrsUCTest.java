@@ -22,7 +22,7 @@ import static org.mockito.Mockito.times;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-public class PqrsUCTest {
+class PqrsUCTest {
     
     private PqrsUC pqrsUC;
 
