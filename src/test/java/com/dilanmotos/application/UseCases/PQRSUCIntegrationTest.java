@@ -17,12 +17,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {
-    "JWT_SECRET=DilanMotos2024SuperSecretKeyQueNadieConoce123!", "GROQ_API_KEY=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"
+"JWT_SECRET=Da!",
+    "GROQ_API_KEY=dummy_groq_key_for_testing_12345"
 })
 class PQRSUCIntegrationTest {
     

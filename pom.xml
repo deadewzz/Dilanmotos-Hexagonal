@@ -22,7 +22,6 @@
         **/config/**,
         **/exception/**
     	</sonar.coverage.exclusions>
-		
     </properties>
 
     <dependencies>
