@@ -16,7 +16,7 @@ public class Usuario {
     private String rol;
     private Integer habilitado;
     private List<MotoResumen> motos;
-    private Integer idReferencia; // ✅ campo temporal para el registro inicial
+    private Integer idReferencia;
     private String resetToken;
     private java.time.LocalDateTime tokenExpiracion;
 }
