@@ -19,7 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 //ExtendWith se utiliza para extender la funcionalidad de JUnit 5 y permitir el uso de Mockito en las pruebas unitarias
-
+@ExtendWith(MockitoExtension.class)
 /**
  * UsuarioUCTest
  */
@@ -28,7 +28,7 @@ public class UsuarioUCTest {
     // // repositorio de usuarios
     @Mock
     private UsuarioRepository usuarioRepository;
-
+    @Mock
     private PasswordEncoder passwordEncoder;
     // // Utilizamos la anotación @InjectMocks para crear una instancia de UsuarioUC
     // y
