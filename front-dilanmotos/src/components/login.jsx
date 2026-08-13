@@ -148,7 +148,7 @@ const Login = () => {
                                     </p>
                                 )}
 
-                            <button type="submit" className="auth-btn-primary">Entrar al Sistema</button>
+                            <button type="submit" name="IniciarSesión" className="auth-btn-primary">Entrar al Sistema</button>
                             
                             <div style={{ marginTop: '15px', textAlign: 'center', fontSize: '0.85rem' }}>
                                 <span onClick={() => setVista('solicitar')} style={{ color: '#ec5e2a', cursor: 'pointer', fontWeight: 'bold' }}>

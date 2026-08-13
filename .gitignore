@@ -33,3 +33,4 @@ build/
 .vscode/
 # Ignorar configuraciones con credenciales sensibles
 .env
+node_modules
