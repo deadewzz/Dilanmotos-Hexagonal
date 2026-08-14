@@ -107,6 +107,7 @@ const Register = () => {
                         <input
                             className="auth-input"
                             type="text"
+                            name="nombre"
                             placeholder="Ej: Juan Perez"
                             value={formData.nombre}
                             onChange={e => setFormData({ ...formData, nombre: e.target.value })}
@@ -119,6 +120,7 @@ const Register = () => {
                         <input
                             className="auth-input"
                             type="email"
+                            name="correo"
                             placeholder="correo@ejemplo.com"
                             value={formData.correo}
                             onChange={e => setFormData({ ...formData, correo: e.target.value })}
@@ -131,6 +133,7 @@ const Register = () => {
                         <input
                             className="auth-input"
                             type="password"
+                            name="contrasena"
                             placeholder="Asigne una contraseña segura (mín. 6, máx. 20 caracteres)"
                             value={formData.contrasena}
                             onChange={e => {
@@ -149,7 +152,11 @@ const Register = () => {
 
                     <div className="form-group">
                         <label>Marca de tu moto</label>
-                        <select className="auth-input" onChange={handleMarcaChange} required>
+                        <select
+                         className="auth-input" 
+                         name="marca" 
+                         onChange={handleMarcaChange}
+                          required>
                             <option value="">-- Selecciona una marca --</option>
                             {marcas.map(m => (
                                 <option key={m.idMarca} value={m.idMarca}>
@@ -164,6 +171,7 @@ const Register = () => {
                         <select
                             className="auth-input"
                             value={formData.idReferencia}
+                            name="modelo"
                             onChange={e => setFormData({ ...formData, idReferencia: e.target.value })}
                             disabled={referencias.length === 0}
                             required
@@ -183,6 +191,7 @@ const Register = () => {
                         <label>Tipo de Servicio</label>
                         <select
                             className="auth-input"
+                            name="tipoServicio"
                             value={formData.idTipoServicio}
                             onChange={e => setFormData({ ...formData, idTipoServicio: e.target.value })}
                             required
@@ -215,7 +224,7 @@ const Register = () => {
     </p>
 )}
 
-                    <button type="submit" className="auth-btn-primary">
+                    <button type="submit" className="auth-btn-primary" name="btn-registro">
                         Completar Registro
                     </button>
 
