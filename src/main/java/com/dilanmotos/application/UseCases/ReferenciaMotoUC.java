@@ -29,6 +29,11 @@ public class ReferenciaMotoUC {
         return mapToDTO(referenciaRepository.guardar(referencia));
     }
 
+    public ReferenciaMotoResponseDTO guardar(ReferenciaMoto referencia) {
+        return mapToDTO(referenciaRepository.guardar(referencia));
+    }
+
+
     public ReferenciaMotoResponseDTO obtenerPorId(Integer id) {
         return referenciaRepository.buscarPorId(id)
                 .map(this::mapToDTO)
