@@ -88,4 +88,35 @@ public class UsuarioUCTest {
 
     }
 
+    @Test
+    void cambiarContrasena_CuandoDatosSonCorrectos_DebeActualizarExitosamente() {
+
+        // 1.Arrange (Preparar)
+        Integer idUsuario = 1;
+        String contrasenaActual = "claveVieja123";
+        String contrasenaNueva = "claveNueva456";
+
+        Usuario usuarioExistente = new Usuario();
+        usuarioExistente.setIdUsuario(idUsuario);
+        usuarioExistente.setContrasena("claveViejaEncriptada");
+
+        // Simulamos que encuentra el usuario por ID
+        when(usuarioRepository.buscarPorId(idUsuario)).thenReturn(Optional.of(usuarioExistente));
+
+        // Simulamos que la contrasena actual coincide
+
+        when(passwordEncoder.matches(contrasenaActual, "claveViejaEncriptada")).thenReturn(true);
+
+        // simulamos encriptacion de contraseña nueva
+        when(passwordEncoder.encode(contrasenaNueva)).thenReturn("claveNuevaEncriptada");
+
+        // 2.ACT
+        usuarioUC.cambiarContrasena(idUsuario, contrasenaActual, contrasenaNueva);
+
+        // 3.assert
+
+        verify(usuarioRepository, times(1)).actualizarContrasena(idUsuario, "claveNuevaEncriptada");
+
+    }
+
 }
