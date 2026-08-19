@@ -28,7 +28,7 @@ public class SecurityConfig {
         this.jwtRequestFilter = jwtRequestFilter;
     }
 
-    @Bean
+@Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         return http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -54,7 +54,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/referencias/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/categorias/**").permitAll()
 
-                        // 4. SWAGGER PÚBLICO
+                        // 4. DESCARGA PÚBLICA DE APK Y ARCHIVOS ESTÁTICOS
+                        .requestMatchers("/app-release.apk", "/*.apk").permitAll()
+
+                        // 5. SWAGGER PÚBLICO
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
@@ -62,7 +65,7 @@ public class SecurityConfig {
                                 "/error")
                         .permitAll()
 
-                        // 5. TODO LO DEMÁS REQUIERE TOKEN
+                        // 6. TODO LO DEMÁS REQUIERE TOKEN
                         .anyRequest().authenticated())
 
                 .exceptionHandling(ex -> ex
@@ -74,7 +77,6 @@ public class SecurityConfig {
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
