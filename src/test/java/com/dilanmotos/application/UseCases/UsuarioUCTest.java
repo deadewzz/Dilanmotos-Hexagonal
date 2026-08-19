@@ -114,9 +114,6 @@ public class UsuarioUCTest {
         usuarioUC.cambiarContrasena(idUsuario, contrasenaActual, contrasenaNueva);
 
         // 3.assert
-
         verify(usuarioRepository, times(1)).actualizarContrasena(idUsuario, "claveNuevaEncriptada");
-
     }
-
 }
