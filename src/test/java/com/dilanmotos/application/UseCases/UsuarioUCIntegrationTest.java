@@ -2,13 +2,11 @@ package com.dilanmotos.application.UseCases;
 
 import com.dilanmotos.domain.model.Usuario;
 import com.dilanmotos.domain.repository.UsuarioRepository;
-import com.dilanmotos.domain.port.ChatPort;
 import net.datafaker.Faker;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,17 +17,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @TestPropertySource(properties = {
-        "JWT_SECRET=Da!",
-        "GROQ_API_KEY=dummy_groq_key_for_testing_12345",
-        "GOOGLE_API_KEY=dummy_google_key",
-        "MAIL_USERNAME=test@dilanmotos.com",
-        "MAIL_PASSWORD=dummy_password"
+        "JWT_SECRET=faker",
+        "GROQ_API_KEY=dumb_api_key"
 })
-@Transactional
+@Transactional 
 class UsuarioUCIntegrationTest {
 
-    @MockBean
-    private ChatPort chatPort; // Desactivamos llamadas externas a la IA
 
     @Autowired
     private UsuarioUC usuarioUC;
