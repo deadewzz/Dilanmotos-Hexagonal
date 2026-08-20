@@ -1,6 +1,7 @@
 package com.dilanmotos.infrastructure.controllers;
 
 import com.dilanmotos.application.UseCases.PqrsUC;
+import com.dilanmotos.infrastructure.dto.PqrsRequestDTO;
 import com.dilanmotos.infrastructure.dto.PqrsResponseDTO;
 import com.dilanmotos.infrastructure.controller.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,10 +18,13 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 
 @TestPropertySource(properties = {
         "JWT_SECRET=Da!",
@@ -38,16 +42,12 @@ public class PqrsControllerTest {
 
     @MockBean
     private com.dilanmotos.infrastructure.Security.JwtUtil jwtUtil;
-
     @Autowired
-    private MockMvc mockMvc; // En minúscula
-
+    private MockMvc mockMvc; 
     @MockBean
-    private PqrsUC pqrsUC;   // En minúscula
-
+    private PqrsUC pqrsUC; 
     @Autowired
     private ObjectMapper objectMapper;
-
     private PqrsResponseDTO responseDTO;
 
     @BeforeEach
@@ -81,4 +81,32 @@ public class PqrsControllerTest {
 
                 verify(pqrsUC, times(1)).listarPorUsuario(eq(1));
     }
+
+    @Test
+@DisplayName("Debe actualizar las PQRS")
+void actualizarPqrs() throws Exception {
+    PqrsRequestDTO requestDTO = new PqrsRequestDTO();
+
+    when(pqrsUC.actualizar(eq(1), any(PqrsRequestDTO.class)))
+            .thenReturn(responseDTO);
+
+    mockMvc.perform(put("/api/pqrs/1")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(requestDTO)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id_pqrs").value(1));
+
+    verify(pqrsUC, times(1)).actualizar(eq(1), any(PqrsRequestDTO.class));
+}
+
+    @Test
+@DisplayName("Debe eliminar las PQRS")
+void eliminarPqrs() throws Exception{
+
+    mockMvc.perform(delete("/api/pqrs/1"))
+        .andExpect(status().isNoContent());
+
+        verify(pqrsUC, times(1)).eliminar(eq(1));
+    
+}
 }
