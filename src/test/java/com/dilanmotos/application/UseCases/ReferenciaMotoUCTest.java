@@ -11,7 +11,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -91,9 +90,8 @@ public class ReferenciaMotoUCTest {
 
         // Act & Assert
         RuntimeException exception = assertThrows(
-            RuntimeException.class,
-            () -> referenciaMotoUC.obtenerPorId(99)
-        );
+                RuntimeException.class,
+                () -> referenciaMotoUC.obtenerPorId(99));
 
         assertTrue(exception.getMessage().contains("Referencia no encontrada con ID: 99"));
         verify(referenciaMotoRepository, times(1)).buscarPorId(99);
