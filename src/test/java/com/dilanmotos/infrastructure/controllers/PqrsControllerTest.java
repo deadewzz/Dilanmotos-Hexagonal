@@ -3,7 +3,7 @@ package com.dilanmotos.infrastructure.controllers;
 import com.dilanmotos.application.UseCases.PqrsUC;
 import com.dilanmotos.infrastructure.dto.PqrsRequestDTO;
 import com.dilanmotos.infrastructure.dto.PqrsResponseDTO;
-import com.dilanmotos.infrastructure.controller.*;
+import com.dilanmotos.infrastructure.controller.PqrsController;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -38,14 +38,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
     excludeAutoConfiguration = {SecurityAutoConfiguration.class}
 )
 @AutoConfigureMockMvc(addFilters = false)
-public class PqrsControllerTest {
-
+ class PqrsControllerTest {
+    
+    @MockBean
+    private PqrsUC pqrsUC; 
     @MockBean
     private com.dilanmotos.infrastructure.Security.JwtUtil jwtUtil;
     @Autowired
     private MockMvc mockMvc; 
-    @MockBean
-    private PqrsUC pqrsUC; 
+    
     @Autowired
     private ObjectMapper objectMapper;
     private PqrsResponseDTO responseDTO;
@@ -72,14 +73,14 @@ public class PqrsControllerTest {
     @Test
     @DisplayName("Debe listar PQRS por usuario")
     void listarPqrs_PorUsuario() throws Exception{
-        when (pqrsUC.listarPorUsuario(eq(1))).thenReturn(List.of(responseDTO));
+        when (pqrsUC.listarPorUsuario((1))).thenReturn(List.of(responseDTO));
 
         mockMvc.perform(get("/api/pqrs/usuario/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].id_pqrs").value(1));
 
-                verify(pqrsUC, times(1)).listarPorUsuario(eq(1));
+                verify(pqrsUC, times(1)).listarPorUsuario((1));
     }
 
     @Test
@@ -106,7 +107,7 @@ void eliminarPqrs() throws Exception{
     mockMvc.perform(delete("/api/pqrs/1"))
         .andExpect(status().isNoContent());
 
-        verify(pqrsUC, times(1)).eliminar(eq(1));
+        verify(pqrsUC, times(1)).eliminar((1));
     
 }
 }
