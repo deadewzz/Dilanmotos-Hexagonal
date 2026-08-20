@@ -10,23 +10,19 @@ import org.springframework.http.MediaType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-
 import com.dilanmotos.domain.repository.ReferenciaMotoRepository;
 import com.dilanmotos.infrastructure.dto.ReferenciaMotoRequestDTO;
 import com.dilanmotos.domain.model.Usuario;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import lombok.With;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @TestPropertySource(properties = {
-"JWT_SECRET=Da!",
-    "GROQ_API_KEY=dummy_groq_key_for_testing_12345"
+        "JWT_SECRET=Da!",
+        "GROQ_API_KEY=dummy_groq_key_for_testing_12345"
 })
 
 public class ReferenciaMotoUCIntegrationTest {
@@ -40,7 +36,7 @@ public class ReferenciaMotoUCIntegrationTest {
 
     @Test
     @DisplayName("Debe listar todas las referencias de motos exitosamente")
-    @WithMockUser(username = "admin", roles = {"USER", "ADMIN"})
+    @WithMockUser(username = "admin", roles = { "USER", "ADMIN" })
     void testListarTodasReferencias() throws Exception {
         mockMvc.perform(get("/api/referencias"))
                 .andExpect(status().isOk())
@@ -49,9 +45,9 @@ public class ReferenciaMotoUCIntegrationTest {
 
     @Test
     @DisplayName("Debe agregar una nueva referencia de moto exitosamente")
-    @WithMockUser(username = "admin", roles = {"USER", "ADMIN"})
+    @WithMockUser(username = "admin", roles = { "USER", "ADMIN" })
     void testAgregarReferencia() throws Exception {
-        
+
         Usuario usuario = new Usuario();
         usuario.setIdUsuario(1); // Asegúrate de que este ID exista en
         // la base de datos o ajusta según tu configuración de prueba.
@@ -72,7 +68,7 @@ public class ReferenciaMotoUCIntegrationTest {
 
     @Test
     @DisplayName("Debe eliminar una referencia de moto exitosamente")
-    @WithMockUser(username = "admin", roles = {"USER", "ADMIN"})
+    @WithMockUser(username = "admin", roles = { "USER", "ADMIN" })
     void testEliminarReferencia() throws Exception {
         // Primero, crea una referencia de moto para eliminarla
         ReferenciaMotoRequestDTO nuevaReferencia = new ReferenciaMotoRequestDTO();
