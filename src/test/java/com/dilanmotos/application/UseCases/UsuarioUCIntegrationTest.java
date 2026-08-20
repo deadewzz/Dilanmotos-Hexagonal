@@ -41,10 +41,12 @@ class UsuarioUCIntegrationTest {
         usuario.setContrasena("Clave123*");
 
         Usuario guardado = usuarioUC.registrar(usuario);
+
         assertNotNull(guardado);
         assertNotNull(guardado.getIdUsuario());
 
         Optional<Usuario> usuarioEnBD = usuarioRepository.buscarPorCorreo(correo);
         assertTrue(usuarioEnBD.isPresent());
     }
+
 }

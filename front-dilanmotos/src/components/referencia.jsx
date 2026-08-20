@@ -35,7 +35,6 @@ const Referencia = () => {
         cargarTodo(); 
     }, []);
 
-    // Corregido: El backend envía 'idMarca' directamente en la raíz de la referencia
     const referenciasFiltradas = filtroMarca === '' 
         ? todasLasReferencias 
         : todasLasReferencias.filter(ref => parseInt(ref.idMarca) === parseInt(filtroMarca));
@@ -46,7 +45,7 @@ const Referencia = () => {
         setFormData({
             nombre: ref.nombre || '',
             cilindraje: ref.cilindraje || '',
-            idMarca: ref.idMarca || '' // Mapeo directo y limpio
+            idMarca: ref.idMarca || ''
         });
         window.scrollTo({ top: 0, behavior: 'smooth' });
     };
@@ -58,7 +57,6 @@ const Referencia = () => {
             ? `http://localhost:8080/api/referencias/${selectedId}` 
             : "http://localhost:8080/api/referencias";
         
-        // Payload estructurado plano como lo requiere tu API
         const payload = {
             nombre: formData.nombre,
             cilindraje: formData.cilindraje ? parseFloat(formData.cilindraje) : 0,
@@ -96,8 +94,10 @@ const Referencia = () => {
                 </h3>
                 <form onSubmit={handleSubmit} className="row">
                     <div className="col-md-4 mb-3">
-                        <label className="form-label">Marca</label>
+                        <label htmlFor="marca" className="form-label">Marca</label>
                         <select 
+                            id="marca"
+                            name="marca"
                             className="input-bs" 
                             value={formData.idMarca} 
                             onChange={e => setFormData({...formData, idMarca: e.target.value})} 
@@ -110,8 +110,10 @@ const Referencia = () => {
                         </select>
                     </div>
                     <div className="col-md-4 mb-3">
-                        <label className="form-label">Nombre del Modelo</label>
+                        <label htmlFor="modelo" className="form-label">Nombre del Modelo</label>
                         <input 
+                            id="modelo"
+                            name="modelo"
                             className="input-bs" 
                             type="text" 
                             value={formData.nombre} 
@@ -120,8 +122,10 @@ const Referencia = () => {
                         />
                     </div>
                     <div className="col-md-4 mb-3">
-                        <label className="form-label">Cilindraje</label>
+                        <label htmlFor="cilindraje" className="form-label">Cilindraje</label>
                         <input 
+                            id="cilindraje"
+                            name="cilindraje"
                             className="input-bs" 
                             type="number" 
                             step="any" 
@@ -133,6 +137,7 @@ const Referencia = () => {
 
                     <div className="col-12" style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '15px' }}>
                         <button 
+                            name="submit"
                             className="btn-bs w-100 btn-success" 
                             type="submit"
                             style={{ padding: '12px', fontSize: '1rem' }}
