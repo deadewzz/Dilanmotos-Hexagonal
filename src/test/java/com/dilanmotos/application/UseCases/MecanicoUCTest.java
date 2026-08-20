@@ -83,26 +83,26 @@ class MecanicoUCTest {
         verify(mecanicoRepository, times(1)).guardar(any(Mecanico.class));
     }
 
-    @Test
-    @DisplayName("Debe editar/actualizar un mecánico existente correctamente")
-    public void editar_CuandoMecanicoExiste_DebeActualizarYRetornarDTO() {
-        // Arrange
-        int idMecanico = 1;
-        MecanicoRequestDTO requestDTO = new MecanicoRequestDTO();
-        Mecanico mecanicoExistente = new Mecanico();
-        mecanicoExistente.setIdMecanico(idMecanico);
+@Test
+@DisplayName("Debe editar/actualizar un mecánico existente correctamente")
+public void editar_CuandoMecanicoExiste_DebeActualizarYRetornarDTO() {
+    // Arrange
+    int idMecanico = 1;
+    MecanicoRequestDTO requestDTO = new MecanicoRequestDTO();
+    Mecanico mecanicoExistente = new Mecanico();
+    mecanicoExistente.setIdMecanico(idMecanico);
 
-        when(mecanicoRepository.buscarPorId(idMecanico)).thenReturn(Optional.of(mecanicoExistente));
-        when(mecanicoRepository.guardar(any(Mecanico.class))).thenReturn(mecanicoExistente);
+    when(mecanicoRepository.buscarPorId(idMecanico)).thenReturn(Optional.of(mecanicoExistente));
+    when(mecanicoRepository.actualizar(any(Mecanico.class))).thenReturn(mecanicoExistente);
 
-        // Act
-        MecanicoResponseDTO resultado = mecanicoUC.actualizar(idMecanico, requestDTO);
+    // Act
+    MecanicoResponseDTO resultado = mecanicoUC.actualizar(idMecanico, requestDTO);
 
-        // Assert
-        assertNotNull(resultado);
-        verify(mecanicoRepository, times(1)).buscarPorId(idMecanico);
-        verify(mecanicoRepository, times(1)).guardar(any(Mecanico.class));
-    }
+    // Assert
+    assertNotNull(resultado);
+    verify(mecanicoRepository, times(1)).buscarPorId(idMecanico);
+    verify(mecanicoRepository, times(1)).actualizar(any(Mecanico.class));
+}
 
     @Test
     @DisplayName("Debe eliminar un mecánico correctamente")
