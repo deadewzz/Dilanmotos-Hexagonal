@@ -44,7 +44,7 @@ class ProductoUCTest {
         productoEjemplo.setNombre("Aceite DiverOsma");
         productoEjemplo.setDescripcion("Aceite para motos");
         productoEjemplo.setPrecio(35000.00);
-        productoEjemplo.setImagenUrl("http://img.com/aceite.jpg");
+        productoEjemplo.setImagen_url("http://img.com/aceite.jpg");
         productoEjemplo.setStock(15);
         productoEjemplo.setDisponible(true);
         productoEjemplo.setNombreCategoria("Lubricantes");

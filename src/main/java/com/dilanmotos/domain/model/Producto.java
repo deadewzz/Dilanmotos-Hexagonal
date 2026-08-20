@@ -15,8 +15,7 @@ public class Producto {
     private String nombre;
     private String descripcion;
     private Double precio;
-    @Column(name = "imagen_url")
-    private String imagenUrl;   
+    private String imagen_url;   
     private Integer stock;
     private Boolean disponible;
 

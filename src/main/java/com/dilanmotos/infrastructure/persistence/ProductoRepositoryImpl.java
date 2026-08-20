@@ -33,7 +33,7 @@ public class ProductoRepositoryImpl implements ProductoRepository {
         p.setNombre(entity.getNombre());
         p.setDescripcion(entity.getDescripcion());
         p.setPrecio(entity.getPrecio());
-        p.setImagenUrl(entity.getImagenUrl());
+        p.setImagen_url(entity.getImagenUrl());
         
         // Mapeo explícito de Stock y Disponible
         p.setStock(entity.getStock() != null ? entity.getStock() : 0);
@@ -66,7 +66,7 @@ public class ProductoRepositoryImpl implements ProductoRepository {
         entity.setNombre(p.getNombre());
         entity.setDescripcion(p.getDescripcion());
         entity.setPrecio(p.getPrecio());
-        entity.setImagenUrl(p.getImagenUrl());
+        entity.setImagenUrl(p.getImagen_url());
         entity.setStock(p.getStock() != null ? p.getStock() : 0);
         entity.setDisponible(p.getDisponible() != null ? p.getDisponible() : true);
         return entity;
@@ -101,7 +101,7 @@ public class ProductoRepositoryImpl implements ProductoRepository {
             entity.setNombre(producto.getNombre());
             entity.setDescripcion(producto.getDescripcion());
             entity.setPrecio(producto.getPrecio());
-            entity.setImagenUrl(producto.getImagenUrl());
+            entity.setImagenUrl(producto.getImagen_url());
             entity.setStock(producto.getStock());
             entity.setDisponible(producto.getDisponible());
             ProductoEntity guardado = jpaRepository.save(entity);
