@@ -47,6 +47,17 @@ public class MarcaProductoController {
         return ResponseEntity.ok(uc.obtenerPorId(id));
     }
 
+    @Operation(summary = "Obtener marcas de producto por categoría")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Marcas de productos obtenidas exitosamente"),
+            @ApiResponse(responseCode = "404", description = "Categoría no encontrada"),
+            @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+    })
+    @GetMapping("/categoria/{idCategoria}")
+    public ResponseEntity<List<MarcaProductoResponseDTO>> obtenerPorCategoria(@PathVariable Integer idCategoria) {
+        return ResponseEntity.ok(uc.listarPorCategoria(idCategoria));
+    }
+
     @Operation(summary = "Crear una nueva marca de producto")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Marca de producto creada exitosamente"),
