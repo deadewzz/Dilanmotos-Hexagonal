@@ -54,7 +54,7 @@ public class ProductoUC {
         p.setNombre(dto.getNombre());
         p.setDescripcion(dto.getDescripcion());
         p.setPrecio(dto.getPrecio());
-        p.setImagenUrl(dto.getImagenUrl());
+        p.setImagen_url(dto.getImagenUrl());
         p.setStock(dto.getStock() != null ? dto.getStock() : 0);
         p.setDisponible(dto.getDisponible() != null ? dto.getDisponible() : true);
         return p;
@@ -69,7 +69,7 @@ public class ProductoUC {
     dto.setNombre(p.getNombre());
     dto.setDescripcion(p.getDescripcion());
     dto.setPrecio(p.getPrecio());
-    dto.setImagenUrl(p.getImagenUrl());
+    dto.setImagenUrl(p.getImagen_url());
     dto.setStock(p.getStock());
     dto.setDisponible(p.getDisponible());
 

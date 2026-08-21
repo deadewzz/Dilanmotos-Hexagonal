@@ -1,5 +1,6 @@
 package com.dilanmotos.domain.model;
 
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ public class Producto {
     private String nombre;
     private String descripcion;
     private Double precio;
-    private String imagenUrl;   
+    private String imagen_url;   
     private Integer stock;
     private Boolean disponible;
 
