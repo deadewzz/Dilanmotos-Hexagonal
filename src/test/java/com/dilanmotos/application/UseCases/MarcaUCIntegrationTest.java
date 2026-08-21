@@ -10,7 +10,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.dilanmotos.domain.repository.MarcaRepository;
 import com.dilanmotos.infrastructure.dto.MarcaRequestDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -30,9 +29,6 @@ public class MarcaUCIntegrationTest {
 
     @Autowired
     private MarcaUC marcaUC;
-
-    @Autowired
-    private MarcaRepository marcaRepository;
 
     @Autowired
     private ObjectMapper objectMapper;

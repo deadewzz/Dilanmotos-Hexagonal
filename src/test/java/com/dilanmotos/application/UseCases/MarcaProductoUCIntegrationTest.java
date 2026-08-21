@@ -32,8 +32,7 @@ class MarcaProductoUCIntegrationTest {
     @Autowired
     private CategoriaJpaRepository categoriaJpaRepository;
 
-     @SuppressWarnings("deprecation")
-    private net.datafaker.Faker faker = new net.datafaker.Faker(new java.util.Locale("es"));
+     private net.datafaker.Faker faker = new net.datafaker.Faker(new java.util.Locale("es"));
 
     /** Crea una categoría real en BD para satisfacer la FK id_categoria (NOT NULL en marca_producto). */
     private CategoriaEntity crearCategoriaPrueba() {

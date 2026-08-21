@@ -9,8 +9,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.http.MediaType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import com.dilanmotos.domain.repository.ReferenciaMotoRepository;
 import com.dilanmotos.infrastructure.dto.ReferenciaMotoRequestDTO;
 import com.dilanmotos.domain.model.Usuario;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -31,9 +29,6 @@ public class ReferenciaMotoUCIntegrationTest {
     private MockMvc mockMvc;
     @Autowired
     private ReferenciaMotoUC referenciaMotoUC;
-    @Autowired
-    private ReferenciaMotoRepository referenciaMotoRepository;
-
     @Test
     @DisplayName("Debe listar todas las referencias de motos exitosamente")
     @WithMockUser(username = "admin", roles = { "USER", "ADMIN" })
