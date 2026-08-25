@@ -7,14 +7,13 @@ const Recomendaciones = () => {
     const [moto, setMoto] = useState(null);
     const [productos, setProductos] = useState([]);
     const [cargando, setCargando] = useState(true);
-    const [error, setError] = useState(null); // Estado para manejar errores visualmente
+    const [error, setError] = useState(null);
     const token = localStorage.getItem('token');
 
     useEffect(() => {
         const cargarDatos = async () => {
             const idUsuarioLocal = localStorage.getItem('idUsuario');
             
-            // Si no hay token o id, redirigir al login por seguridad
             if (!token || !idUsuarioLocal) {
                 setError("Sesión inválida. Por favor, inicia sesión nuevamente.");
                 setCargando(false);
@@ -22,7 +21,7 @@ const Recomendaciones = () => {
             }
 
             try {
-                // 1. Traemos la moto del usuario
+                // 1. Obtener la moto del usuario
                 const resMoto = await fetch(`http://localhost:8080/api/motos/usuario/${idUsuarioLocal}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
@@ -40,48 +39,44 @@ const Recomendaciones = () => {
                 
                 setMoto(motoData);
 
-                // 2. Llamamos a la IA pasándole el ID de usuario requerido y el motor
-                const resIA = await fetch('http://localhost:8080/api/ia/consultar', {
-                    method: 'POST',
+                // 2. Obtener las recomendaciones generadas por la IA
+                const resIA = await fetch(`http://localhost:8080/api/ia/recomendaciones/${idUsuarioLocal}`, {
+                    method: 'GET',
                     headers: {
-                        'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({
-                        idUsuario: parseInt(idUsuarioLocal, 10), // Blindado: Se envía el ID requerido en base 10
-                        motor: motoData.modelo,
-                        falla: `Dame exactamente 3 recomendaciones de productos para mi moto ${motoData.modelo} de ${motoData.cilindraje}cc. 
-                                Responde SOLO en formato JSON con esta estructura, sin texto adicional:
-                                [
-                                  {"tipo": "Lubricante", "nombre": "nombre del producto", "razon": "por qué lo recomiendas"},
-                                  {"tipo": "Llantas", "nombre": "nombre del producto", "razon": "por qué lo recomiendas"},
-                                  {"tipo": "Kit de Arrastre", "nombre": "nombre del producto", "razon": "por qué lo recomiendas"}
-                                ]`
-                    })
+                    }
                 });
 
-                // Blindado: Validar respuesta HTTP antes de intentar convertir a JSON
                 if (!resIA.ok) {
                     const textoErrorBackend = await resIA.text();
                     throw new Error(`Error del Servidor IA (${resIA.status}): ${textoErrorBackend || 'Petición rechazada'}`);
                 }
 
+                // AHORA el backend devuelve directamente el objeto JSON con recomendaciones
                 const dataIA = await resIA.json();
+                console.log('Respuesta de la IA:', dataIA);
 
-                // 3. Parseamos el JSON que devuelve la IA
-                const textoIA = dataIA?.content;
-                if (!textoIA) {
-                    throw new Error("La IA respondió con un formato de contenido vacío.");
+                // Extraer las recomendaciones directamente
+                let productosIA = [];
+                
+                if (dataIA && dataIA.recomendaciones && Array.isArray(dataIA.recomendaciones)) {
+                    productosIA = dataIA.recomendaciones;
+                } else if (Array.isArray(dataIA)) {
+                    productosIA = dataIA;
                 }
 
-                const jsonMatch = textoIA.match(/\[[\s\S]*\]/);
-                if (jsonMatch) {
-                    const productosIA = JSON.parse(jsonMatch[0]);
-                    const imgs = ["/AceiteMotul.png", "/Llanta.png", "/KitDeArrastre.png"];
-                    setProductos(productosIA.map((p, i) => ({ ...p, img: imgs[i] || "" })));
-                } else {
-                    throw new Error("El formato de respuesta de la IA no contiene una estructura JSON válida.");
+                if (!productosIA || productosIA.length === 0) {
+                    throw new Error("No hay recomendaciones disponibles para esta moto en este momento.");
                 }
+
+                // Mapeo de imágenes estáticas de respaldo
+                const imgs = ["/AceiteMotul.png", "/Llanta.png", "/KitDeArrastre.png"];
+                setProductos(productosIA.map((p, i) => ({
+                    tipo: p.tipo || 'Repuesto',
+                    nombre: p.nombre || 'Producto recomendado',
+                    razon: p.razon || 'Adecuado para el mantenimiento de tu motocicleta.',
+                    img: imgs[i % imgs.length]
+                })));
 
             } catch (err) {
                 console.error("Error en el flujo de recomendaciones:", err);
@@ -94,7 +89,6 @@ const Recomendaciones = () => {
         cargarDatos();
     }, [token]);
 
-    // UI de Carga
     if (cargando) return (
         <div className="dashboard-wrapper" style={{display:'flex', justifyContent:'center', alignItems:'center', flexDirection:'column', gap:'20px'}}>
             <div className="spinner" style={{border: '4px solid #f3f3f3', borderTop: '4px solid #4e54c8', borderRadius: '50%', width: '40px', height: '40px', animation: 'spin 1s linear infinite'}}></div>
@@ -103,7 +97,6 @@ const Recomendaciones = () => {
         </div>
     );
 
-    // UI de Error (Previene pantallas en blanco o crashes)
     if (error) return (
         <div className="dashboard-wrapper" style={{display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', padding:'40px', textAlign:'center'}}>
             <h2 style={{color: '#ff4d4d', marginBottom:'15px'}}>⚠️ Ups, algo salió mal</h2>
@@ -114,7 +107,6 @@ const Recomendaciones = () => {
         </div>
     );
 
-    // UI de Éxito Principal
     return (
         <div className="dashboard-wrapper">
             <header className="dashboard-header">
@@ -134,7 +126,7 @@ const Recomendaciones = () => {
 
                 <div className="categories-grid">
                     {productos.map((prod, index) => (
-                        <div key={index} className="category-item" style={{border: '2px solid #4e54c8', display: 'flex', flexDirection: 'column', justifyContent: 'between'}}>
+                        <div key={index} className="category-item" style={{border: '2px solid #4e54c8', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
                             <div>
                                 <span style={{color: '#4e54c8', fontWeight: 'bold', fontSize: '0.8rem'}}>{prod.tipo}</span>
                                 <div className="category-img" style={{marginTop: '20px', height: '120px', display: 'flex', justifyContent: 'center', alignItems: 'center'}}>
@@ -144,7 +136,6 @@ const Recomendaciones = () => {
                                 <p style={{fontSize: '0.85rem', color: '#666', marginBottom: '20px'}}>{prod.razon}</p>
                             </div>
                             
-                            {/* Botón blindado con redirección directa al Catálogo */}
                             <button 
                                 onClick={() => navigate('/catalogo')} 
                                 className="category-btn" 

@@ -4,7 +4,6 @@ import remarkGfm from 'remark-gfm';
 import { useLocation } from 'react-router-dom'; 
 import './AsistenteMotos.css';
 
-
 const AsistenteMotos = () => {
     const location = useLocation(); 
     const [pregunta, setPregunta] = useState('');
@@ -14,12 +13,10 @@ const AsistenteMotos = () => {
         { rol: 'ia', texto: '¡Habla pues **parcero**! Bienvenido a **Dilan Motos**. ¿Qué máquina vamos a revisar hoy?' }
     ]);
 
-    // Recuperamos credenciales del localStorage
     const idLogueado = localStorage.getItem("idUsuario");
-    const token = localStorage.getItem("token"); //  Crucial para evitar el error 401
+    const token = localStorage.getItem("token");
     const mensajesFinRef = useRef(null);
 
-    // 🏍️ Efecto para cargar la moto al iniciar
     useEffect(() => {
         const cargarMoto = async () => {
             if (!idLogueado) return;
@@ -32,13 +29,11 @@ const AsistenteMotos = () => {
                 
                 if (res.ok) {
                     const data = await res.json();
-                    // Ajustado para manejar si el backend devuelve una lista o un objeto único
                     const motoData = Array.isArray(data) ? data[0] : data;
 
                     if (motoData && motoData.modelo) {
                         const nombreMoto = motoData.modelo.toUpperCase();
                         setModeloSeleccionado(nombreMoto);
-                        
                         
                         if (location.state?.autoPrompt) {
                             dispararRecomendacionInicial(nombreMoto);
@@ -54,7 +49,6 @@ const AsistenteMotos = () => {
         cargarMoto();
     }, [idLogueado, token, location.state]);
 
-    // Función para la recomendación automática
     const dispararRecomendacionInicial = (moto) => {
         const promoMsg = `✨ ¡Dame recomendaciones para mi ${moto}!`;
         ejecutarConsulta(promoMsg, moto);
@@ -82,7 +76,6 @@ const AsistenteMotos = () => {
 
             if (res.ok) {
                 const data = await res.json();
-                // Usamos 'recomendacion' o 'respuesta' según lo que envíe tu backend
                 setMensajes(prev => [...prev, { rol: 'ia', texto: data.content }]);
             } else if (res.status === 401) {
                 setMensajes(prev => [...prev, { rol: 'ia', texto: "🚨 Tu sesión ha expirado. Por favor, ingresa de nuevo." }]);

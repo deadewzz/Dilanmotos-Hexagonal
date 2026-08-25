@@ -21,25 +21,23 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class GroqAdapter implements ChatExternalPort {
+public class DeepSeekAdapter { // ← Nota: NO implementa ChatExternalPort
 
-    @Value("${groq.api.key}")
+    @Value("${deepseek.api.key}")
     private String apiKey;
 
-    // ✅ MODELO ACTIVO Y RECOMENDADO (actualizado)
-    private static final String MODEL_NAME = "llama3-70b-8192";
-    // Alternativas: "mixtral-8x7b-32768", "gemma2-9b-it", "llama3-8b-8192"
-    private static final String GROQ_URL = "https://api.groq.com/openai/v1/chat/completions";
+    private static final String MODEL_NAME = "deepseek-v4-flash";
+    private static final String DEEPSEEK_URL = "https://api.deepseek.com/v1/chat/completions";
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final ProductoRepository productoRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public GroqAdapter(ProductoRepository productoRepository) {
+    public DeepSeekAdapter(ProductoRepository productoRepository) {
         this.productoRepository = productoRepository;
     }
 
-    @Override
+    // Método para chat normal
     public ChatResponse getAiAnswer(String question, String nombreMarca, String modelo, double cilindraje) {
         List<Producto> productos = productoRepository.obtenerTodos();
         String catalogo = buildCatalogoTexto(productos);
@@ -74,13 +72,14 @@ public class GroqAdapter implements ChatExternalPort {
                 Map.of("role", "user", "content", question)
             ),
             "temperature", 0.7,
-            "max_tokens", 2048
+            "max_tokens", 2048,
+            "thinking", Map.of("type", "disabled")
         );
 
         return ejecutarConsulta(body, false);
     }
 
-    @Override
+    // Método para recomendaciones en JSON
     public ChatResponse getRecomendaciones(String nombreMarca, String modelo, double cilindraje) {
         List<Producto> productos = productoRepository.obtenerTodos();
         
@@ -124,7 +123,9 @@ public class GroqAdapter implements ChatExternalPort {
                 Map.of("role", "user", "content", prompt)
             ),
             "temperature", 0.1,
-            "max_tokens", 600
+            "max_tokens", 600,
+            "thinking", Map.of("type", "disabled"),
+            "response_format", Map.of("type", "json_object")
         );
 
         ChatResponse response = ejecutarConsulta(body, true);
@@ -144,6 +145,8 @@ public class GroqAdapter implements ChatExternalPort {
         return response;
     }
 
+    // ========== MÉTODOS PRIVADOS ==========
+
     private ChatResponse ejecutarConsulta(Map<String, Object> body, boolean esJson) {
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(apiKey);
@@ -151,18 +154,17 @@ public class GroqAdapter implements ChatExternalPort {
 
         try {
             String jsonPayload = objectMapper.writeValueAsString(body);
-            System.out.println(">>> Enviando a Groq con modelo: " + MODEL_NAME);
+            System.out.println(">>> Enviando a DeepSeek con modelo: " + MODEL_NAME);
             
             HttpEntity<String> entity = new HttpEntity<>(jsonPayload, headers);
-            var response = restTemplate.postForObject(GROQ_URL, entity, Map.class);
+            var response = restTemplate.postForObject(DEEPSEEK_URL, entity, Map.class);
             
             var choices = (List<Map<String, Object>>) response.get("choices");
             var message = (Map<String, Object>) choices.get(0).get("message");
             String content = message.get("content").toString();
             
-            System.out.println(">>> Respuesta de Groq recibida, longitud: " + content.length());
+            System.out.println(">>> Respuesta de DeepSeek recibida, longitud: " + content.length());
 
-            // Limpiar la respuesta para eliminar <think> y otros tags
             String respuestaLimpia = limpiarRespuesta(content);
             System.out.println(">>> Respuesta limpiada: " + respuestaLimpia);
 
@@ -175,10 +177,10 @@ public class GroqAdapter implements ChatExternalPort {
             return new ChatResponse(respuestaLimpia);
 
         } catch (HttpStatusCodeException e) {
-            System.err.println(">>> Error HTTP Groq (" + e.getStatusCode() + "): " + e.getResponseBodyAsString());
+            System.err.println(">>> Error HTTP DeepSeek (" + e.getStatusCode() + "): " + e.getResponseBodyAsString());
             return new ChatResponse(esJson ? "{\"recomendaciones\":[]}" : "Error al conectar con la IA. Por favor, intenta de nuevo.");
         } catch (Exception e) {
-            System.err.println(">>> Error inesperado en GroqAdapter: " + e.getMessage());
+            System.err.println(">>> Error inesperado en DeepSeekAdapter: " + e.getMessage());
             e.printStackTrace();
             return new ChatResponse(esJson ? "{\"recomendaciones\":[]}" : "Error al procesar la solicitud.");
         }
@@ -187,14 +189,11 @@ public class GroqAdapter implements ChatExternalPort {
     private String limpiarRespuesta(String content) {
         if (content == null) return "";
         
-        // Eliminar todo lo que esté entre <think> y </think> (incluyendo el contenido)
         String cleaned = content.replaceAll("(?s)<think>.*?</think>", "")
                                 .replaceAll("(?s)<thinking>.*?</thinking>", "")
-                                .replaceAll("(?s)<\\?xml.*?\\?>", "")
                                 .replaceAll("```\\s*", "")
                                 .trim();
         
-        // Si la respuesta comienza con "Thinking Process:", eliminar todo hasta el primer salto de línea
         if (cleaned.toLowerCase().startsWith("thinking process") || 
             cleaned.toLowerCase().startsWith("process:")) {
             int firstNewLine = cleaned.indexOf('\n');
@@ -203,17 +202,13 @@ public class GroqAdapter implements ChatExternalPort {
             }
         }
         
-        // Limpiar múltiples saltos de línea
         cleaned = cleaned.replaceAll("\\n\\s*\\n", "\n");
         
-        // Si quedó vacío, devolver un mensaje por defecto
         if (cleaned.isEmpty()) {
             return "¡Hola, parcero! ¿En qué te puedo ayudar con tu moto?";
         }
         
-        // Verificar que no contenga etiquetas XML/HTML
         if (cleaned.contains("<") && cleaned.contains(">")) {
-            // Si tiene etiquetas, intentar extraer solo el texto
             cleaned = cleaned.replaceAll("<[^>]*>", " ").trim();
         }
         
@@ -225,7 +220,6 @@ public class GroqAdapter implements ChatExternalPort {
         
         String cleaned = raw.trim();
         
-        // Buscar el primer '{' y hacer matching de llaves
         int start = -1;
         int end = -1;
         int braceCount = 0;
@@ -248,7 +242,6 @@ public class GroqAdapter implements ChatExternalPort {
             cleaned = cleaned.substring(start, end + 1);
         }
         
-        // Limpiar caracteres no deseados
         cleaned = cleaned.replaceAll("```json\\s*", "")
                          .replaceAll("```\\s*", "")
                          .replaceAll("`", "")
@@ -258,7 +251,6 @@ public class GroqAdapter implements ChatExternalPort {
                          .replaceAll("\\s+", " ")
                          .trim();
         
-        // Validar y corregir JSON
         try {
             JsonNode jsonNode = objectMapper.readTree(cleaned);
             if (jsonNode.has("recomendaciones") && jsonNode.get("recomendaciones").isArray()) {
@@ -271,7 +263,6 @@ public class GroqAdapter implements ChatExternalPort {
             }
         } catch (Exception e) {
             System.err.println(">>> Error validando JSON: " + e.getMessage());
-            System.err.println(">>> Texto recibido: " + cleaned);
             return "{\"recomendaciones\":[]}";
         }
     }
@@ -344,35 +335,18 @@ public class GroqAdapter implements ChatExternalPort {
             .collect(Collectors.joining("\n"));
     }
 
-    private String buildCatalogoSeguro(List<Producto> productos) {
-        if (productos == null || productos.isEmpty()) return "Sin inventario disponible.";
-
-        StringBuilder sb = new StringBuilder();
-        for (Producto p : productos) {
-            String nombre = (p.getNombre() != null) ? p.getNombre() : "Producto";
-            String cat = (p.getNombreCategoria() != null) ? p.getNombreCategoria() : "General";
-            nombre = nombre.replace("\"", "'").replace("\n", " ").replace("\r", " ").trim();
-            cat = cat.replace("\"", "'").replace("\n", " ").replace("\r", " ").trim();
-            sb.append(String.format("- [%s] %s\n", cat, nombre));
-        }
-        return sb.toString();
-    }
-
     private String buildCatalogoParaJson(List<Producto> productos) {
         if (productos == null || productos.isEmpty()) {
             return "Sin productos en inventario.";
         }
-
         StringBuilder sb = new StringBuilder();
         int count = 0;
         for (Producto p : productos) {
             if (count >= 30) break;
             String nombre = p.getNombre() != null ? p.getNombre() : "Producto";
             String categoria = p.getNombreCategoria() != null ? p.getNombreCategoria() : "General";
-            
             nombre = nombre.replaceAll("[\\n\\r\\t\"]", " ").trim();
             categoria = categoria.replaceAll("[\\n\\r\\t\"]", " ").trim();
-            
             sb.append(count + 1).append(". ").append(nombre)
               .append(" (").append(categoria).append(")\n");
             count++;

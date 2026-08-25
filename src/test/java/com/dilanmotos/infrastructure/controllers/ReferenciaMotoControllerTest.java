@@ -48,7 +48,7 @@ class ReferenciaMotoControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    // Nombre de variable ajustado a convención Java (camelCase)
+    
     private ReferenciaMotoResponseDTO respuestaDTO;
 
     @BeforeEach
