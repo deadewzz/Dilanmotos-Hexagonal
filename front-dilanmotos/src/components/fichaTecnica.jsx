@@ -29,7 +29,6 @@ const fetchProducto = async () => {
     try {
         // 1. Recuperamos el token del almacenamiento local
         const token = localStorage.getItem('token'); 
-        console.log("El token enviado es:", token);
         const response = await fetch(`http://localhost:8080/api/productos/${id}`, {
             method: 'GET',
             // 2. Añadimos los headers con el token de autorización
@@ -117,7 +116,7 @@ const fetchProducto = async () => {
                     <div className="product-card">
                         <div className="product-header">
                             <h2>Ficha Técnica: {producto.nombre}</h2>
-                            <span className="badge-category">{producto.categoria?.nombre || 'General'}</span>
+                            <span className="badge-category">{producto.nombreCategoria || producto.categoria?.nombre || 'General'}</span>
                         </div>
                         
                         <div className="product-body">
@@ -127,11 +126,11 @@ const fetchProducto = async () => {
                                     <tbody>
                                         <tr>
                                             <td><strong>Referencia:</strong></td>
-                                            <td>#{producto.id_producto}</td>
+                                            <td>#{producto.idProducto ?? producto.id_producto ?? producto.id}</td>
                                         </tr>
                                         <tr>
                                             <td><strong>Marca:</strong></td>
-                                            <td>{producto.marca?.nombre || 'No especificada'}</td>
+                                            <td>{producto.nombreMarca || producto.marca?.nombre || 'No especificada'}</td>
                                         </tr>
                                         <tr>
                                             <td><strong>Precio:</strong></td>
@@ -154,7 +153,7 @@ const fetchProducto = async () => {
                                 onClick={() => {
                                     if (!producto) return;
 
-                                    const productId = producto.id_producto ?? producto.id ?? Math.random().toString(36).slice(2, 9)
+                                    const productId = producto.idProducto ?? producto.id_producto ?? producto.id ?? Math.random().toString(36).slice(2, 9)
                                     const normalizedProduct = {
                                         id: productId,
                                         nombre: producto.nombre ?? producto.titulo ?? 'Producto',
