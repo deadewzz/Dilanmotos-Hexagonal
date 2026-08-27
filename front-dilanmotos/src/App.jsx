@@ -190,13 +190,22 @@ function App() {
     return (
         <Router>
             <Routes>
-                {/* RUTAS PÚBLICAS */}
-                <Route path="/" element={<Navigate to="/dashboard" />} />
+                {/* RUTAS PÚBLICAS Y SUS ALIAS */}
+                <Route path="/" element={<Navigate to="/dashboard" replace />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
+                
+                {/* Catalogos (Rutas exactas y aliases en minúsculas) */}
                 <Route path="/catalogoKit" element={<CatalogoKit />} />
+                <Route path="/catalogokit" element={<Navigate to="/catalogoKit" replace />} />
+                <Route path="/kits" element={<Navigate to="/catalogoKit" replace />} />
+                
                 <Route path="/catalogoAceites" element={<CatalogoAceites />} />
+                <Route path="/catalogoaceites" element={<Navigate to="/catalogoAceites" replace />} />
+                
                 <Route path="/catalogoLlantas" element={<CatalogoLlantas />} />
+                <Route path="/catalogollantas" element={<Navigate to="/catalogoLlantas" replace />} />
+                
                 <Route path="/fichaTecnica/:id" element={<FichaTecnica />} />
                 <Route path="/hacer-cotizacion" element={<HacerCotizacion />} />
                 <Route path="/dashboard" element={<Dashboard />} /> 
@@ -209,7 +218,10 @@ function App() {
                 <Route path="/nueva-pqrs" element={<PrivateRoute><CrearPqrs /></PrivateRoute>} />
                 <Route path="/perfil" element={<PrivateRoute><PerfilUsuario /></PrivateRoute>} />
                 <Route path="/asistente" element={<PrivateRoute><AsistenteMotos /></PrivateRoute>} />
+                
+                {/* Ruta de Recomendaciones y alias en singular */}
                 <Route path="/recomendaciones" element={<PrivateRoute><RecomendACIONES /></PrivateRoute>} />
+                <Route path="/recomendacion" element={<Navigate to="/recomendaciones" replace />} />
 
                 {/* RUTAS ADMINISTRATIVAS */}
                 <Route path="/usuarios" element={
@@ -255,8 +267,8 @@ function App() {
                     <PrivateRoute requireAdmin><AdminLayout><BackupView /></AdminLayout></PrivateRoute>
                 } />
 
-                {/* RUTAS NO ENCONTRADAS (404 / 403) */}
-                <Route path="*" element={<Error403 />} />
+                {/* RUTAS NO ENCONTRADAS (FALLBACK DEFAULT A DASHBOARD) */}
+                <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
         </Router>
     );
