@@ -17,6 +17,8 @@ public class PqrsDTO {
     private String tipo;
     @NotBlank
     private String asunto;
+    @NotBlank(message = "La descripción es obligatoria")
+    @Size(min = 15, message = "La descripción debe tener al menos 15 caracteres")
     private String descripcion;
     private LocalDateTime fecha;
     private String respuesta_admin;

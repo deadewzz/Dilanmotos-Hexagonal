@@ -21,7 +21,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class DeepSeekAdapter { // ← Nota: NO implementa ChatExternalPort
+public class DeepSeekAdapter {
 
     @Value("${deepseek.api.key}")
     private String apiKey;
@@ -49,13 +49,17 @@ public class DeepSeekAdapter { // ← Nota: NO implementa ChatExternalPort
             Eres el mecánico jefe de Dilan Motos en Bogotá, Colombia.
             El cliente tiene una %s %s de %.0fcc.
             
-            **INSTRUCCIONES CRÍTICAS:**
-            1. NO uses etiquetas <think>, <thinking> o cualquier tipo de razonamiento visible.
-            2. NO muestres tu proceso de pensamiento.
-            3. Responde DIRECTAMENTE con la respuesta final.
-            4. NO digas "basado en", "considerando" o frases similares.
-            5. SOLO recomienda productos del inventario listado abajo.
-            6. NO inventes productos ni precios.
+            **INSTRUCCIONES ESTRICTAS Y OBLIGATORIAS:**
+            1. NUNCA GENERES CÓDIGO. NUNCA.
+            2. NUNCA DES INSTRUCCIONES DE PROGRAMACIÓN.
+            3. NUNCA EXPLIQUES CÓMO FUNCIONA UN SISTEMA INFORMÁTICO.
+            4. NUNCA DES COMANDOS DE TERMINAL O SISTEMA.
+            5. SOLO HABLA DE: motos, mecánica, repuestos, mantenimiento, aceites, llantas, kits de arrastre y problemas mecánicos.
+            6. Si el usuario pregunta algo que NO sea de mecánica de motos, responde: "Parcero, eso no es de mi área. Yo solo sé de motos. ¿En qué te puedo ayudar con tu Gixxer?"
+            7. NO uses etiquetas <think>, <thinking> o cualquier tipo de razonamiento visible.
+            8. Responde DIRECTAMENTE con la respuesta final.
+            9. SOLO recomienda productos del inventario listado abajo.
+            10. NO inventes productos ni precios.
 
             INVENTARIO ACTUAL:
             %s
@@ -95,8 +99,10 @@ public class DeepSeekAdapter { // ← Nota: NO implementa ChatExternalPort
             Eres un asistente de recomendaciones para una tienda de motos Dilan Motos en Bogotá.
             
             **INSTRUCCIONES CRÍTICAS:**
-            1. NO uses etiquetas <think>, <thinking> o razonamiento visible.
-            2. SOLO responde con JSON puro.
+            1. NUNCA GENERES CÓDIGO. NUNCA.
+            2. NO uses etiquetas <think>, <thinking> o razonamiento visible.
+            3. SOLO responde con JSON puro.
+            4. SOLO recomiendas productos del inventario.
             
             INVENTARIO DISPONIBLE (SOLO estos productos existen):
             %s
@@ -114,12 +120,13 @@ public class DeepSeekAdapter { // ← Nota: NO implementa ChatExternalPort
             2. Usa los nombres EXACTOS del inventario
             3. Cada producto debe ser de una categoría diferente
             4. Si no hay suficientes productos, devuelve {"recomendaciones": []}
+            5. NUNCA GENERES CÓDIGO
             """, catalogoSeguro, marcaSafe, modeloSafe, cilindraje);
 
         var body = Map.of(
             "model", MODEL_NAME,
             "messages", List.of(
-                Map.of("role", "system", "content", "Eres un asistente que genera JSON válido. NO uses <think>. Siempre respondes con JSON puro."),
+                Map.of("role", "system", "content", "Eres un asistente que genera JSON válido. NO uses <think>. Siempre respondes con JSON puro. NUNCA GENERES CÓDIGO."),
                 Map.of("role", "user", "content", prompt)
             ),
             "temperature", 0.1,
@@ -165,6 +172,11 @@ public class DeepSeekAdapter { // ← Nota: NO implementa ChatExternalPort
             
             System.out.println(">>> Respuesta de DeepSeek recibida, longitud: " + content.length());
 
+            // 🔥 FILTRO DE SEGURIDAD: DETECTAR Y BLOQUEAR CÓDIGO 🔥
+            if (!esJson) {
+                content = filtrarCodigo(content);
+            }
+
             String respuestaLimpia = limpiarRespuesta(content);
             System.out.println(">>> Respuesta limpiada: " + respuestaLimpia);
 
@@ -184,6 +196,34 @@ public class DeepSeekAdapter { // ← Nota: NO implementa ChatExternalPort
             e.printStackTrace();
             return new ChatResponse(esJson ? "{\"recomendaciones\":[]}" : "Error al procesar la solicitud.");
         }
+    }
+
+    /**
+     * 🔒 FILTRO DE SEGURIDAD: Detecta y bloquea respuestas que contienen código
+     */
+    private String filtrarCodigo(String respuesta) {
+        if (respuesta == null) return respuesta;
+        
+        // Patrones para detectar código
+        String[] patronesPeligrosos = {
+            "```", "public class", "function", "def ", "npm install", 
+            "sudo ", "git clone", "SELECT ", "CREATE TABLE", "System.out",
+            "console.log", "#!/bin", "import ", "from ", "require(",
+            "new ", "extends ", "implements ", "@Override", "private ",
+            "protected ", "public ", "static ", "void ", "return ",
+            "if (", "for (", "while (", "switch (", "case ",
+            "print(", "printf(", "System.out.println"
+        };
+        
+        String respuestaLower = respuesta.toLowerCase();
+        for (String patron : patronesPeligrosos) {
+            if (respuestaLower.contains(patron.toLowerCase())) {
+                System.out.println(">>> ⚠️ CÓDIGO DETECTADO en respuesta: " + patron);
+                return "Parcero, eso no es de mi área. Yo solo sé de motos. ¿En qué te puedo ayudar con tu Gixxer?";
+            }
+        }
+        
+        return respuesta;
     }
 
     private String limpiarRespuesta(String content) {

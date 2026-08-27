@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PqrsResponseDTO {
-    private Integer id_pqrs; // Cambiado a snake_case para coincidir con tu BD y Front
+    private Integer id_pqrs; 
     private Integer id_usuario;
     private String tipo;
     private String asunto;

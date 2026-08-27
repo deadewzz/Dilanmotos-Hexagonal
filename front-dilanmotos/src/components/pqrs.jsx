@@ -115,6 +115,8 @@ export default function Pqrs() {
         }
     };
 
+    
+
     return (
         <div className="main-content-inner">
             {/* PANEL DE FORMULARIO */}
