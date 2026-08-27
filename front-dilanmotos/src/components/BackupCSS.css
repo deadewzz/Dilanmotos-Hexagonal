@@ -1,0 +1,150 @@
+/* BackupView.css - Centrado Minimalista */
+.backup-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 75vh; /* Centra la tarjeta verticalmente en la pantalla */
+  padding: 1.5rem;
+  width: 100%;
+}
+
+.backup-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 2.25rem 2rem;
+  width: 100%;
+  max-width: 480px; /* Ancho máximo para mantenerlo centrado e integrado */
+  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+}
+
+.backup-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.backup-header h2 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  color: #0f172a;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.3rem;
+}
+
+.backup-header p {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.backup-content {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  background-color: #f8fafc;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #f1f5f9;
+}
+
+.backup-icon-box {
+  background-color: #ccfbf1;
+  color: #0d9488; /* Verde azulado para el ícono */
+  padding: 0.75rem;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.backup-text h3 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #0f172a;
+  margin: 0 0 0.25rem 0;
+}
+
+.backup-text p {
+  font-size: 0.825rem;
+  color: #64748b;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.backup-alert {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.backup-alert.success {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #15803d;
+}
+
+.backup-alert.danger {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.backup-alert-close {
+  background: none;
+  border: none;
+  color: currentColor;
+  cursor: pointer;
+  font-size: 1rem;
+  opacity: 0.6;
+}
+
+/* Botón con tono Verde-Azulado / Teal */
+.backup-btn {
+  width: 100%;
+  background-color: #0d9488; /* Verde azulado suave (Teal) */
+  color: #ffffff;
+  border: none;
+  padding: 0.85rem 1.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.backup-btn:hover:not(:disabled) {
+  background-color: #0f766e;
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
+  transform: translateY(-1px);
+}
+
+.backup-btn:disabled {
+  background-color: #94a3b8;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.spinner-minimal {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
