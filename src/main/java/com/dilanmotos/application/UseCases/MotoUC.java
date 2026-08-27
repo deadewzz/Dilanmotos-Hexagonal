@@ -2,7 +2,7 @@ package com.dilanmotos.application.UseCases;
 
 import com.dilanmotos.domain.model.Moto;
 import com.dilanmotos.domain.repository.MotoRepository;
-import com.dilanmotos.domain.repository.MarcaRepository; // Necesario para el nombre
+import com.dilanmotos.domain.repository.MarcaRepository;
 import com.dilanmotos.domain.exception.MotoNotFoundException;
 import com.dilanmotos.infrastructure.dto.MotoRequestDTO;
 import com.dilanmotos.infrastructure.dto.MotoResponseDTO;
@@ -41,11 +41,10 @@ public class MotoUC {
     }
 
     public List<MotoResponseDTO> listarPorUsuario(Integer idUsuario) {
-    return motoRepository.obtenerPorUsuario(idUsuario).stream()
-            .map(this::mapToDTO)
-            .collect(Collectors.toList());
+        return motoRepository.obtenerPorUsuario(idUsuario).stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
-    
 
     public MotoResponseDTO actualizar(Integer id, MotoRequestDTO request) {
         motoRepository.buscarPorId(id)
@@ -66,6 +65,7 @@ public class MotoUC {
         m.setIdMarca(dto.getIdMarca());
         m.setModelo(dto.getModelo());
         m.setCilindraje(dto.getCilindraje());
+        m.setPlaca(dto.getPlaca()); // ← NUEVO: Mapeo de la placa al Modelo
         return m;
     }
 
@@ -76,6 +76,7 @@ public class MotoUC {
         dto.setIdMarca(m.getIdMarca());
         dto.setModelo(m.getModelo());
         dto.setCilindraje(m.getCilindraje());
+        dto.setPlaca(m.getPlaca()); // ← NUEVO: Mapeo de la placa hacia el Frontend
 
         // Llenamos el objeto marca dentro del DTO para el Frontend
         marcaRepository.buscarPorId(m.getIdMarca()).ifPresent(marca -> {

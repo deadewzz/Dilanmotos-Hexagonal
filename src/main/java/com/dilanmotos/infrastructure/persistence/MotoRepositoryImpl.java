@@ -45,32 +45,34 @@ public class MotoRepositoryImpl implements MotoRepository {
         jpa.deleteById(id);
     }
 
-   private Moto toModel(MotoEntity e) {
-    Moto m = new Moto();
-    m.setIdMoto(e.getIdMoto());
-    m.setIdUsuario(e.getIdUsuario());
-    m.setIdMarca(e.getIdMarca());
-    m.setModelo(e.getModelo());
-    m.setCilindraje(e.getCilindraje() != null ? e.getCilindraje() : 0.0); // ✅ null-safe
-    return m;
-}
+    private Moto toModel(MotoEntity e) {
+        Moto m = new Moto();
+        m.setIdMoto(e.getIdMoto());
+        m.setIdUsuario(e.getIdUsuario());
+        m.setIdMarca(e.getIdMarca());
+        m.setModelo(e.getModelo());
+        m.setCilindraje(e.getCilindraje() != null ? e.getCilindraje() : 0.0);
+        m.setPlaca(e.getPlaca()); // ← ¡AQUÍ ESTÁ LA CORRECCIÓN AL LEER!
+        return m;
+    }
 
     @Override
-public List<Moto> obtenerPorUsuario(Integer idUsuario) {
-    return jpa.findByIdUsuario(idUsuario).stream()
-            .map(this::toModel)
-            .collect(Collectors.toList());
+    public List<Moto> obtenerPorUsuario(Integer idUsuario) {
+        return jpa.findByIdUsuario(idUsuario).stream()
+                .map(this::toModel)
+                .collect(Collectors.toList());
     }
 
     private MotoEntity toEntity(Moto m) {
-    MotoEntity e = new MotoEntity();
-    if (m.getIdMoto() != null) {
-        e.setIdMoto(m.getIdMoto());
+        MotoEntity e = new MotoEntity();
+        if (m.getIdMoto() != null) {
+            e.setIdMoto(m.getIdMoto());
+        }
+        e.setIdUsuario(m.getIdUsuario());
+        e.setIdMarca(m.getIdMarca());
+        e.setModelo(m.getModelo());
+        e.setCilindraje(m.getCilindraje());
+        e.setPlaca(m.getPlaca());
+        return e;
     }
-    e.setIdUsuario(m.getIdUsuario());
-    e.setIdMarca(m.getIdMarca());
-    e.setModelo(m.getModelo());
-    e.setCilindraje(m.getCilindraje()); // ✅ sin cast
-    return e;
-}
 }

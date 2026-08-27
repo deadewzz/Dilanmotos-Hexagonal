@@ -8,4 +8,5 @@ public class MotoRequestDTO {
     private Integer idMarca;
     private String modelo;
     private Double cilindraje;
+    private String placa;
 }

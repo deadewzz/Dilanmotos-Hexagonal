@@ -10,4 +10,5 @@ public class MotoResponseDTO {
     private String modelo;
     private Double cilindraje;
     private MarcaResponseDTO marca;
+    private String placa;
 }

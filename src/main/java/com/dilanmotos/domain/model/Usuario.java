@@ -17,6 +17,7 @@ public class Usuario {
     private Integer habilitado;
     private List<MotoResumen> motos;
     private Integer idReferencia;
+    private String placa;
     private String resetToken;
     private java.time.LocalDateTime tokenExpiracion;
 }

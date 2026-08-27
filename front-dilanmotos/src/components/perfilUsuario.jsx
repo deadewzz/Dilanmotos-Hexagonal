@@ -186,8 +186,8 @@ const PerfilUsuario = () => {
                                     </div>
                                     <h3 className="modelo-text">{moto.modelo}</h3>
                                     <div className="moto-card-footer">
-                                        <span className="estado-ok">
-                                            <i className="fa-solid fa-check-double"></i> Documentos al día
+                                        <span className="estado-ok" style={{ color: '#ec5e2a', fontWeight: '600' }}>
+                                            <i className="fa-solid fa-hashtag"></i> Tu placa es: {moto.placa || 'N/A'}
                                         </span>
                                     </div>
                                 </div>

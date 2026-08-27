@@ -38,11 +38,11 @@ public class UsuarioRepositoryAdapter implements UsuarioRepository {
 
     @Override
     public void actualizarContrasena(Integer idUsuario, String contrasenaNueva) {
-    jpaRepository.findById(idUsuario).ifPresent(entity -> {
-        entity.setContrasena(contrasenaNueva);
-        jpaRepository.save(entity);
-    });
-}
+        jpaRepository.findById(idUsuario).ifPresent(entity -> {
+            entity.setContrasena(contrasenaNueva);
+            jpaRepository.save(entity);
+        });
+    }
 
     @Override
     public void guardarToken(String correo, String token, LocalDateTime expiracion) {
@@ -90,7 +90,8 @@ public class UsuarioRepositoryAdapter implements UsuarioRepository {
     }
 
     private Usuario toDomain(UsuarioEntity entity) {
-        if (entity == null) return null;
+        if (entity == null)
+            return null;
 
         Usuario user = new Usuario();
         user.setIdUsuario(entity.getId_usuario());
@@ -108,9 +109,11 @@ public class UsuarioRepositoryAdapter implements UsuarioRepository {
                 mr.setCilindraje(m.getCilindraje());
                 mr.setIdMarca(m.getIdMarca());
 
+                mr.setPlaca(m.getPlaca());
+
                 if (m.getIdMarca() != null) {
                     marcaJpaRepository.findById(m.getIdMarca())
-                    .ifPresent(marca -> mr.setNombreMarca(marca.getNombre()));
+                            .ifPresent(marca -> mr.setNombreMarca(marca.getNombre()));
                 }
 
                 return mr;

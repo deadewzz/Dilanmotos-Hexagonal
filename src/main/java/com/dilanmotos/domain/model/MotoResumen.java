@@ -9,4 +9,5 @@ public class MotoResumen {
     private Double cilindraje;
     private Integer idMarca;
     private String nombreMarca;
+    private String placa;
 }

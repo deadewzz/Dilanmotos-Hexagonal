@@ -26,4 +26,7 @@ public class MotoEntity {
 
     @Column(name = "cilindraje")
     private Double cilindraje;
+
+    @Column(name = "placa")
+    private String placa;
 }

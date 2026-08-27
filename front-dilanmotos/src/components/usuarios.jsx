@@ -6,7 +6,10 @@ export default function Usuarios() {
     const [marcas, setMarcas] = useState([]);
     const [referencias, setReferencias] = useState([]);
     const [tiposServicio, setTiposServicio] = useState([]);
-    const [nuevo, setNuevo] = useState({ nombre: '', correo: '', contrasena: '', idReferencia: '', idMarca: '', cilindraje: '', idTipoServicio: '' });
+    
+    // Agregamos la placa al estado inicial
+    const [nuevo, setNuevo] = useState({ nombre: '', correo: '', contrasena: '', idReferencia: '', idMarca: '', cilindraje: '', idTipoServicio: '', placa: '' });
+    
     const [editMode, setEditMode] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
     const [mensaje, setMensaje] = useState('');
@@ -28,7 +31,6 @@ export default function Usuarios() {
 
     useEffect(() => { 
         cargar(); 
-        // cargar marcas y tipos de servicio para el formulario
         fetch('http://localhost:8080/api/marcas')
             .then(r => r.ok ? r.json() : [])
             .then(d => setMarcas(Array.isArray(d) ? d : []))
@@ -53,7 +55,6 @@ export default function Usuarios() {
         }
     };
 
-    // FUNCIÓN DE VALIDACIÓN MANUAL EN JS
     const validarFormulario = () => {
         const regexNombre = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
         const regexCorreo = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$/;
@@ -64,12 +65,10 @@ export default function Usuarios() {
         }
 
         if (!regexCorreo.test(nuevo.correo.trim())) {
-            setMensaje("❌ El correo electrónico debe tener un formato válido y terminar en '.com' (Ej: usuario@gmail.com).");
+            setMensaje("❌ El correo debe terminar en '.com' (Ej: usuario@gmail.com).");
             return false;
         }
 
-        // VALIDACIÓN DE CONTRASEÑA (Mínimo 6 caracteres)
-        // En registro siempre es obligatoria. En edición solo se valida si el usuario escribió algo.
         if (!editMode || nuevo.contrasena.length > 0) {
             if (nuevo.contrasena.length < 6 || nuevo.contrasena.length > 20) {
                 setMensaje("❌ La contraseña debe tener al menos 6 caracteres y maximo 20.");
@@ -102,6 +101,7 @@ export default function Usuarios() {
                     ...nuevo,
                     nombre: nuevo.nombre.trim(),
                     correo: nuevo.correo.trim().toLowerCase(),
+                    placa: nuevo.placa ? nuevo.placa.trim().toUpperCase() : '',
                     idReferencia: nuevo.idReferencia ? parseInt(nuevo.idReferencia) : null,
                     idTipoServicio: nuevo.idTipoServicio && nuevo.idTipoServicio !== '0' ? parseInt(nuevo.idTipoServicio) : null,
                     cilindraje: nuevo.cilindraje ? parseFloat(nuevo.cilindraje) : null,
@@ -133,9 +133,10 @@ export default function Usuarios() {
             idReferencia: u.idReferencia ?? u.id_referencia ?? '',
             idMarca: u.idMarca ?? u.id_marca ?? '',
             cilindraje: u.cilindraje ?? '',
-            idTipoServicio: u.idTipoServicio ?? u.id_tipo_servicio ?? ''
+            idTipoServicio: u.idTipoServicio ?? u.id_tipo_servicio ?? '',
+            placa: (u.motos && u.motos.length > 0) ? u.motos[0].placa : ''
         });
-        // si tiene marca, cargar referencias para mostrar el select correctamente
+        
         if (u.idMarca) {
             fetch(`http://localhost:8080/api/referencias?marcaId=${u.idMarca}`)
                 .then(res => res.ok ? res.json() : [])
@@ -167,154 +168,86 @@ export default function Usuarios() {
     };
 
     const resetForm = () => {
-        setNuevo({ nombre: '', correo: '', contrasena: '', idReferencia: '', idMarca: '', cilindraje: '', idTipoServicio: '' });
+        setNuevo({ nombre: '', correo: '', contrasena: '', idReferencia: '', idMarca: '', cilindraje: '', idTipoServicio: '', placa: '' });
         setEditMode(false);
         setSelectedId(null);
     };
 
     const gridLayoutTabla = {
         display: 'grid',
-        gridTemplateColumns: '80px 2fr 2fr 120px 150px',
+        gridTemplateColumns: '70px 1.5fr 1.5fr 1.5fr 100px 120px',
         gap: '15px',
         alignItems: 'center',
         padding: '15px',
-        minWidth: '800px'
+        minWidth: '850px'
     };
 
     return (
         <div className="main-content-inner">
-            
-            {/* PANEL DEL FORMULARIO */}
             <div className="card-panel">
-                <h3 className="text-primary mb-4">
-                    {editMode ? '📝 Editar Usuario' : '👥 Gestión de Usuarios'}
-                </h3>
-
-                {mensaje && (
-                    <div className="alert alert-info fw-bold mb-3">
-                        {mensaje}
-                    </div>
-                )}
-
+                <h3 className="text-primary mb-4">{editMode ? '📝 Editar Usuario' : '👥 Gestión de Usuarios'}</h3>
+                {mensaje && <div className="alert alert-info fw-bold mb-3">{mensaje}</div>}
+                
                 <form onSubmit={guardar}>
                     <div className="mb-3">
                         <label className="form-label fw-bold">Nombre Completo</label>
-                        <input 
-                            className="input-bs" 
-                            type="text"
-                            placeholder="Ej: Juan Pérez" 
-                            value={nuevo.nombre} 
-                            onChange={e => setNuevo({...nuevo, nombre: e.target.value})} 
-                            pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
-                            title="El nombre solo debe contener letras y espacios."
-                            required 
-                        />
+                        <input className="input-bs" type="text" value={nuevo.nombre} onChange={e => setNuevo({...nuevo, nombre: e.target.value})} pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$" required />
                     </div>
 
                     <div className="mb-3">
                         <label className="form-label fw-bold">Correo Electrónico</label>
-                        <input 
-                            className="input-bs" 
-                            type="text" 
-                            placeholder="nombre@correo.com" 
-                            value={nuevo.correo} 
-                            onChange={e => setNuevo({...nuevo, correo: e.target.value})} 
-                            pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$"
-                            title="El correo debe ser válido y terminar estrictamente en '.com'."
-                            required 
-                        />
+                        <input className="input-bs" type="text" value={nuevo.correo} onChange={e => setNuevo({...nuevo, correo: e.target.value})} pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.com$" required />
                     </div>
 
                     <div className="mb-3">
                         <label className="form-label fw-bold">Contraseña</label>
-                        <input 
-                            className="input-bs" 
-                            type="password" 
-                            placeholder={editMode ? "Dejar vacío para mantener la contraseña actual" : "Asigne una contraseña segura (mín. 6 caracteres)"} 
-                            value={nuevo.contrasena} 
-                            onChange={e => setNuevo({...nuevo, contrasena: e.target.value})} 
-                            // Propiedad HTML5: Valida la longitud mínima nativamente en el navegador
-                            minLength={editMode ? undefined : 6}
-                            title="La contraseña debe tener un mínimo de 6 caracteres."
-                            required={!editMode} 
-                        />
+                        <input className="input-bs" type="password" value={nuevo.contrasena} onChange={e => setNuevo({...nuevo, contrasena: e.target.value})} minLength={editMode ? undefined : 6} required={!editMode} />
                     </div>
+                    
                     <hr />
                     <h5 className="mb-3">Información de tu Moto</h5>
 
                     <div className="mb-3">
                         <label className="form-label fw-bold">Marca de tu moto</label>
-                        <select className="input-bs" value={nuevo.idMarca} onChange={handleMarcaChange} required>
+                        <select className="input-bs" value={nuevo.idMarca} onChange={handleMarcaChange} required={!editMode}>
                             <option value="">-- Selecciona una marca --</option>
-                            {marcas.map(m => (
-                                <option key={m.idMarca} value={m.idMarca}>{m.nombre}</option>
-                            ))}
+                            {marcas.map(m => ( <option key={m.idMarca} value={m.idMarca}>{m.nombre}</option> ))}
                         </select>
                     </div>
 
                     <div className="mb-3">
                         <label className="form-label fw-bold">Modelo (de nuestro catálogo)</label>
-                        <select
-                            className="input-bs"
-                            value={nuevo.idReferencia}
-                            onChange={e => setNuevo({ ...nuevo, idReferencia: e.target.value })}
-                            disabled={referencias.length === 0}
-                            required
-                        >
+                        <select className="input-bs" value={nuevo.idReferencia} onChange={e => setNuevo({ ...nuevo, idReferencia: e.target.value })} disabled={referencias.length === 0} required={!editMode}>
                             <option value="">{referencias.length === 0 ? "Primero elige una marca" : "-- Elige el modelo --"}</option>
-                            {referencias.map(ref => (
-                                <option key={ref.idReferencia} value={ref.idReferencia}>{ref.nombre}</option>
-                            ))}
+                            {referencias.map(ref => ( <option key={ref.idReferencia} value={ref.idReferencia}>{ref.nombre}</option> ))}
                         </select>
+                    </div>
+
+                    <div className="mb-3">
+                        <label className="form-label fw-bold">Placa de la Moto</label>
+                        <input className="input-bs" type="text" value={nuevo.placa} onChange={e => setNuevo({ ...nuevo, placa: e.target.value.toUpperCase() })} maxLength={6} required={!editMode} />
                     </div>
 
                     <div className="mb-3">
                         <label className="form-label fw-bold">Cilindraje (cc)</label>
-                        <input
-                            className="input-bs"
-                            type="number"
-                            value={nuevo.cilindraje}
-                            onChange={e => setNuevo({ ...nuevo, cilindraje: e.target.value })}
-                            min={125}
-                            max={1400}
-                            step={1}
-                            required
-                        />
+                        <input className="input-bs" type="number" value={nuevo.cilindraje} onChange={e => setNuevo({ ...nuevo, cilindraje: e.target.value })} min={125} max={1400} step={1} required={!editMode} />
                     </div>
 
                     <div className="mb-3">
                         <label className="form-label fw-bold">Tipo de Servicio</label>
-                        <select
-                            className="input-bs"
-                            value={nuevo.idTipoServicio}
-                            onChange={e => setNuevo({ ...nuevo, idTipoServicio: e.target.value })}
-                            required
-                        >
+                        <select className="input-bs" value={nuevo.idTipoServicio} onChange={e => setNuevo({ ...nuevo, idTipoServicio: e.target.value })} required={!editMode}>
                             <option value="">-- Selecciona un tipo de servicio --</option>
                             <option value="0">N/A</option>
-                            {tiposServicio.map(t => (
-                                <option key={(t.idTipoServicio ?? t.idTipo ?? t.id_tipo_servicio)} value={(t.idTipoServicio ?? t.idTipo ?? t.id_tipo_servicio)}>
-                                    {t.nombre}
-                                </option>
-                            ))}
+                            {tiposServicio.map(t => ( <option key={(t.idTipoServicio ?? t.idTipo ?? t.id_tipo_servicio)} value={(t.idTipoServicio ?? t.idTipo ?? t.id_tipo_servicio)}>{t.nombre}</option> ))}
                         </select>
                     </div>
                     
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }} className="mt-4">
-                        <button 
-                            type="submit" 
-                            className={`btn-bs w-100 ${editMode ? 'btn-success' : 'btn-success'}`}
-                            style={{ padding: '12px', fontSize: '1rem' }}
-                        >
+                        <button type="submit" className="btn-bs w-100 btn-success" style={{ padding: '12px', fontSize: '1rem' }}>
                             {editMode ? 'Actualizar Cambios' : 'Registrar Usuario'}
                         </button>
                         {editMode && (
-                            <button 
-                                type="button" 
-                                className="btn-bs btn-danger w-100" 
-                                onClick={() => { resetForm(); setMensaje(''); }}
-                                style={{ padding: '12px', fontSize: '1rem' }}
-                            >
+                            <button type="button" className="btn-bs btn-danger w-100" onClick={() => { resetForm(); setMensaje(''); }} style={{ padding: '12px', fontSize: '1rem' }}>
                                 Cancelar Edición
                             </button>
                         )}
@@ -322,70 +255,41 @@ export default function Usuarios() {
                 </form>
             </div>
 
-            {/* PANEL DE LA TABLA */}
             <div className="card-panel mt-4">
                 <h4 className="mb-4">📋 Listado de Usuarios Registrados</h4>
-
                 <div style={{ width: '100%', overflowX: 'auto', background: 'var(--white)', borderRadius: '10px', border: '1px solid #dee2e6' }}>
                     
-                    {/* ENCABEZADO */}
-                    <div style={{ 
-                        ...gridLayoutTabla, 
-                        background: 'var(--header-table)', 
-                        color: 'var(--white)', 
-                        fontWeight: 'bold' 
-                    }}>
+                    <div style={{ ...gridLayoutTabla, background: 'var(--header-table)', color: 'var(--white)', fontWeight: 'bold' }}>
                         <div>ID</div>
                         <div>Nombre</div>
-                        <div>Correo Electrónico</div>
+                        <div>Correo</div>
+                        <div>Placa / Moto</div>
                         <div>Estado</div>
                         <div style={{ display: 'flex', justifyContent: 'center' }}>Acciones</div>
                     </div>
 
-                    {/* FILAS */}
                     {usuarios.length > 0 ? (
                         usuarios.map(u => {
                             const currentId = u.idUsuario || u.id_usuario;
+                            const moto = (u.motos && u.motos.length > 0) ? u.motos[0] : null;
                             return (
-                                <div 
-                                    className="table-row-hover-effect"
-                                    style={{ 
-                                        ...gridLayoutTabla, 
-                                        borderBottom: '1px solid #eee',
-                                        background: 'var(--white)',
-                                        transition: '0.2s'
-                                    }} 
-                                    key={currentId}
-                                >
+                                <div className="table-row-hover-effect" style={{ ...gridLayoutTabla, borderBottom: '1px solid #eee', background: 'var(--white)', transition: '0.2s' }} key={currentId}>
                                     <div style={{ color: 'var(--text-dark)', fontWeight: 'bold' }}>#{currentId}</div>
                                     <div style={{ fontWeight: '600', color: '#212529' }}>{u.nombre}</div>
                                     <div style={{ color: '#4b5563', wordBreak: 'break-all' }}>{u.correo}</div>
-                                    <div>
-                                        <span style={{ backgroundColor: '#e8f5e9', color: '#2e7d32', padding: '5px 10px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 'bold' }}>
-                                            ACTIVO
-                                        </span>
+                                    <div style={{ color: '#0d6efd', fontWeight: 'bold' }}>
+                                        {moto ? `${moto.placa || 'S/P'} - ${moto.modelo}` : <span className="text-muted">N/A</span>}
                                     </div>
+                                    <div><span style={{ backgroundColor: '#e8f5e9', color: '#2e7d32', padding: '5px 10px', borderRadius: '6px', fontSize: '0.78rem', fontWeight: 'bold' }}>ACTIVO</span></div>
                                     <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
-                                        <button 
-                                            className="btn-bs btn-success btn-sm" 
-                                            style={{ padding: '6px 12px' }} 
-                                            onClick={() => iniciarEdicion(u)}
-                                        >
-                                            <i className="fa-solid fa-pen"></i>
-                                        </button>
-                                        <button 
-                                            className="btn-bs btn-danger btn-sm" 
-                                            style={{ padding: '6px 12px' }} 
-                                            onClick={() => eliminar(currentId)}
-                                        >
-                                            <i className="fa-solid fa-trash"></i>
-                                        </button>
+                                        <button className="btn-bs btn-success btn-sm" style={{ padding: '6px 12px' }} onClick={() => iniciarEdicion(u)}><i className="fa-solid fa-pen"></i></button>
+                                        <button className="btn-bs btn-danger btn-sm" style={{ padding: '6px 12px' }} onClick={() => eliminar(currentId)}><i className="fa-solid fa-trash"></i></button>
                                     </div>
                                 </div>
                             );
                         })
                     ) : (
-                        <div className="p-4 text-center text-muted">No se encontraron usuarios registrados en el sistema.</div>
+                        <div className="p-4 text-center text-muted">No se encontraron usuarios registrados.</div>
                     )}
                 </div>
             </div>
