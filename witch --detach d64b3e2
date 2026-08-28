@@ -1,0 +1,180 @@
+* [33m79602c0[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mcorrecciones[m[33m, [m[1;31morigin/correcciones[m[33m)[m Refactor
+*   [33mcf2c4d4[m Merge branch 'correcciones' of https://github.com/deadewzz/Dilanmotos-Hexagonal into correcciones
+[32m|[m[33m\[m  
+[32m|[m * [33md8fd7ae[m FIX BACKUP
+[32m|[m * [33md36f20c[m PQRS Bugs solucionados al 100%
+* [33m|[m [33m8032b1e[m fix: sincronizacion y mapeo completo de placa en backend y frontend
+[33m|[m[33m/[m  
+* [33m76cef0a[m Bugs solucionados PQRS
+* [33m5ba0e32[m[33m ([m[1;32mmain[m[33m)[m Fix Fichas Tecnicas
+* [33mf5371b5[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m IA arreglada
+[33m|[m * [33m2a12272[m[33m ([m[1;31morigin/Testeo[m[33m, [m[1;32mtesteo[m[33m)[m Creacion de las pruebas integradas para Cotizacion, Moto y Categoria
+[33m|[m * [33md64b3e2[m fix
+[33m|[m * [33m1bb6a53[m Se Realizaron las Pruebas Integradas: Marca Producto, Historial y Servicio
+[33m|[m[33m/[m  
+*   [33md033a81[m Merge branch 'main' of https://github.com/deadewzz/Dilanmotos-Hexagonal
+[35m|[m[36m\[m  
+[35m|[m * [33m66adb50[m Correcciones de Producto.java y nombres de variables
+[35m|[m * [33mff22827[m Correcciones de Producto.java y nombres de variables
+[35m|[m * [33ma209380[m fix: corregir mapeo de imagen_url
+[35m|[m * [33m3b5db4c[m Pruebas de integración de Mecanico, Marca y Tipo de servicio
+[35m|[m *   [33m1d02e3b[m Merge branch 'Testeo' of https://github.com/deadewzz/Dilanmotos-Hexagonal
+[35m|[m [1;31m|[m[1;32m\[m  
+[35m|[m [1;31m|[m * [33mc85a7b7[m Pruebas de integracion Producto
+[35m|[m * [1;32m|[m [33m2aa6c95[m Pruebas unitrarias de Marca, Tipo de servicio y mecanicas terminadas
+[35m|[m [1;32m|[m[1;32m/[m  
+* [1;32m/[m [33md7e8f47[m Pruebas unitarias de Categoria, Cotizacion y Moto / Pruebas automatizadas de Categoria y Moto
+[1;32m|[m[1;32m/[m  
+*   [33m56d4bec[m Merge branch 'main' of https://github.com/deadewzz/Dilanmotos-Hexagonal
+[1;33m|[m[1;34m\[m  
+[1;33m|[m *   [33m4aba6a6[m Pruebas unitarias producto OK y fix de merge
+[1;33m|[m [1;35m|[m[1;36m\[m  
+[1;33m|[m * [1;36m|[m [33m3306fb2[m Pruebas unitarias Productos OK
+* [1;36m|[m [1;36m|[m [33mc7ef78d[m Referencia Controller Test
+[1;36m|[m [1;36m|[m[1;36m/[m  
+[1;36m|[m[1;36m/[m[1;36m|[m   
+* [1;36m|[m [33m13d8c5f[m Controller de pqrs terminado en testeo
+* [1;36m|[m [33m4b2c280[m Pqrs Controller Test
+[1;36m|[m[1;36m/[m  
+* [33mfc164e6[m Cofiguraciones para APK mobile
+* [33ma0a3f9c[m Se Crearon las Pruebas Unitarias: Historial, Servicio y Marca Producto
+*   [33m4cb1bfa[m Merge branch 'main' of https://github.com/deadewzz/Dilanmotos-Hexagonal
+[31m|[m[32m\[m  
+[31m|[m * [33m7af9ce0[m Pruebas unitarias de Mecanico
+* [32m|[m [33m926b0cb[m Fix: Arreglo al usuariointegrado
+[32m|[m[32m/[m  
+* [33m1424a11[m Caracteristicas UC Test
+* [33ma61ce3c[m Update: Pruebas usuario completa
+* [33m4b7a62b[m Creación de test de ReferenciaMoto
+*   [33m036957c[m .
+[33m|[m[34m\[m  
+[33m|[m * [33m94da9f8[m avance prueba de registro
+* [34m|[m [33mc8b2689[m Prueba unitaria y Prueba de Automatizacion para cotizacion
+[34m|[m[34m/[m  
+* [33mc29c8f5[m instalación de selenium
+* [33m206a210[m Prueba unitaria de Mecánico
+* [33m4d19def[m Fix: Correcion prueba unitaria Usuario
+*   [33m304a66a[m Merge branch 'main' of https://github.com/deadewzz/Dilanmotos-Hexagonal
+[35m|[m[36m\[m  
+[35m|[m * [33mb257d32[m Test de Chat UC
+[35m|[m * [33mbfecc84[m chore: corregir test y remover secretos del codigo
+[35m|[m * [33m44ead98[m Revert "Medición metricas de JMeter"
+[35m|[m * [33m25a3a3a[m Medición metricas de JMeter
+[35m|[m * [33m0f83894[m Actualización del pom para JaCoCo, e integracion comando ./mvwn.cmd
+[35m|[m * [33me5c80fd[m Prueba unitaria JUnit y Mockito para PQRS UC
+* [36m|[m [33m1d3be05[m Pruebas unitarias de usuario
+[36m|[m[36m/[m  
+* [33m7906c53[m Ajustes
+* [33m6586fb2[m Preparación de dilanmotos para los test
+* [33m4ca1ee2[m Creación de backup, copias de seguridad
+* [33m239113e[m Revise README.md for project overview and setup
+* [33m1ea3ff8[m Creación de variables de entorno
+* [33m8f9ed65[m UPDATE: Se creo todo el CRUD de marca de producto
+* [33m0a94b85[m Fix: CRUD de registro de moto y asignacion automatica
+* [33m7783604[m Update: Se agregaron las validaciones del registro
+* [33m066fb58[m Readme
+* [33m7c38b4f[m Ajustes de auth controller
+* [33m3a5f131[m Correcciones generales
+* [33m71f4ec4[m Merge branch 'main' of https://github.com/deadewzz/Dilanmotos-Hexagonal
+*   [33m1f2d0d9[m Merge branch 'main' of https://github.com/deadewzz/Dilanmotos-Hexagonal
+[1;31m|[m[1;32m\[m  
+[1;31m|[m * [33m9c184cb[m Pequeños cambios en el security config
+* [1;32m|[m [33med7c38a[m Correcion de estado en cotizacion
+[1;32m|[m[1;32m/[m  
+* [33m7dca82d[m Se añadio la columna de Cliente a la cotizacion
+* [33ma76cd81[m Implementacion Swagger y correcion de JWT
+* [33meddd0e9[m Ajustes en la IA
+* [33m7b0e9b2[m Modificaciones en Cotizacion
+*   [33mcef3671[m Merge branch 'main' of https://github.com/deadewzz/Dilanmotos-Hexagonal
+[1;33m|[m[1;34m\[m  
+[1;33m|[m * [33m63dea18[m Ajustes en tabla de referencias
+* [1;34m|[m [33m0253a71[m Merge branch 'main' of https://github.com/deadewzz/Dilanmotos-Hexagonal
+[1;35m|[m[1;34m\[m[1;34m|[m 
+[1;35m|[m * [33m540e7b6[m Se completo la IA y se implemento la recuperacion y cambio de contraseña
+* [1;36m|[m [33m1118770[m Correcion de fecha en cotizacion
+[1;36m|[m[1;36m/[m  
+* [33m265bda6[m Arreglos y validaciones del menu administrador
+* [33m9e5882e[m Implementacion IdProducto a cotizacion
+* [33madc8571[m Correcion de los CRUD. Implementacion de boton agregado/pendiente
+* [33m945c233[m Implementacion de seguridad movil para la funcion de las APIs
+* [33m047e802[m Fichas tecnicas
+* [33mcd98330[m Historial Completado
+* [33m2a5dab6[m ajuste en la tabla para el administrador
+* [33mc361811[m Ajuste en los catalogos
+* [33m3677be9[m Arreglos en los catalogos de cada producto, ahora funcional con cada id, pendiente:url en bd para cada imagen
+* [33mc1489ee[m Cotizacion: Ya envia cotizacion por correo y modulo terminado (Alejadro)
+*   [33m97de993[m Merge branch 'main' of https://github.com/deadewzz/Dilanmotos-Hexagonal
+[31m|[m[32m\[m  
+[31m|[m * [33mb2d6836[m IA Implementada
+* [32m|[m [33m282fa2b[m Correciones en hacer cotizacion
+[32m|[m[32m/[m  
+* [33mff94ebc[m Arreglos en el front-end
+* [33mb9492d6[m Correcciones: Filtro motos y Perfil usuario
+* [33mfae8a82[m Ajuste en metodo para obtener por id un producto, corrección de ficha técnica
+* [33md03beab[m Creación de marca y ajuste en cotización
+* [33m8ca2b83[m Modulo Tipo de Servicio Corregido
+* [33m8045900[m Ajuste en SecurityConfig para cotizaciones
+* [33m1687f41[m Cotizacion y Categoria funcionales
+* [33m8f04b52[m Modulo Servicios funcional
+* [33m2c5a1a8[m Corrección de Servicios, mecanico y tipo servicio
+* [33m0ce8351[m List en moto
+* [33m6e7168c[m Modulos Productos y Motos: Se ajustaron tablas para que se vean las marcas
+* [33m7565d9d[m Modulo usuarios: CRUD OK
+* [33m160f9be[m PQRS Finalizadas, falta en historial
+* [33m7730339[m Despliegue front-back corregidod
+* [33m897bce4[m Arreglos del merge
+*   [33med84b6b[m Merge branch 'main' of https://github.com/deadewzz/Dilanmotos-Hexagonal
+[33m|[m[34m\[m  
+[33m|[m * [33mbecc76a[m Correcion en JWT
+* [34m|[m [33m259e08f[m Creacion cotizacion y categoria(para revisar)
+* [34m|[m [33mef6e970[m Ajuste en SegurityConfig
+[34m|[m[34m/[m  
+* [33maca9a03[m Correcion login de usuarios
+* [33mdca8986[m agregacion de CORS origin a los controller
+* [33md735bd4[m JWT Y Seguridad instalada
+* [33m2ffc5d9[m Implementación de react
+* [33m5182975[m Ajustes de la IA
+* [33mb8fce85[m Implementación de la IA
+* [33m2034e76[m Correcciones en referencias
+* [33mc4795b9[m Correciones
+* [33medde9b8[m Ajustes en referencia
+* [33m5f98ec8[m Arreglos pqrs
+* [33mfca2548[m Creación de tipo de servicio
+* [33m973eb18[m creacion cotizacion
+* [33mb701e85[m creacion categoria
+* [33m42c4458[m Pequeño ajuste en refMoto
+* [33m9cec9ef[m Modulo Historial Creado
+* [33m9b8c4c6[m Ajustes en referencia moto
+*   [33m2cb29a6[m Merge branch 'main' of https://github.com/deadewzz/Dilanmotos-Hexagonal
+[35m|[m[36m\[m  
+[35m|[m * [33mef7850b[m Implementación de Marca
+[35m|[m *   [33m3ca3a85[m Modulo Servicio Creado
+[35m|[m [1;31m|[m[1;32m\[m  
+* [1;31m|[m [1;32m\[m   [33m6725559[m Merge branch 'main' of https://github.com/deadewzz/Dilanmotos-Hexagonal
+[1;33m|[m[1;34m\[m [1;31m\[m [1;32m\[m  
+[1;33m|[m * [1;31m\[m [1;32m\[m   [33me68943c[m Modulo Servicio Creado
+[1;33m|[m [1;31m|[m[1;32m\[m [1;31m\[m [1;32m\[m  
+[1;33m|[m [1;31m|[m [1;32m|[m[1;31m/[m [1;32m/[m  
+[1;33m|[m [1;31m|[m[1;31m/[m[1;32m|[m [1;32m/[m   
+[1;33m|[m [1;31m|[m [1;32m|[m[1;32m/[m    
+* [1;31m|[m [1;32m|[m   [33mc08af6b[m Merge branch 'main' of https://github.com/deadewzz/Dilanmotos-Hexagonal
+[31m|[m[32m\[m [1;31m\[m [1;32m\[m  
+[31m|[m * [1;31m\[m [1;32m\[m   [33m41d25ae[m Modulo Servicio Creado
+[31m|[m [1;31m|[m[1;32m\[m [1;31m\[m [1;32m\[m  
+[31m|[m [1;31m|[m [1;32m|[m[1;31m/[m [1;32m/[m  
+[31m|[m [1;31m|[m[1;31m/[m[1;32m|[m [1;32m/[m   
+[31m|[m [1;31m|[m [1;32m|[m[1;32m/[m    
+[31m|[m [1;31m|[m * [33m7aeee5d[m pequeña corrección e variables
+[31m|[m [1;31m|[m * [33md5f45bd[m Implementación de mecanico
+[31m|[m * [34m|[m [33mb350ce9[m Modulo Servicio Creado
+[31m|[m [34m|[m[34m/[m  
+* [34m/[m [33m0fbc19f[m Creación de modulo Referencia motos
+[34m|[m[34m/[m  
+* [33mca865af[m Creación modulo PQRS
+* [33me4c0a20[m Modulo motos funcional
+* [33m33e1163[m Modulo Caracteristicas completo
+* [33m0c75f53[m Modulo productos completo
+* [33m1efc95e[m Modulo usuarios, Registrar y listar, Conexion DB
+* [33m091a73c[m Modulo usuarios: Permite registrar y lista, conexion con DB ok
+* [33mca0c365[m Reestructuración
+* [33m36e03ca[m Reinicio del repositorio
