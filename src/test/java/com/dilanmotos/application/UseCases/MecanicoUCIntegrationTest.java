@@ -10,7 +10,6 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
-import com.dilanmotos.domain.repository.MecanicoRepository;
 import com.dilanmotos.infrastructure.dto.MecanicoRequestDTO;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -30,9 +29,6 @@ public class MecanicoUCIntegrationTest {
 
     @Autowired
     private MecanicoUC mecanicoUC;
-
-    @Autowired
-    private MecanicoRepository mecanicoRepository;
 
     @Autowired
     private ObjectMapper objectMapper;

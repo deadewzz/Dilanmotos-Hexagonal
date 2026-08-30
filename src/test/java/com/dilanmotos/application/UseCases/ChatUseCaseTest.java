@@ -6,7 +6,6 @@ import com.dilanmotos.domain.model.Marca;
 import com.dilanmotos.domain.repository.MarcaRepository;
 import com.dilanmotos.domain.repository.MotoRepository;
 import com.dilanmotos.infrastructure.persistence.ChatExternalPort;
-import com.dilanmotos.domain.exception.*;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
