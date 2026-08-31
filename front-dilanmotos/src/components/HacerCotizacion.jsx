@@ -4,6 +4,11 @@ import './HacerCotizacion.css'
 
 const STORAGE_KEYS = ['cart', 'selectedProducts', 'selected_items']
 
+// Helper para dar formato de Peso Colombiano (sin decimales y con puntos de miles)
+const formatCOP = (valor) => {
+    return '$' + Math.round(Number(valor) || 0).toLocaleString('es-CO');
+};
+
 function readStoredItems() {
     for (const key of STORAGE_KEYS) {
         const raw = localStorage.getItem(key)
@@ -91,7 +96,6 @@ export default function HacerCotizacion() {
                 })
                 
                 if (!response.ok) {
-                    // Validar si la sesión expiró al cargar productos
                     if (response.status === 401 || response.status === 403) {
                         handleSessionExpired();
                         return;
@@ -102,7 +106,7 @@ export default function HacerCotizacion() {
                 const data = await response.json()
                 setProducts(Array.isArray(data) ? data : [])
             } catch (error) {
-                // ignore load failure; dropdown stays empty
+                // ignore load failure
             } finally {
                 setLoadingProducts(false)
             }
@@ -121,7 +125,6 @@ export default function HacerCotizacion() {
         }
     }, [items])
     
-    // Función centralizada para matar la sesión
     const handleSessionExpired = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('idUsuario');
@@ -206,7 +209,6 @@ export default function HacerCotizacion() {
             })
 
             if (!response.ok) {
-                // DETECCIÓN DE SESIÓN EXPIRADA
                 if (response.status === 401 || response.status === 403) {
                     const error = new Error('Sesión expirada');
                     error.status = response.status;
@@ -228,7 +230,7 @@ export default function HacerCotizacion() {
 
     function formatDetalleCotizacion(items) {
         return items
-            .map((item) => `${item.nombre} - ${item.cantidad} x $${item.precio.toFixed(2)} = $${(item.precio * item.cantidad).toFixed(2)}`)
+            .map((item) => `${item.nombre} - ${item.cantidad} x ${formatCOP(item.precio)} = ${formatCOP(item.precio * item.cantidad)}`)
             .join('\n')
     }
 
@@ -308,10 +310,9 @@ export default function HacerCotizacion() {
         } catch (error) {
             console.error(error)
 
-            // MANEJO ESTRICTO DE SESIÓN EXPIRADA
             if (error.status === 401 || error.status === 403) {
                 handleSessionExpired();
-                return; // Corta el flujo aquí, NO dibuja la cotización ficticia
+                return;
             }
 
             setQuoteMessage('No se pudo guardar la cotización en la base de datos. Revise la conexión o el inicio de sesión.')
@@ -328,17 +329,6 @@ export default function HacerCotizacion() {
         }
     }
 
-    function descargarJSON() {
-        if (!quote) return
-        const blob = new Blob([JSON.stringify(quote, null, 2)], { type: 'application/json' })
-        const url = URL.createObjectURL(blob)
-        const a = document.createElement('a')
-        a.href = url
-        a.download = `cotizacion_${quote.idCotizacion ?? quote.id ?? 'sin-id'}.json`
-        a.click()
-        URL.revokeObjectURL(url)
-    }
-
     const isSelected = (id) => items.some((item) => String(item.id) === String(id))
 
     const handleSelectProduct = (e) => {
@@ -348,7 +338,7 @@ export default function HacerCotizacion() {
     const addSelectedProduct = () => {
         if (!selectedProductId) return
         const product = products.find((product) => String(product.idProducto ?? product.id) === String(selectedProductId))
-        if (product) {
+        if (product && Number(product.stock ?? 0) > 0) {
             addProduct(product)
             setSelectedProductId('')
         }
@@ -389,13 +379,13 @@ export default function HacerCotizacion() {
                                 {items.map((it) => (
                                     <tr key={it.id} style={{ borderBottom: '1px solid #eee' }}>
                                         <td style={{ padding: '10px 12px' }}>{it.nombre}</td>
-                                        <td style={{ padding: '10px 12px', textAlign: 'center' }}>${it.precio.toFixed(2)}</td>
+                                        <td style={{ padding: '10px 12px', textAlign: 'center' }}>{formatCOP(it.precio)}</td>
                                         <td style={{ padding: '10px 12px', textAlign: 'center' }}>
                                             <button className="btn-bs btn-primary btn-sm" onClick={() => updateCantidad(it.id, -1)}>-</button>
                                             <span style={{ margin: '0 10px', fontWeight: 'bold' }}>{it.cantidad}</span>
                                             <button className="btn-bs btn-primary btn-sm" onClick={() => updateCantidad(it.id, +1)}>+</button>
                                         </td>
-                                        <td style={{ padding: '10px 12px', textAlign: 'center' }}>${(it.precio * it.cantidad).toFixed(2)}</td>
+                                        <td style={{ padding: '10px 12px', textAlign: 'center' }}>{formatCOP(it.precio * it.cantidad)}</td>
                                         <td style={{ padding: '10px 12px', textAlign: 'center' }}>
                                             <button className="btn-bs btn-danger btn-sm" onClick={() => removeItem(it.id)}>
                                                 <i className="fa-solid fa-trash"></i>
@@ -435,9 +425,13 @@ export default function HacerCotizacion() {
                             </option>
                             {products.map((product) => {
                                 const id = product.idProducto ?? product.id
+                                const stock = Number(product.stock ?? 0)
+                                const sinStock = stock <= 0
+                                const precio = product.precio ?? product.price ?? 0
+
                                 return (
-                                    <option key={id} value={id}>
-                                        {product.nombre ?? product.titulo ?? 'Producto'} - ${Number(product.precio ?? product.price ?? 0).toFixed(2)}
+                                    <option key={id} value={id} disabled={sinStock}>
+                                        {product.nombre ?? product.titulo ?? 'Producto'} - {formatCOP(precio)} {sinStock ? '(Sin stock)' : ''}
                                     </option>
                                 )
                             })}
@@ -455,7 +449,7 @@ export default function HacerCotizacion() {
                 {/* --- RESUMEN Y ACCIONES --- */}
                 <div style={{ borderTop: '1px solid #eee', paddingTop: '1rem', marginBottom: '1rem' }}>
                     <p className="fw-bold" style={{ fontSize: '1.1rem' }}>
-                        Total: <span className="text-primary">${total.toFixed(2)}</span>
+                        Total: <span className="text-primary">{formatCOP(total)}</span>
                     </p>
                 </div>
 
@@ -508,7 +502,7 @@ export default function HacerCotizacion() {
                             <div className="invoice-details">
                                 <p><strong>Fecha:</strong> {new Date(quote.fecha).toLocaleString()}</p>
                                 <p><strong>No. Cotización:</strong> {quote.idCotizacion ?? quote.id}</p>
-                                <p><strong>Total:</strong> ${quote.total.toFixed(2)}</p>
+                                <p><strong>Total:</strong> {formatCOP(quote.total)}</p>
                             </div>
                         </div>
 
@@ -526,9 +520,9 @@ export default function HacerCotizacion() {
                                     {quote.items.map((item) => (
                                         <tr key={item.id}>
                                             <td>{item.nombre}</td>
-                                            <td>${item.precio.toFixed(2)}</td>
+                                            <td>{formatCOP(item.precio)}</td>
                                             <td>{item.cantidad}</td>
-                                            <td>${(item.precio * item.cantidad).toFixed(2)}</td>
+                                            <td>{formatCOP(item.precio * item.cantidad)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -536,9 +530,9 @@ export default function HacerCotizacion() {
                         </div>
 
                         <div className="invoice-summary">
-                            <div><span>Total</span><strong>${quote.total.toFixed(2)}</strong></div>
+                            <div><span>Total</span><strong>{formatCOP(quote.total)}</strong></div>
                         </div>
-                            <h3 style={{ textAlign: 'center', color: '#732dcf' }}>¡Gracias por utilizar nuestros servicios!</h3>
+                        <h3 style={{ textAlign: 'center', color: '#732dcf' }}>¡Gracias por utilizar nuestros servicios!</h3>
                     </div>
                 )}
             </div>

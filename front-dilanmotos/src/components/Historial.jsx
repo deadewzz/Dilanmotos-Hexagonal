@@ -10,9 +10,21 @@ const Historial = () => {
     const idLogueado = localStorage.getItem('idUsuario');
     const token = localStorage.getItem('token');
 
+    // Función para limpiar la sesión y redirigir
+    const handleSessionExpired = () => {
+        localStorage.clear();
+        alert("Su sesión ha expirado. Por favor, inicie sesión nuevamente.");
+        navigate('/login');
+    };
+
     useEffect(() => {
         const cargarDatos = async () => {
-            if (!idLogueado || !token) return;
+            // Si faltan las credenciales locales, expira sesión de inmediato
+            if (!idLogueado || !token) {
+                handleSessionExpired();
+                return;
+            }
+
             setCargando(true);
             const endpoint = tab === 'pqrs' ? 'pqrs'
                            : tab === 'servicios' ? 'servicios'
@@ -21,6 +33,13 @@ const Historial = () => {
                 const res = await fetch(`http://localhost:8080/api/${endpoint}/usuario/${idLogueado}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
+
+                // Validar expiración de Token (401 / 403)
+                if (res.status === 401 || res.status === 403) {
+                    handleSessionExpired();
+                    return;
+                }
+
                 if (res.ok) {
                     const data = await res.json();
                     setDatos(Array.isArray(data) ? data : []);
@@ -34,8 +53,9 @@ const Historial = () => {
                 setCargando(false);
             }
         };
+
         cargarDatos();
-    }, [tab, idLogueado]);
+    }, [tab, idLogueado, token, navigate]);
 
     const rowStyle = {
         display: 'flex',
