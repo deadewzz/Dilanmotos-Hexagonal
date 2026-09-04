@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE_URL } from '../api';
 
 const Referencia = () => {
     const [marcas, setMarcas] = useState([]);
@@ -17,10 +18,10 @@ const Referencia = () => {
     const cargarTodo = async () => {
         try {
             const [resMarcas, resRefs] = await Promise.all([
-                fetch("http://localhost:8080/api/marcas", {
+                fetch(`${API_BASE_URL}/api/marcas`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 }),
-                fetch("http://localhost:8080/api/referencias", {
+                fetch(`${API_BASE_URL}/api/referencias`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
             ]);
@@ -54,8 +55,8 @@ const Referencia = () => {
         e.preventDefault();
 
         const url = editMode 
-            ? `http://localhost:8080/api/referencias/${selectedId}` 
-            : "http://localhost:8080/api/referencias";
+            ? `${API_BASE_URL}/api/referencias/${selectedId}` 
+            : `${API_BASE_URL}/api/referencias`;
         
         const payload = {
             nombre: formData.nombre,
@@ -231,7 +232,7 @@ const Referencia = () => {
                                         style={{ padding: '6px 12px' }}
                                         onClick={async () => {
                                             if(window.confirm("¿Eliminar del catálogo?")) {
-                                                await fetch(`http://localhost:8080/api/referencias/${ref.idReferencia}`, {
+                                                await fetch(`${API_BASE_URL}/api/referencias/${ref.idReferencia}`, {
                                                     method:'DELETE',
                                                     headers: { 'Authorization': `Bearer ${token}` }
                                                 });

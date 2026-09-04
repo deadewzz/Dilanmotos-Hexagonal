@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import '../global.css';
+import { API_BASE_URL } from '../api';
 
-const API_URL = 'http://localhost:8080/api/servicios';
+const API_URL = `${API_BASE_URL}/api/servicios`;
 
 const Servicio = () => {
     const token = localStorage.getItem('token');
@@ -28,9 +29,9 @@ const Servicio = () => {
         if (!token) return;
         try {
             const [resU, resM, resT, resS] = await Promise.all([
-                fetch('http://localhost:8080/api/usuarios', { headers: { 'Authorization': `Bearer ${token}` }}),
-                fetch('http://localhost:8080/api/mecanicos', { headers: { 'Authorization': `Bearer ${token}` }}),
-                fetch('http://localhost:8080/api/tipoServicio', { headers: { 'Authorization': `Bearer ${token}` }}),
+                fetch(`${API_BASE_URL}/api/usuarios`, { headers: { 'Authorization': `Bearer ${token}` }}),
+                fetch(`${API_BASE_URL}/api/mecanicos`, { headers: { 'Authorization': `Bearer ${token}` }}),
+                fetch(`${API_BASE_URL}/api/tipoServicio`, { headers: { 'Authorization': `Bearer ${token}` }}),
                 fetch(API_URL, { headers: { 'Authorization': `Bearer ${token}` }})
             ]);
             const [dataU, dataM, dataT, dataS] = await Promise.all([

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Dashboard.css';
+import { API_BASE_URL } from '../api';
 
 const Recomendaciones = () => {
     const navigate = useNavigate();
@@ -22,7 +23,7 @@ const Recomendaciones = () => {
 
             try {
                 // 1. Obtener la moto del usuario
-                const resMoto = await fetch(`http://localhost:8080/api/motos/usuario/${idUsuarioLocal}`, {
+                const resMoto = await fetch(`${API_BASE_URL}/api/motos/usuario/${idUsuarioLocal}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 
@@ -40,7 +41,7 @@ const Recomendaciones = () => {
                 setMoto(motoData);
 
                 // 2. Obtener las recomendaciones generadas por la IA
-                const resIA = await fetch(`http://localhost:8080/api/ia/recomendaciones/${idUsuarioLocal}`, {
+                const resIA = await fetch(`${API_BASE_URL}/api/ia/recomendaciones/${idUsuarioLocal}`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`

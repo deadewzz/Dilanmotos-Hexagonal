@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from '../api';
 
 export default function Caracteristicas() {
     const [caracteristicas, setCaracteristicas] = useState([]);
@@ -7,7 +8,7 @@ export default function Caracteristicas() {
     const [editMode, setEditMode] = useState(false);
     const [selectedId, setSelectedId] = useState(null);
 
-    const API_URL = 'http://localhost:8080/api/caracteristicas';
+    const API_URL = `${API_BASE_URL}/api/caracteristicas`;
     const token = localStorage.getItem('token');
 
     const cargarDatos = async () => {
@@ -15,7 +16,7 @@ export default function Caracteristicas() {
             const opciones = { headers: { 'Authorization': `Bearer ${token}` } };
             const [resCar, resMoto] = await Promise.all([
                 fetch(API_URL, opciones),
-                fetch('http://localhost:8080/api/motos', opciones)
+                fetch(`${API_BASE_URL}/api/motos`, opciones)
             ]);
             
             if (resCar.ok && resMoto.ok) {

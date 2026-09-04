@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import './fichaTecnica.css';
+import { API_BASE_URL } from '../api';
 
 const FichaTecnica = () => {
     const navigate = useNavigate();
@@ -29,7 +30,7 @@ const fetchProducto = async () => {
     try {
         // 1. Recuperamos el token del almacenamiento local
         const token = localStorage.getItem('token'); 
-        const response = await fetch(`http://localhost:8080/api/productos/${id}`, {
+        const response = await fetch(`${API_BASE_URL}/api/productos/${id}`, {
             method: 'GET',
             // 2. Añadimos los headers con el token de autorización
             headers: { 

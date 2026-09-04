@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './perfilUsuario.css';
+import { API_BASE_URL } from '../api';
 
 const PerfilUsuario = () => {
     const navigate = useNavigate();
@@ -32,7 +33,7 @@ const PerfilUsuario = () => {
             }
 
             try {
-                const response = await fetch(`http://localhost:8080/api/usuarios/${id}`, {
+                const response = await fetch(`${API_BASE_URL}/api/usuarios/${id}`, {
                     method: 'GET',
                     headers: {
                         'Authorization': `Bearer ${token}`,
@@ -70,7 +71,7 @@ const PerfilUsuario = () => {
         setEnviandoClave(true);
 
         try {
-            const response = await fetch("http://localhost:8080/api/usuarios/cambiar-contrasena", {
+            const response = await fetch(`${API_BASE_URL}/api/usuarios/cambiar-contrasena`, {
                 method: "POST",
                 headers: {
                     'Authorization': `Bearer ${token}`,

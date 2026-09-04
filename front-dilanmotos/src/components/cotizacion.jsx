@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../global.css';
+import { API_BASE_URL } from '../api';
 
-const API_URL = 'http://localhost:8080/api/cotizaciones';
+const API_URL = `${API_BASE_URL}/api/cotizaciones`;
 
 const Cotizacion = () => {
     const token = localStorage.getItem('token');
@@ -39,7 +40,7 @@ const Cotizacion = () => {
 
     const cargarProductos = async () => {
         try {
-            const response = await fetch('http://localhost:8080/api/productos', {
+            const response = await fetch(`${API_BASE_URL}/api/productos`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

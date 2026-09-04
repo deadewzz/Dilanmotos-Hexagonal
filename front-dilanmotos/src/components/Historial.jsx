@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Historial.css';
+import { API_BASE_URL } from '../api';
 
 const Historial = () => {
     const navigate = useNavigate();
@@ -30,7 +31,7 @@ const Historial = () => {
                            : tab === 'servicios' ? 'servicios'
                            : 'cotizaciones';
             try {
-                const res = await fetch(`http://localhost:8080/api/${endpoint}/usuario/${idLogueado}`, {
+                const res = await fetch(`${API_BASE_URL}/api/${endpoint}/usuario/${idLogueado}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 

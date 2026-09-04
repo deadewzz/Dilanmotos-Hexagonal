@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../auth.css';
+import { API_BASE_URL } from '../api';
 
 const Register = () => {
     const navigate = useNavigate();
@@ -21,7 +22,7 @@ const Register = () => {
     const [errorMensaje, setErrorMensaje] = useState(''); 
 
     useEffect(() => {
-        fetch("http://localhost:8080/api/marcas")
+        fetch(`${API_BASE_URL}/api/marcas`)
             .then(res => {
                 if (!res.ok) throw new Error("Error al obtener marcas");
                 return res.json();
@@ -29,7 +30,7 @@ const Register = () => {
             .then(data => setMarcas(data))
             .catch(err => console.error("Error cargando marcas:", err));
 
-        fetch("http://localhost:8080/api/tipoServicio")
+        fetch(`${API_BASE_URL}/api/tipoServicio`)
             .then(res => {
                 if (!res.ok) throw new Error("Error al obtener tipos de servicio");
                 return res.json();
@@ -44,7 +45,7 @@ const Register = () => {
         setFormData(prev => ({ ...prev, idReferencia: '' }));
 
         if (idMarca) {
-            fetch(`http://localhost:8080/api/referencias?marcaId=${idMarca}`)
+            fetch(`${API_BASE_URL}/api/referencias?marcaId=${idMarca}`)
                 .then(res => {
                     if (!res.ok) throw new Error("Error al obtener modelos");
                     return res.json();
@@ -69,7 +70,7 @@ const Register = () => {
         };
 
         try {
-            const res = await fetch("http://localhost:8080/api/usuarios", {
+            const res = await fetch(`${API_BASE_URL}/api/usuarios`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)

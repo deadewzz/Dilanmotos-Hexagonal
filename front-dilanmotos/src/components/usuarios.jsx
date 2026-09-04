@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import '../global.css';
+import { API_BASE_URL } from '../api';
 
 export default function Usuarios() {
     const [usuarios, setUsuarios] = useState([]);
@@ -18,7 +19,7 @@ export default function Usuarios() {
 
     const cargar = async () => {
         try {
-            const r = await fetch('http://localhost:8080/api/usuarios', {
+            const r = await fetch(`${API_BASE_URL}/api/usuarios`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const d = await r.json();
@@ -31,12 +32,12 @@ export default function Usuarios() {
 
     useEffect(() => { 
         cargar(); 
-        fetch('http://localhost:8080/api/marcas')
+        fetch(`${API_BASE_URL}/api/marcas`)
             .then(r => r.ok ? r.json() : [])
             .then(d => setMarcas(Array.isArray(d) ? d : []))
             .catch(() => setMarcas([]));
 
-        fetch('http://localhost:8080/api/tipoServicio')
+        fetch(`${API_BASE_URL}/api/tipoServicio`)
             .then(r => r.ok ? r.json() : [])
             .then(d => setTiposServicio(Array.isArray(d) ? d : []))
             .catch(() => setTiposServicio([]));
@@ -48,7 +49,7 @@ export default function Usuarios() {
         setNuevo(prev => ({ ...prev, idReferencia: '' , idMarca }));
 
         if (idMarca) {
-            fetch(`http://localhost:8080/api/referencias?marcaId=${idMarca}`)
+            fetch(`${API_BASE_URL}/api/referencias?marcaId=${idMarca}`)
                 .then(res => res.ok ? res.json() : [])
                 .then(data => setReferencias(Array.isArray(data) ? data : []))
                 .catch(() => setReferencias([]));
@@ -86,8 +87,8 @@ export default function Usuarios() {
         if (!validarFormulario()) return;
 
         const url = editMode 
-            ? `http://localhost:8080/api/usuarios/${selectedId}` 
-            : 'http://localhost:8080/api/usuarios';
+            ? `${API_BASE_URL}/api/usuarios/${selectedId}` 
+            : `${API_BASE_URL}/api/usuarios`;
         const method = editMode ? 'PUT' : 'POST';
 
         try {
@@ -138,7 +139,7 @@ export default function Usuarios() {
         });
         
         if (u.idMarca) {
-            fetch(`http://localhost:8080/api/referencias?marcaId=${u.idMarca}`)
+            fetch(`${API_BASE_URL}/api/referencias?marcaId=${u.idMarca}`)
                 .then(res => res.ok ? res.json() : [])
                 .then(data => setReferencias(Array.isArray(data) ? data : []))
                 .catch(() => setReferencias([]));
@@ -152,7 +153,7 @@ export default function Usuarios() {
         if (!window.confirm("¿Estás seguro de que deseas eliminar este usuario?")) return;
         
         try {
-            const res = await fetch(`http://localhost:8080/api/usuarios/${id}`, { 
+            const res = await fetch(`${API_BASE_URL}/api/usuarios/${id}`, { 
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             });

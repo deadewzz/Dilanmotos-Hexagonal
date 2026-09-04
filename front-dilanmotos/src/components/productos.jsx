@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import '../global.css';
+import { API_BASE_URL } from '../api';
 
-const BASE_URL = 'http://localhost:8080/api';
+const BASE_URL = `${API_BASE_URL}/api`;
 
 const Productos = () => {
     const token = localStorage.getItem('token');

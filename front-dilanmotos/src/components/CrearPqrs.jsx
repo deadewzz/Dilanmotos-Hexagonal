@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../global.css';
+import { API_BASE_URL } from '../api';
 
 const CrearPqrs = () => {
     const navigate = useNavigate();
@@ -52,7 +53,7 @@ const CrearPqrs = () => {
         };
 
         try {
-            const res = await fetch('http://localhost:8080/api/pqrs', {
+            const res = await fetch(`${API_BASE_URL}/api/pqrs`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',

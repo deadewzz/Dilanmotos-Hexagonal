@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import '../global.css';
+import { API_BASE_URL } from '../api';
 
 export default function Pqrs() {
     const idLogueado = localStorage.getItem("idUsuario");
@@ -23,7 +24,7 @@ export default function Pqrs() {
     const [selectedId, setSelectedId] = useState(null);
     const [estadoOriginal, setEstadoOriginal] = useState(null);
 
-    const API_URL = 'http://localhost:8080/api/pqrs';
+    const API_URL = `${API_BASE_URL}/api/pqrs`;
 
     const cargarDatos = async () => {
         setLoading(true);

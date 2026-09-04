@@ -4,6 +4,7 @@ import remarkGfm from 'remark-gfm';
 import { useLocation, useNavigate } from 'react-router-dom'; 
 import './AsistenteMotos.css';
 import './Dashboard.css';
+import { API_BASE_URL } from '../api';
 
 const AsistenteMotos = () => {
     const navigate = useNavigate();
@@ -23,7 +24,7 @@ const AsistenteMotos = () => {
         const cargarMoto = async () => {
             if (!idLogueado) return;
             try {
-                const res = await fetch(`http://localhost:8080/api/motos/usuario/${idLogueado}`, {
+                const res = await fetch(`${API_BASE_URL}/api/motos/usuario/${idLogueado}`, {
                     headers: { 
                         'Authorization': `Bearer ${token}` 
                     }
@@ -67,7 +68,7 @@ const AsistenteMotos = () => {
         setCargando(true);
 
         try {
-            const res = await fetch('http://localhost:8080/api/ia/consultar', {
+            const res = await fetch(`${API_BASE_URL}/api/ia/consultar`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',

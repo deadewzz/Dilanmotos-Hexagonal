@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../global.css';
+import { API_BASE_URL } from '../api';
 
 const TipoServicio = () => {
     const [tipoServicios, setTipoServicios] = useState([]); 
@@ -8,7 +9,7 @@ const TipoServicio = () => {
     const [editMode, setEditMode] = useState(false); 
     const [mensaje, setMensaje] = useState(''); // Estado unificado para notificaciones
 
-    const API_URL = "http://localhost:8080/api/tipoServicio";
+    const API_URL = `${API_BASE_URL}/api/tipoServicio`;
     const token = localStorage.getItem('token');
 
     const cargarServicios = async () => {

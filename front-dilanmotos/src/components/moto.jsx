@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { API_BASE_URL } from '../api';
 
 export default function Motos() {
     const [motos, setMotos] = useState([]);
@@ -12,8 +13,8 @@ export default function Motos() {
     const [selectedId, setSelectedId] = useState(null);
 
     const token = localStorage.getItem('token');
-    const API_URL = 'http://localhost:8080/api/motos';
-    const MARCAS_URL = 'http://localhost:8080/api/marcas';
+    const API_URL = `${API_BASE_URL}/api/motos`;
+    const MARCAS_URL = `${API_BASE_URL}/api/marcas`;
 
     const cargarDatos = async () => {
         try {

@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import '../global.css';
+import { API_BASE_URL } from '../api';
 
 // ⚠️ AJUSTA ESTA URL AL ENDPOINT EXACTO DE TU BACKEND PARA MARCAS DE PRODUCTO
-const API_MARCAS = 'http://localhost:8080/api/marcas-producto'; 
-const API_CATEGORIAS = 'http://localhost:8080/api/categorias';
+const API_MARCAS = `${API_BASE_URL}/api/marcas-producto`; 
+const API_CATEGORIAS = `${API_BASE_URL}/api/categorias`;
 
 const MarcaProducto = () => {
     const token = localStorage.getItem('token');

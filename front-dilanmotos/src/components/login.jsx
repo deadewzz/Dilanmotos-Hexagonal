@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../auth.css';
+import { API_BASE_URL } from '../api';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -25,7 +26,7 @@ const Login = () => {
         e.preventDefault(); 
         setErrorMensaje('');
         try {
-            const response = await fetch("http://localhost:8080/api/usuarios/login", {
+            const response = await fetch(`${API_BASE_URL}/api/usuarios/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(credenciales)
@@ -61,7 +62,7 @@ const Login = () => {
     const handleSolicitarRecuperacion = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch("http://localhost:8080/api/usuarios/recuperar-contrasena", {
+            const response = await fetch(`${API_BASE_URL}/api/usuarios/recuperar-contrasena`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ correo: correoRecuperacion })
@@ -89,7 +90,7 @@ const Login = () => {
     const handleResetearContrasena = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch("http://localhost:8080/api/usuarios/resetear-contrasena", {
+            const response = await fetch(`${API_BASE_URL}/api/usuarios/resetear-contrasena`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({

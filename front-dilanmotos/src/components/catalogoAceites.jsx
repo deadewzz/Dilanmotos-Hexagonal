@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Dashboard.css';
+import { API_BASE_URL } from '../api';
 
 const CatalogoAceites = () => {
     const navigate = useNavigate();
@@ -39,7 +40,7 @@ const CatalogoAceites = () => {
             const token = localStorage.getItem('token');
             
             try {
-                const response = await fetch('http://localhost:8080/api/productos', { 
+                const response = await fetch(`${API_BASE_URL}/api/productos`, { 
                     method: 'GET', 
                     headers: {
                         'Authorization': `Bearer ${token}`,

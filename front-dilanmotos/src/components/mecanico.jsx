@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import '../global.css';
+import { API_BASE_URL } from '../api';
 
 const Mecanico = () => {
     const [mecanicos, setMecanicos] = useState([]); 
@@ -12,7 +13,7 @@ const Mecanico = () => {
     const [editMode, setEditMode] = useState(false); 
     const [mensaje, setMensaje] = useState(''); // Estado unificado para notificaciones
 
-    const API_URL = "http://localhost:8080/api/mecanicos";
+    const API_URL = `${API_BASE_URL}/api/mecanicos`;
 
     const cargarMecanicos = async () => {
         const token = localStorage.getItem('token'); 

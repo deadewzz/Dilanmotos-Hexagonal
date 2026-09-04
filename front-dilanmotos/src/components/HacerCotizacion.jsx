@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom';
 import './HacerCotizacion.css'
+import { API_BASE_URL } from '../api';
 
 const STORAGE_KEYS = ['cart', 'selectedProducts', 'selected_items']
 
@@ -90,7 +91,7 @@ export default function HacerCotizacion() {
             try {
                 const token = localStorage.getItem('token')
                 const headers = token ? { Authorization: `Bearer ${token}` } : {}
-                const response = await fetch('http://localhost:8080/api/productos', {
+                const response = await fetch(`${API_BASE_URL}/api/productos`, {
                     signal: abortController.signal,
                     headers,
                 })
@@ -202,7 +203,7 @@ export default function HacerCotizacion() {
                 producto_agregado: false,
             }
 
-            const response = await fetch('http://localhost:8080/api/cotizaciones', {
+            const response = await fetch(`${API_BASE_URL}/api/cotizaciones`, {
                 method: 'POST',
                 headers,
                 body: JSON.stringify(payload),
@@ -252,7 +253,7 @@ export default function HacerCotizacion() {
             total: quote.total,
         }
 
-        const response = await fetch('http://localhost:8080/cotizacion/generar', {
+        const response = await fetch(`${API_BASE_URL}/cotizacion/generar`, {
             method: 'POST',
             headers,
             body: JSON.stringify(payload),
