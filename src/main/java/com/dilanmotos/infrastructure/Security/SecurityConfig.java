@@ -94,7 +94,8 @@ public class SecurityConfig {
                 "http://192.168.56.1",        // VirtualBox
                 "http://192.168.56.1:8080",   // VirtualBox con puerto
                 "http://10.1.196.118",        // IP LAN SENA
-                "http://10.1.196.118:8080"    // IP LAN SENA con puerto
+                "http://10.1.196.118:8080",    // IP LAN SENA con puerto
+                "https://dilanmotos.vercel.app/dashboard"
         ));
 
         configuration.setAllowedMethods(Arrays.asList(
