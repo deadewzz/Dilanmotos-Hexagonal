@@ -1,271 +1,295 @@
+/* Layout Principal */
 .perfil-wrapper {
     min-height: 100vh;
-    background-color: #f7f9fc;
-    font-family: 'Inter', sans-serif;
+    background-color: #f4f7fe;
     position: relative;
+    padding-bottom: 40px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .perfil-header-bg {
-    height: 200px;
-    background: linear-gradient(135deg, #4e54c8 0%, #6772e5 100%);
+    height: 160px;
+    background: linear-gradient(135deg, #5b50e3 0%, #3e32bf 100%);
     padding: 20px;
+    display: flex;
+    align-items: flex-start;
 }
 
 .btn-volver {
     background: rgba(255, 255, 255, 0.2);
+    color: #ffffff;
     border: none;
-    color: white;
-    padding: 8px 15px;
-    border-radius: 10px;
+    padding: 8px 16px;
+    border-radius: 20px;
     cursor: pointer;
     font-weight: 600;
-    transition: 0.3s;
-}
-
-.btn-volver:hover { background: rgba(255, 255, 255, 0.3); }
-
-.perfil-content {
-    max-width: 850px;
-    margin: -80px auto 0;
-    padding: 0 20px 50px;
-}
-
-/* Tarjeta Principal */
-.perfil-card.main-info {
-    background: white;
-    border-radius: 24px;
-    padding: 30px;
     display: flex;
     align-items: center;
-    gap: 30px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    gap: 8px;
+    backdrop-filter: blur(5px);
+    transition: background 0.2s;
+}
+
+.btn-volver:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.perfil-content {
+    max-width: 650px;
+    margin: -60px auto 0 auto;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* Tarjeta Principal de Información */
+.perfil-card {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+}
+
+.main-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
 }
 
 .avatar-section {
     position: relative;
-    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .avatar-img {
-    width: 120px;
-    height: 120px;
-    border-radius: 20px;
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
     object-fit: cover;
-    border: 4px solid #fff;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    background: #e0e5f2;
 }
 
 .badge-rol {
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #4e54c8;
-    color: white;
-    padding: 4px 12px;
-    border-radius: 20px;
+    margin-top: 8px;
+    background: #4318ff;
+    color: #fff;
     font-size: 0.7rem;
-    font-weight: 800;
-    white-space: nowrap;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 10px;
+    text-transform: uppercase;
 }
 
 .info-section h1 {
     margin: 0;
-    font-size: 1.8rem;
-    color: #1a1f36;
+    font-size: 1.5rem;
+    color: #2b3674;
 }
 
 .email-text {
-    color: #697386;
-    margin-top: 5px;
-    word-break: break-all;
+    margin: 6px 0 0 0;
+    color: #a3aed0;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 
-/* Sección Motos */
-.motos-section { margin-top: 40px; }
+/* Sección Seguridad (Acordeón) */
+.seguridad-accordion {
+    width: 100%;
+}
 
+.seguridad-header {
+    background: #ffffff;
+    padding: 16px 20px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.seguridad-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 700;
+    color: #2b3674;
+}
+
+.seguridad-title i {
+    color: #4318ff;
+}
+
+.arrow-icon {
+    color: #a3aed0;
+    transition: transform 0.2s ease;
+}
+
+.arrow-icon.rotate {
+    transform: rotate(180deg);
+}
+
+.seguridad-body {
+    background: #ffffff;
+    margin-top: 8px;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.seguridad-body h3 {
+    margin: 0 0 16px 0;
+    font-size: 1rem;
+    color: #2b3674;
+}
+
+.form-cambiar-clave {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #707ebe;
+}
+
+.form-group input {
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #e0e5f2;
+    outline: none;
+}
+
+.form-group input:focus {
+    border-color: #4318ff;
+}
+
+.btn-actualizar-clave {
+    align-self: flex-start;
+    background: #ec5e2a;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+    margin-top: 6px;
+}
+
+.btn-actualizar-clave:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+/* Sección Garaje */
 .section-title {
-    font-size: 1.2rem;
-    color: #4f566b;
-    margin-bottom: 20px;
+    font-size: 1.1rem;
+    color: #2b3674;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
 .motos-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .moto-card-premium {
-    background: white;
-    padding: 25px;
-    border-radius: 20px;
-    border-left: 6px solid #4e54c8;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-    transition: 0.3s;
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 18px 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    border-left: 4px solid #4318ff;
 }
-
-.moto-card-premium:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.08); }
 
 .moto-card-header {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 10px;
-}
-
-.marca-tag {
-    font-weight: 800;
-    color: #4e54c8;
-    text-transform: uppercase;
-    font-size: 0.8rem;
-}
-
-.cilindraje-tag {
-    background: #f0f2f5;
-    padding: 2px 8px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 700;
-}
-
-.modelo-text {
-    margin: 10px 0;
-    font-size: 1.4rem;
-    color: #1a1f36;
-}
-
-.estado-ok {
-    color: #24b47e;
-    font-size: 0.85rem;
-    font-weight: 600;
-}
-
-/* Botones */
-.perfil-footer { margin-top: 50px; text-align: center; }
-
-.btn-logout {
-    background: #fff;
-    border: 2px solid #ff4d4f;
-    color: #ff4d4f;
-    padding: 10px 25px;
-    border-radius: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.btn-logout:hover { background: #ff4d4f; color: white; }
-
-/* Loader */
-.perfil-loader {
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
     align-items: center;
 }
 
-.spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid #4e54c8;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+.marca-tag {
+    font-weight: 700;
+    color: #4318ff;
+    font-size: 0.85rem;
+    text-transform: uppercase;
 }
 
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-/* ============================================= */
-/* --- RESPONSIVE: TABLET (max-width: 768px) --- */
-/* ============================================= */
-@media (max-width: 768px) {
-    .perfil-header-bg {
-        height: 160px;
-        padding: 15px;
-    }
-
-    .perfil-content {
-        margin-top: -60px;
-        padding: 0 15px 40px;
-    }
-
-    .perfil-card.main-info {
-        flex-direction: column;
-        text-align: center;
-        padding: 25px 20px;
-        gap: 20px;
-        border-radius: 18px;
-    }
-
-    .info-section h1 {
-        font-size: 1.5rem;
-    }
-
-    .avatar-img {
-        width: 100px;
-        height: 100px;
-    }
-
-    .motos-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .moto-card-premium {
-        padding: 20px;
-        border-radius: 15px;
-    }
-
-    .modelo-text {
-        font-size: 1.2rem;
-    }
-
-    .motos-section {
-        margin-top: 30px;
-    }
+.cilindraje-tag {
+    background: #f4f7fe;
+    color: #2b3674;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 6px;
 }
 
-/* ============================================= */
-/* --- RESPONSIVE: SMALL (max-width: 480px) --- */
-/* ============================================= */
-@media (max-width: 480px) {
-    .perfil-header-bg {
-        height: 140px;
-        padding: 12px;
-    }
+.modelo-text {
+    margin: 8px 0;
+    font-size: 1.2rem;
+    color: #1b2559;
+}
 
-    .perfil-content {
-        margin-top: -50px;
-        padding: 0 10px 30px;
-    }
+.estado-ok {
+    color: #ec5e2a;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
 
-    .perfil-card.main-info {
-        padding: 20px 15px;
-        border-radius: 14px;
-    }
+/* Botón Cerrar Sesión */
+.perfil-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
 
-    .info-section h1 {
-        font-size: 1.3rem;
-    }
+.btn-logout {
+    background: transparent;
+    color: #ee5d50;
+    border: 1px solid #ee5d50;
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+}
 
-    .avatar-img {
-        width: 85px;
-        height: 85px;
-        border-radius: 16px;
-    }
+.btn-logout:hover {
+    background: #ee5d50;
+    color: #ffffff;
+}
 
-    .moto-card-premium {
-        padding: 16px;
-    }
-
-    .section-title {
-        font-size: 1rem;
-    }
-
-    .perfil-footer {
-        margin-top: 30px;
-    }
+/* Loader */
+.perfil-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
 }

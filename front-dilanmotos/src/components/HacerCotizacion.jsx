@@ -4,311 +4,347 @@ import './HacerCotizacion.css'
 
 const STORAGE_KEYS = ['cart', 'selectedProducts', 'selected_items']
 
+// Helper para dar formato de Peso Colombiano (sin decimales y con puntos de miles)
+const formatCOP = (valor) => {
+    return '$' + Math.round(Number(valor) || 0).toLocaleString('es-CO');
+};
+
 function readStoredItems() {
-	for (const key of STORAGE_KEYS) {
-		const raw = localStorage.getItem(key)
-		if (raw) {
-			try {
-				const parsed = JSON.parse(raw)
-				if (Array.isArray(parsed)) return parsed
-			} catch (e) {
-			}
-		}
-	}
-	return []
+    for (const key of STORAGE_KEYS) {
+        const raw = localStorage.getItem(key)
+        if (raw) {
+            try {
+                const parsed = JSON.parse(raw)
+                if (Array.isArray(parsed)) return parsed
+            } catch (e) {
+            }
+        }
+    }
+    return []
 }
 
 export default function HacerCotizacion() {
 
-	const navigate = useNavigate();
-	const location = useLocation();
-	const [items, setItems] = useState([])
-	const [customer, setCustomer] = useState({ nombre: '', email: '' })
-	const [quote, setQuote] = useState(null)
-	const [products, setProducts] = useState([])
-	const [selectedProductId, setSelectedProductId] = useState('')
-	const [loadingProducts, setLoadingProducts] = useState(true)
-	const [savingQuote, setSavingQuote] = useState(false)
-	const [quoteMessage, setQuoteMessage] = useState('')
+    const navigate = useNavigate();
+    const location = useLocation();
+    const [items, setItems] = useState([])
+    const [customer, setCustomer] = useState({ nombre: '', email: '' })
+    const [quote, setQuote] = useState(null)
+    const [products, setProducts] = useState([])
+    const [selectedProductId, setSelectedProductId] = useState('')
+    const [loadingProducts, setLoadingProducts] = useState(true)
+    const [savingQuote, setSavingQuote] = useState(false)
+    const [quoteMessage, setQuoteMessage] = useState('')
 
-	useEffect(() => {
-		const nombreGuardado = localStorage.getItem('nombreUsuario') || ''
-		const correoGuardado = localStorage.getItem('correoUsuario') || localStorage.getItem('emailUsuario') || ''
-		if (nombreGuardado || correoGuardado) {
-			setCustomer({ nombre: nombreGuardado, email: correoGuardado })
-		}
+    useEffect(() => {
+        const nombreGuardado = localStorage.getItem('nombreUsuario') || ''
+        const correoGuardado = localStorage.getItem('correoUsuario') || localStorage.getItem('emailUsuario') || ''
+        if (nombreGuardado || correoGuardado) {
+            setCustomer({ nombre: nombreGuardado, email: correoGuardado })
+        }
 
-		try {
-			const stored = readStoredItems()
-			const normalized = stored.map((it) => ({
-				id: it.id ?? it._id ?? Math.random().toString(36).slice(2, 9),
-				nombre: it.nombre ?? it.name ?? it.titulo ?? 'Producto',
-				precio: Number(it.precio ?? it.price ?? 0) || 0,
-				cantidad: Number(it.cantidad ?? it.qty ?? it.quantity ?? 1) || 1,
-			}))
-			setItems(normalized)
-		} catch (e) {
-			setItems([])
-		}
-	}, [])
+        try {
+            const stored = readStoredItems()
+            const normalized = stored.map((it) => ({
+                id: it.id ?? it._id ?? Math.random().toString(36).slice(2, 9),
+                nombre: it.nombre ?? it.name ?? it.titulo ?? 'Producto',
+                precio: Number(it.precio ?? it.price ?? 0) || 0,
+                cantidad: Number(it.cantidad ?? it.qty ?? it.quantity ?? 1) || 1,
+            }))
+            setItems(normalized)
+        } catch (e) {
+            setItems([])
+        }
+    }, [])
 
-	useEffect(() => {
-		const productoDesdeRuta = location.state?.producto
-		if (!productoDesdeRuta) return
+    useEffect(() => {
+        const productoDesdeRuta = location.state?.producto
+        if (!productoDesdeRuta) return
 
-		setItems((prev) => {
-			const currentId = String(productoDesdeRuta.id)
-			const existing = prev.find((item) => String(item.id) === currentId)
+        setItems((prev) => {
+            const currentId = String(productoDesdeRuta.id)
+            const existing = prev.find((item) => String(item.id) === currentId)
 
-			if (existing) {
-				return prev.map((item) =>
-					String(item.id) === currentId
-						? { ...item, cantidad: Number(item.cantidad ?? 0) + Number(productoDesdeRuta.cantidad ?? 1) }
-						: item,
-				)
-			}
+            if (existing) {
+                return prev.map((item) =>
+                    String(item.id) === currentId
+                        ? { ...item, cantidad: Number(item.cantidad ?? 0) + Number(productoDesdeRuta.cantidad ?? 1) }
+                        : item,
+                )
+            }
 
-			return [...prev, {
-				id: currentId,
-				nombre: productoDesdeRuta.nombre ?? 'Producto',
-				precio: Number(productoDesdeRuta.precio ?? 0) || 0,
-				cantidad: Number(productoDesdeRuta.cantidad ?? 1) || 1,
-			}]
-		})
-	}, [location.state])
+            return [...prev, {
+                id: currentId,
+                nombre: productoDesdeRuta.nombre ?? 'Producto',
+                precio: Number(productoDesdeRuta.precio ?? 0) || 0,
+                cantidad: Number(productoDesdeRuta.cantidad ?? 1) || 1,
+            }]
+        })
+    }, [location.state])
 
-	useEffect(() => {
-		const abortController = new AbortController()
+    useEffect(() => {
+        const abortController = new AbortController()
 
-		async function fetchProducts() {
-			setLoadingProducts(true)
-			try {
-				const token = localStorage.getItem('token')
-				const headers = token ? { Authorization: `Bearer ${token}` } : {}
-				const response = await fetch('http://localhost:8080/api/productos', {
-					signal: abortController.signal,
-					headers,
-				})
-				if (!response.ok) throw new Error('No se pudieron cargar los productos')
-				const data = await response.json()
-				setProducts(Array.isArray(data) ? data : [])
-			} catch (error) {
-				// ignore load failure; dropdown stays empty
-			} finally {
-				setLoadingProducts(false)
-			}
-		}
+        async function fetchProducts() {
+            setLoadingProducts(true)
+            try {
+                const token = localStorage.getItem('token')
+                const headers = token ? { Authorization: `Bearer ${token}` } : {}
+                const response = await fetch('http://localhost:8080/api/productos', {
+                    signal: abortController.signal,
+                    headers,
+                })
+                
+                if (!response.ok) {
+                    if (response.status === 401 || response.status === 403) {
+                        handleSessionExpired();
+                        return;
+                    }
+                    throw new Error('No se pudieron cargar los productos')
+                }
+                
+                const data = await response.json()
+                setProducts(Array.isArray(data) ? data : [])
+            } catch (error) {
+                // ignore load failure
+            } finally {
+                setLoadingProducts(false)
+            }
+        }
 
-		fetchProducts()
+        fetchProducts()
 
-		return () => abortController.abort()
-	}, [])
+        return () => abortController.abort()
+    }, [])
 
-	useEffect(() => {
-		try {
-			localStorage.setItem('selectedProducts', JSON.stringify(items))
-		} catch (e) {
-			// ignore storage errors
-		}
-	}, [items])
+    useEffect(() => {
+        try {
+            localStorage.setItem('selectedProducts', JSON.stringify(items))
+        } catch (e) {
+            // ignore storage errors
+        }
+    }, [items])
+    
+    const handleSessionExpired = () => {
+        localStorage.removeItem('token');
+        localStorage.removeItem('idUsuario');
+        localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem('nombreUsuario');
+        localStorage.removeItem('correoUsuario');
+        localStorage.removeItem('rolUsuario');
+        alert("Su sesión ha expirado. Por favor, inicie sesión nuevamente.");
+        navigate('/login');
+    };
 
-	function addProduct(product) {
-		if (!product) return
-		const id = product.idProducto ?? product.id ?? Math.random().toString(36).slice(2, 9)
-		const price = Number(product.precio ?? product.price ?? 0) || 0
-		const name = product.nombre ?? product.titulo ?? 'Producto'
+    function addProduct(product) {
+        if (!product) return
+        const id = product.idProducto ?? product.id ?? Math.random().toString(36).slice(2, 9)
+        const price = Number(product.precio ?? product.price ?? 0) || 0
+        const name = product.nombre ?? product.titulo ?? 'Producto'
 
-		setItems((prev) => {
-			const found = prev.find((item) => String(item.id) === String(id))
-			if (found) {
-				return prev.map((item) =>
-					String(item.id) === String(id)
-						? { ...item, cantidad: item.cantidad + 1 }
-						: item,
-				)
-			}
-			return [...prev, { id, nombre: name, precio: price, cantidad: 1 }]
-		})
-	}
+        setItems((prev) => {
+            const found = prev.find((item) => String(item.id) === String(id))
+            if (found) {
+                return prev.map((item) =>
+                    String(item.id) === String(id)
+                        ? { ...item, cantidad: item.cantidad + 1 }
+                        : item,
+                )
+            }
+            return [...prev, { id, nombre: name, precio: price, cantidad: 1 }]
+        })
+    }
 
-	function updateCantidad(id, delta) {
-		setItems((prev) =>
-			prev
-				.map((it) => (String(it.id) === String(id) ? { ...it, cantidad: Math.max(1, it.cantidad + delta) } : it))
-				.filter(Boolean),
-		)
-	}
+    function updateCantidad(id, delta) {
+        setItems((prev) =>
+            prev
+                .map((it) => (String(it.id) === String(id) ? { ...it, cantidad: Math.max(1, it.cantidad + delta) } : it))
+                .filter(Boolean),
+        )
+    }
 
-	function removeItem(id) {
-		setItems((prev) => prev.filter((it) => String(it.id) !== String(id)))
-	}
+    function removeItem(id) {
+        setItems((prev) => prev.filter((it) => String(it.id) !== String(id)))
+    }
 
-	function clearAll() {
-		setItems([])
-	}
+    function clearAll() {
+        setItems([])
+    }
 
-	const total = items.reduce((s, it) => s + it.precio * it.cantidad, 0)
+    const total = items.reduce((s, it) => s + it.precio * it.cantidad, 0)
 
-	async function saveCotizacionToBackend(items) {
-		const token = localStorage.getItem('token')
-		const idUsuario = localStorage.getItem('idUsuario')
-		if (!token || !idUsuario) {
-			throw new Error('Es necesario iniciar sesión para guardar la cotización en la base de datos.')
-		}
+    async function saveCotizacionToBackend(items) {
+        const token = localStorage.getItem('token')
+        const idUsuario = localStorage.getItem('idUsuario')
+        if (!token || !idUsuario) {
+            const err = new Error('Es necesario iniciar sesión para guardar la cotización.');
+            err.status = 401;
+            throw err;
+        }
 
-		const headers = {
-			'Content-Type': 'application/json',
-			Authorization: `Bearer ${token}`,
-		}
+        const headers = {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        }
 
-		const fecha = new Date().toISOString()
-		let quoteId = null
-		const savedItems = []
+        const fecha = new Date().toISOString()
+        let quoteId = null
+        const savedItems = []
 
-		for (const item of items) {
-			const payload = {
-				idUsuario: Number(idUsuario),
-				idProducto: Number(item.id) || null,
-				producto: item.nombre,
-				cantidad: item.cantidad,
-				precioUnitario: item.precio,
-				fecha,
-				producto_agregado: false,
-			}
+        for (const item of items) {
+            const payload = {
+                idUsuario: Number(idUsuario),
+                idProducto: Number(item.id) || null,
+                producto: item.nombre,
+                cantidad: item.cantidad,
+                precioUnitario: item.precio,
+                fecha,
+                producto_agregado: false,
+            }
 
-			const response = await fetch('http://localhost:8080/api/cotizaciones', {
-				method: 'POST',
-				headers,
-				body: JSON.stringify(payload),
-			})
+            const response = await fetch('http://localhost:8080/api/cotizaciones', {
+                method: 'POST',
+                headers,
+                body: JSON.stringify(payload),
+            })
 
-			if (!response.ok) {
-				const errorText = await response.text()
-				throw new Error(errorText || 'Error al guardar la cotización')
-			}
+            if (!response.ok) {
+                if (response.status === 401 || response.status === 403) {
+                    const error = new Error('Sesión expirada');
+                    error.status = response.status;
+                    throw error;
+                }
+                const errorText = await response.text()
+                throw new Error(errorText || 'Error al guardar la cotización')
+            }
 
-			const saved = await response.json()
-			savedItems.push(saved)
-			if (quoteId === null) {
-				quoteId = saved.idCotizacion ?? saved.id
-			}
-		}
+            const saved = await response.json()
+            savedItems.push(saved)
+            if (quoteId === null) {
+                quoteId = saved.idCotizacion ?? saved.id
+            }
+        }
 
-		return { quoteId, savedItems }
-	}
+        return { quoteId, savedItems }
+    }
 
-	function formatDetalleCotizacion(items) {
-		return items
-			.map((item) => `${item.nombre} - ${item.cantidad} x $${item.precio.toFixed(2)} = $${(item.precio * item.cantidad).toFixed(2)}`)
-			.join('\n')
-	}
+    function formatDetalleCotizacion(items) {
+        return items
+            .map((item) => `${item.nombre} - ${item.cantidad} x ${formatCOP(item.precio)} = ${formatCOP(item.precio * item.cantidad)}`)
+            .join('\n')
+    }
 
-	async function enviarCotizacionPorCorreo(quote) {
-		if (!quote?.cliente?.email) {
-			throw new Error('No hay correo del cliente para enviar la cotización.')
-		}
+    async function enviarCotizacionPorCorreo(quote) {
+        if (!quote?.cliente?.email) {
+            throw new Error('No hay correo del cliente para enviar la cotización.')
+        }
 
-		const token = localStorage.getItem('token')
-		const headers = {
-			'Content-Type': 'application/json',
-			...(token ? { Authorization: `Bearer ${token}` } : {}),
-		}
+        const token = localStorage.getItem('token')
+        const headers = {
+            'Content-Type': 'application/json',
+            ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        }
 
-		const payload = {
-			destino: quote.cliente.email,
-			nombreCliente: quote.cliente.nombre || 'Cliente',
-			detalleCotizacion: formatDetalleCotizacion(quote.items),
-			total: quote.total,
-		}
+        const payload = {
+            destino: quote.cliente.email,
+            nombreCliente: quote.cliente.nombre || 'Cliente',
+            detalleCotizacion: formatDetalleCotizacion(quote.items),
+            total: quote.total,
+        }
 
-		const response = await fetch('http://localhost:8080/cotizacion/generar', {
-			method: 'POST',
-			headers,
-			body: JSON.stringify(payload),
-		})
+        const response = await fetch('http://localhost:8080/cotizacion/generar', {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(payload),
+        })
 
-		if (!response.ok) {
-			const errorText = await response.text()
-			throw new Error(errorText || 'Error al enviar el correo de cotización.')
-		}
+        if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+                const error = new Error('Sesión expirada');
+                error.status = response.status;
+                throw error;
+            }
+            const errorText = await response.text()
+            throw new Error(errorText || 'Error al enviar el correo de cotización.')
+        }
 
-		return response.text()
-	}
+        return response.text()
+    }
 
-	async function generarCotizacion() {
-		if (items.length === 0) return
-		setSavingQuote(true)
-		setQuoteMessage('')
-		try {
-			const { quoteId } = await saveCotizacionToBackend(items)
-			const q = {
-				idCotizacion: quoteId,
-				fecha: new Date().toISOString(),
-				cliente: customer,
-				items,
-				total,
-			}
-			setQuote(q)
+    async function generarCotizacion() {
+        if (items.length === 0) return
+        setSavingQuote(true)
+        setQuoteMessage('')
+        try {
+            const { quoteId } = await saveCotizacionToBackend(items)
+            const q = {
+                idCotizacion: quoteId,
+                fecha: new Date().toISOString(),
+                cliente: customer,
+                items,
+                total,
+            }
+            setQuote(q)
 
-			let message = quoteId
-				? `Cotización guardada en la base de datos con No. ${quoteId}`
-				: 'Cotización generada localmente.'
+            let message = quoteId
+                ? `Cotización guardada en la base de datos con No. ${quoteId}`
+                : 'Cotización generada localmente.'
 
-			try {
-				await enviarCotizacionPorCorreo(q)
-				message += ' Correo enviado al cliente.'
-			} catch (emailError) {
-				console.error(emailError)
-				message += ' No se pudo enviar el correo de cotización.'
-			}
+            try {
+                await enviarCotizacionPorCorreo(q)
+                message += ' Correo enviado al cliente.'
+            } catch (emailError) {
+                console.error(emailError)
+                if (emailError.status === 401 || emailError.status === 403) {
+                    handleSessionExpired();
+                    return;
+                }
+                message += ' No se pudo enviar el correo de cotización.'
+            }
 
-			setQuoteMessage(message)
-			try {
-				navigator.clipboard && navigator.clipboard.writeText(JSON.stringify(q, null, 2))
-			} catch (e) {}
-		} catch (error) {
-			console.error(error)
-			setQuoteMessage('No se pudo guardar la cotización en la base de datos. Revise la conexión o el inicio de sesión.')
-			const q = {
-				idCotizacion: Date.now(),
-				fecha: new Date().toISOString(),
-				cliente: customer,
-				items,
-				total,
-			}
-			setQuote(q)
-		} finally {
-			setSavingQuote(false)
-		}
-	}
+            setQuoteMessage(message)
+            try {
+                navigator.clipboard && navigator.clipboard.writeText(JSON.stringify(q, null, 2))
+            } catch (e) {}
+            
+        } catch (error) {
+            console.error(error)
 
-	function descargarJSON() {
-		if (!quote) return
-		const blob = new Blob([JSON.stringify(quote, null, 2)], { type: 'application/json' })
-		const url = URL.createObjectURL(blob)
-		const a = document.createElement('a')
-		a.href = url
-		a.download = `cotizacion_${quote.idCotizacion ?? quote.id ?? 'sin-id'}.json`
-		a.click()
-		URL.revokeObjectURL(url)
-	}
+            if (error.status === 401 || error.status === 403) {
+                handleSessionExpired();
+                return;
+            }
 
-	const isSelected = (id) => items.some((item) => String(item.id) === String(id))
+            setQuoteMessage('No se pudo guardar la cotización en la base de datos. Revise la conexión o el inicio de sesión.')
+            const q = {
+                idCotizacion: Date.now(),
+                fecha: new Date().toISOString(),
+                cliente: customer,
+                items,
+                total,
+            }
+            setQuote(q)
+        } finally {
+            setSavingQuote(false)
+        }
+    }
 
-	const handleSelectProduct = (e) => {
-		setSelectedProductId(e.target.value)
-	}
+    const isSelected = (id) => items.some((item) => String(item.id) === String(id))
 
-	const addSelectedProduct = () => {
-		if (!selectedProductId) return
-		const product = products.find((product) => String(product.idProducto ?? product.id) === String(selectedProductId))
-		if (product) {
-			addProduct(product)
-			setSelectedProductId('')
-		}
-	}
+    const handleSelectProduct = (e) => {
+        setSelectedProductId(e.target.value)
+    }
 
-	return (
+    const addSelectedProduct = () => {
+        if (!selectedProductId) return
+        const product = products.find((product) => String(product.idProducto ?? product.id) === String(selectedProductId))
+        if (product && Number(product.stock ?? 0) > 0) {
+            addProduct(product)
+            setSelectedProductId('')
+        }
+    }
+
+    return (
     <div className="dashboard-wrapper">
         <header className="dashboard-header">
             <div className="header-container">
@@ -343,13 +379,13 @@ export default function HacerCotizacion() {
                                 {items.map((it) => (
                                     <tr key={it.id} style={{ borderBottom: '1px solid #eee' }}>
                                         <td style={{ padding: '10px 12px' }}>{it.nombre}</td>
-                                        <td style={{ padding: '10px 12px', textAlign: 'center' }}>${it.precio.toFixed(2)}</td>
+                                        <td style={{ padding: '10px 12px', textAlign: 'center' }}>{formatCOP(it.precio)}</td>
                                         <td style={{ padding: '10px 12px', textAlign: 'center' }}>
                                             <button className="btn-bs btn-primary btn-sm" onClick={() => updateCantidad(it.id, -1)}>-</button>
                                             <span style={{ margin: '0 10px', fontWeight: 'bold' }}>{it.cantidad}</span>
                                             <button className="btn-bs btn-primary btn-sm" onClick={() => updateCantidad(it.id, +1)}>+</button>
                                         </td>
-                                        <td style={{ padding: '10px 12px', textAlign: 'center' }}>${(it.precio * it.cantidad).toFixed(2)}</td>
+                                        <td style={{ padding: '10px 12px', textAlign: 'center' }}>{formatCOP(it.precio * it.cantidad)}</td>
                                         <td style={{ padding: '10px 12px', textAlign: 'center' }}>
                                             <button className="btn-bs btn-danger btn-sm" onClick={() => removeItem(it.id)}>
                                                 <i className="fa-solid fa-trash"></i>
@@ -389,9 +425,13 @@ export default function HacerCotizacion() {
                             </option>
                             {products.map((product) => {
                                 const id = product.idProducto ?? product.id
+                                const stock = Number(product.stock ?? 0)
+                                const sinStock = stock <= 0
+                                const precio = product.precio ?? product.price ?? 0
+
                                 return (
-                                    <option key={id} value={id}>
-                                        {product.nombre ?? product.titulo ?? 'Producto'} - ${Number(product.precio ?? product.price ?? 0).toFixed(2)}
+                                    <option key={id} value={id} disabled={sinStock}>
+                                        {product.nombre ?? product.titulo ?? 'Producto'} - {formatCOP(precio)} {sinStock ? '(Sin stock)' : ''}
                                     </option>
                                 )
                             })}
@@ -409,7 +449,7 @@ export default function HacerCotizacion() {
                 {/* --- RESUMEN Y ACCIONES --- */}
                 <div style={{ borderTop: '1px solid #eee', paddingTop: '1rem', marginBottom: '1rem' }}>
                     <p className="fw-bold" style={{ fontSize: '1.1rem' }}>
-                        Total: <span className="text-primary">${total.toFixed(2)}</span>
+                        Total: <span className="text-primary">{formatCOP(total)}</span>
                     </p>
                 </div>
 
@@ -462,7 +502,7 @@ export default function HacerCotizacion() {
                             <div className="invoice-details">
                                 <p><strong>Fecha:</strong> {new Date(quote.fecha).toLocaleString()}</p>
                                 <p><strong>No. Cotización:</strong> {quote.idCotizacion ?? quote.id}</p>
-                                <p><strong>Total:</strong> ${quote.total.toFixed(2)}</p>
+                                <p><strong>Total:</strong> {formatCOP(quote.total)}</p>
                             </div>
                         </div>
 
@@ -480,9 +520,9 @@ export default function HacerCotizacion() {
                                     {quote.items.map((item) => (
                                         <tr key={item.id}>
                                             <td>{item.nombre}</td>
-                                            <td>${item.precio.toFixed(2)}</td>
+                                            <td>{formatCOP(item.precio)}</td>
                                             <td>{item.cantidad}</td>
-                                            <td>${(item.precio * item.cantidad).toFixed(2)}</td>
+                                            <td>{formatCOP(item.precio * item.cantidad)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
@@ -490,14 +530,13 @@ export default function HacerCotizacion() {
                         </div>
 
                         <div className="invoice-summary">
-                            <div><span>Total</span><strong>${quote.total.toFixed(2)}</strong></div>
+                            <div><span>Total</span><strong>{formatCOP(quote.total)}</strong></div>
                         </div>
-							<h3 style={{ textAlign: 'center', color: '#732dcf' }}>¡Gracias por utilizar nuestros servicios!</h3>
+                        <h3 style={{ textAlign: 'center', color: '#732dcf' }}>¡Gracias por utilizar nuestros servicios!</h3>
                     </div>
                 )}
             </div>
         </main>
     </div>
-)
+    )
 }
-

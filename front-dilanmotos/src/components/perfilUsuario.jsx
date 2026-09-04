@@ -6,11 +6,9 @@ const PerfilUsuario = () => {
     const navigate = useNavigate();
     const [usuario, setUsuario] = useState(null);
     const [cargando, setCargando] = useState(true);
-
-    // Estado para controlar si la sección de seguridad está abierta o cerrada
+    const [enviandoClave, setEnviandoClave] = useState(false);
     const [seguridadAbierto, setSeguridadAbierto] = useState(false);
 
-    // Estado exclusivo para cambiar contraseña
     const [claves, setClaves] = useState({
         contrasenaActual: '',
         contrasenaNueva: '',
@@ -27,6 +25,12 @@ const PerfilUsuario = () => {
             const id = localStorage.getItem('idUsuario');
             const token = localStorage.getItem('token'); 
 
+            if (!id || !token) {
+                localStorage.clear();
+                navigate('/login');
+                return;
+            }
+
             try {
                 const response = await fetch(`http://localhost:8080/api/usuarios/${id}`, {
                     method: 'GET',
@@ -39,7 +43,7 @@ const PerfilUsuario = () => {
                 if (response.ok) {
                     const data = await response.json();
                     setUsuario(data);
-                } else if (response.status === 401) {
+                } else if (response.status === 401 || response.status === 403) {
                     localStorage.clear();
                     navigate('/login');
                 }
@@ -49,10 +53,10 @@ const PerfilUsuario = () => {
                 setCargando(false);
             }
         };
+
         cargarDatos();
     }, [navigate]);
 
-    // Gestión del envío de cambio de contraseña
     const handleCambiarContrasena = async (e) => {
         e.preventDefault();
         const idUsuario = localStorage.getItem('idUsuario');
@@ -63,12 +67,14 @@ const PerfilUsuario = () => {
             return;
         }
 
+        setEnviandoClave(true);
+
         try {
             const response = await fetch("http://localhost:8080/api/usuarios/cambiar-contrasena", {
                 method: "POST",
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    "Content-Type": "application/json"
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     idUsuario: idUsuario,
@@ -77,17 +83,19 @@ const PerfilUsuario = () => {
                 })
             });
 
-            const data = await response.json();
+            const data = await response.json().catch(() => ({}));
 
             if (response.ok) {
                 alert(data.mensaje || "Contraseña cambiada exitosamente.");
                 setClaves({ contrasenaActual: '', contrasenaNueva: '', confirmarNueva: '' });
-                setSeguridadAbierto(false); // Cierra el menú tras un cambio exitoso
+                setSeguridadAbierto(false);
             } else {
-                alert(data.error || "Ocurrió un error al cambiar la contraseña.");
+                alert(data.error || data.mensaje || "Error al cambiar la contraseña.");
             }
         } catch (error) {
             alert("Error de conexión al intentar cambiar la contraseña.");
+        } finally {
+            setEnviandoClave(false);
         }
     };
 
@@ -107,10 +115,11 @@ const PerfilUsuario = () => {
             </div>
 
             <div className="perfil-content">
+                {/* Tarjeta Usuario */}
                 <div className="perfil-card main-info">
                     <div className="avatar-section">
                         <img src="/iconoPerfil.png" alt="Usuario" className="avatar-img" />
-                        <span className="badge-rol">{usuario?.rol || 'SOCIO'}</span>
+                        <span className="badge-rol">{usuario?.rol || 'USER'}</span>
                     </div>
                     <div className="info-section">
                         <h1>{usuario?.nombre || 'Usuario'}</h1>
@@ -120,57 +129,64 @@ const PerfilUsuario = () => {
                     </div>
                 </div>
 
-                {/* ── SECCIÓN MODIFICADA: SEGURIDAD Y CONFIGURACIÓN (DESPLEGABLE) ── */}
-                <div className="motos-section" style={{ marginTop: '30px' }}>
+                {/* Acordeón Seguridad */}
+                <div className="seguridad-accordion">
                     <div 
+                        className={`seguridad-header ${seguridadAbierto ? 'abierto' : ''}`}
                         onClick={() => setSeguridadAbierto(!seguridadAbierto)}
-                        style={{ 
-                            display: 'flex', 
-                            justifyContent: 'space-between', 
-                            alignItems: 'center', 
-                            cursor: 'pointer',
-                            userSelect: 'none'
-                        }}
                     >
-                        <h2 className="section-title" style={{ margin: 0 }}>
-                            <i className="fa-solid fa-lock"></i> Seguridad de la Cuenta
-                        </h2>
-                        <i 
-                            className={`fa-solid ${seguridadAbierto ? 'fa-chevron-up' : 'fa-chevron-down'}`} 
-                            style={{ fontSize: '1.2rem', color: '#666', transition: 'transform 0.2s' }}
-                        ></i>
+                        <div className="seguridad-title">
+                            <i className="fa-solid fa-lock"></i>
+                            <span>Seguridad de la Cuenta</span>
+                        </div>
+                        <i className={`fa-solid fa-chevron-down arrow-icon ${seguridadAbierto ? 'rotate' : ''}`}></i>
                     </div>
                     
-                    {/* Renderizado condicional: Solo se muestra si seguridadAbierto es true */}
                     {seguridadAbierto && (
-                        <div className="perfil-card" style={{ padding: '20px', background: '#fff', borderRadius: '12px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)', marginTop: '15px' }}>
-                            <h3 style={{ marginBottom: '15px', fontSize: '1.1rem', color: '#333' }}>Cambiar Contraseña</h3>
-                            
-                            <form onSubmit={handleCambiarContrasena} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                                    <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#555' }}>Contraseña Actual</label>
-                                    <input type="password" name="contrasenaActual" value={claves.contrasenaActual} onChange={handleClaveChange} required style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} />
+                        <div className="seguridad-body">
+                            <h3>Cambiar Contraseña</h3>
+                            <form onSubmit={handleCambiarContrasena} className="form-cambiar-clave">
+                                <div className="form-group">
+                                    <label>Contraseña Actual</label>
+                                    <input 
+                                        type="password" 
+                                        name="contrasenaActual" 
+                                        value={claves.contrasenaActual} 
+                                        onChange={handleClaveChange} 
+                                        required 
+                                    />
                                 </div>
-                                
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                                        <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#555' }}>Nueva Contraseña</label>
-                                        <input type="password" name="contrasenaNueva" value={claves.contrasenaNueva} onChange={handleClaveChange} required style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} />
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label>Nueva Contraseña</label>
+                                        <input 
+                                            type="password" 
+                                            name="contrasenaNueva" 
+                                            value={claves.contrasenaNueva} 
+                                            onChange={handleClaveChange} 
+                                            required 
+                                        />
                                     </div>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                                        <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#555' }}>Confirmar Nueva Contraseña</label>
-                                        <input type="password" name="confirmarNueva" value={claves.confirmarNueva} onChange={handleClaveChange} required style={{ padding: '10px', borderRadius: '6px', border: '1px solid #ccc' }} />
+                                    <div className="form-group">
+                                        <label>Confirmar Nueva Contraseña</label>
+                                        <input 
+                                            type="password" 
+                                            name="confirmarNueva" 
+                                            value={claves.confirmarNueva} 
+                                            onChange={handleClaveChange} 
+                                            required 
+                                        />
                                     </div>
                                 </div>
-
-                                <button type="submit" style={{ alignSelf: 'flex-start', background: '#ec5e2a', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', marginTop: '5px' }}>
-                                    Actualizar Contraseña
+                                <button type="submit" disabled={enviandoClave} className="btn-actualizar-clave">
+                                    {enviandoClave ? 'Actualizando...' : 'Actualizar Contraseña'}
                                 </button>
                             </form>
                         </div>
                     )}
                 </div>
 
+                {/* Sección Garaje */}
                 <div className="motos-section">
                     <h2 className="section-title">
                         <i className="fa-solid fa-motorcycle"></i> Mi Garaje
@@ -179,14 +195,14 @@ const PerfilUsuario = () => {
                     <div className="motos-grid">
                         {usuario?.motos && usuario.motos.length > 0 ? (
                             usuario.motos.map((moto, index) => (
-                                <div key={index} className="moto-card-premium">
+                                <div key={moto.id || index} className="moto-card-premium">
                                     <div className="moto-card-header">
                                         <span className="marca-tag">{moto.nombreMarca || 'Marca'}</span>
                                         <span className="cilindraje-tag">{moto.cilindraje} CC</span>
                                     </div>
                                     <h3 className="modelo-text">{moto.modelo}</h3>
                                     <div className="moto-card-footer">
-                                        <span className="estado-ok" style={{ color: '#ec5e2a', fontWeight: '600' }}>
+                                        <span className="estado-ok">
                                             <i className="fa-solid fa-hashtag"></i> Tu placa es: {moto.placa || 'N/A'}
                                         </span>
                                     </div>

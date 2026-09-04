@@ -5,9 +5,8 @@ import '../auth.css';
 const Login = () => {
     const navigate = useNavigate();
     const [errorMensaje, setErrorMensaje] = useState('');
-    const [vista, setVista] = useState('login'); // Vistas posibles: 'login', 'solicitar', 'resetear'
+    const [vista, setVista] = useState('login'); 
     
-    // Estados de los formularios
     const [credenciales, setCredenciales] = useState({ correo: '', contrasena: '' });
     const [correoRecuperacion, setCorreoRecuperacion] = useState('');
     const [resetDatos, setResetDatos] = useState({ token: '', nuevaContrasena: '' });
@@ -22,49 +21,43 @@ const Login = () => {
         setResetDatos(prev => ({ ...prev, [name]: value }));
     };
 
-    // ── 1. Login Normal ───────────────────────────────────
     const handleLogin = async (e) => {
-    e.preventDefault(); 
-    setErrorMensaje('');
-    try {
-        const response = await fetch("http://localhost:8080/api/usuarios/login", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(credenciales)
-        });
+        e.preventDefault(); 
+        setErrorMensaje('');
+        try {
+            const response = await fetch("http://localhost:8080/api/usuarios/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(credenciales)
+            });
 
-        if (response.ok) {
-            const usuario = await response.json();
-            console.log("Respuesta completa del servidor:", usuario);
-            
-            const idFinal = usuario.idUsuario || usuario.id || usuario.id_usuario;
+            if (response.ok) {
+                const usuario = await response.json();
+                const idFinal = usuario.idUsuario || usuario.id || usuario.id_usuario;
 
-            if (!idFinal) {
-                console.error("ERROR: El backend no envió un ID de usuario válido.");
+                localStorage.setItem('isAuthenticated', 'true'); 
+                localStorage.setItem("idUsuario", idFinal); 
+                localStorage.setItem("nombreUsuario", usuario.nombre);
+                localStorage.setItem("correoUsuario", usuario.correo);
+                localStorage.setItem('token', usuario.token); 
+                localStorage.setItem("rolUsuario", usuario.rol || 'USER'); 
+                
+                window.location.href = "/dashboard"; 
+
+            } else if (response.status === 404) {
+                const data = await response.json();
+                setErrorMensaje(data.mensaje); 
+            } else if (response.status === 401) {
+                const data = await response.json();
+                setErrorMensaje(data.mensaje); 
+            } else {
+                setErrorMensaje("Ocurrió un error al iniciar sesión.");
             }
-
-            localStorage.setItem('isAuthenticated', 'true'); 
-            localStorage.setItem("idUsuario", idFinal); 
-            localStorage.setItem("nombreUsuario", usuario.nombre);
-            localStorage.setItem("correoUsuario", usuario.correo || usuario.email || credenciales.correo || '');
-            localStorage.setItem('token', usuario.token); 
-            localStorage.setItem("rolUsuario", usuario.rol || 'USER'); 
-            
-            window.location.href = "/dashboard"; 
-        } else if (response.status === 404) {
-            const data = await response.json();
-            setErrorMensaje(data.mensaje || "Ese correo no está registrado");
-        } else if (response.status === 401) {
-            setErrorMensaje("Correo o contraseña incorrectos.");
-        } else {
-            setErrorMensaje("Ocurrió un error al iniciar sesión.");
+        } catch (error) {
+            setErrorMensaje("Error de conexión. Revisa que el servidor esté activo.");
         }
-    } catch (error) {
-        alert("Error de conexión. Revisa que el servidor esté activo.");
-    }
-};
+    };
 
-    // ── 2. Enviar Correo de Recuperación ──────────────────
     const handleSolicitarRecuperacion = async (e) => {
         e.preventDefault();
         try {
@@ -75,18 +68,24 @@ const Login = () => {
             });
 
             const data = await response.json();
+            
+            // Si el correo EXISTE y se envió el código (Código 200)
             if (response.ok) {
-                alert(data.mensaje || "Si el correo existe, recibirás las instrucciones.");
-                setVista('resetear'); // Saltamos al formulario del Token
+                alert(data.mensaje || "Código de recuperación enviado. Revisa tu correo.");
+                setVista('resetear'); 
+                
+            // Si el correo NO EXISTE en la BD (Código 404)
+            } else if (response.status === 404) {
+                alert(data.error || "Ese correo no está registrado en la base de datos.");
+                
             } else {
-                alert(data.error || "Ocurrió un error.");
+                alert(data.error || data.mensaje || "Ocurrió un error.");
             }
         } catch (error) {
             alert("Error de conexión al solicitar recuperación.");
         }
     };
 
-    // ── 3. Resetear Contraseña con Token ─────────────────
     const handleResetearContrasena = async (e) => {
         e.preventDefault();
         try {
@@ -102,9 +101,9 @@ const Login = () => {
             const data = await response.json();
             if (response.ok) {
                 alert(data.mensaje || "Contraseña restablecida correctamente.");
-                setVista('login'); // Volvemos al Login para que pruebe su nueva clave
+                setVista('login');
             } else {
-                alert(data.error || "Token inválido o expirado.");
+                alert(data.error || data.mensaje || "Token inválido o expirado.");
             }
         } catch (error) {
             alert("Error de conexión al restablecer contraseña.");
@@ -116,7 +115,6 @@ const Login = () => {
             <div className="auth-card">
                 <h2>Dilan Motos</h2>
                 
-                {/* ── VISITOR: LOGIN NORMAL ── */}
                 {vista === 'login' && (
                     <>
                         <p style={{ textAlign: 'center', color: '#666' }}>Inicia sesión para entrar al taller</p>
@@ -130,23 +128,23 @@ const Login = () => {
                                 <input className="auth-input" type="password" name="contrasena" value={credenciales.contrasena} onChange={handleChangeLogin} required />
                             </div>
 
-                                {errorMensaje && (
-                                    <p style={{ color: '#c0392b', textAlign: 'center', fontSize: '0.9rem', marginBottom: '10px' }}>
-                                        {errorMensaje.includes('no está registrado') ? (
-                                            <>
-                                                Ese correo no está registrado,{' '}
-                                                <span
-                                                    onClick={() => navigate('/register')}
-                                                    style={{ color: '#3b46d8', cursor: 'pointer', fontWeight: 'bold', textDecoration: 'underline' }}
-                                                >
-                                                    regístrate aquí
-                                                </span>
-                                            </>
-                                        ) : (
-                                            errorMensaje
-                                        )}
-                                    </p>
-                                )}
+                            {errorMensaje && (
+                                <p style={{ color: '#c0392b', textAlign: 'center', fontSize: '0.9rem', marginBottom: '10px' }}>
+                                    {errorMensaje.toLowerCase().includes('no está registrado') ? (
+                                        <>
+                                            Ese correo no está registrado en la base de datos,{' '}
+                                            <span
+                                                onClick={() => navigate('/register')}
+                                                style={{ color: '#3b46d8', cursor: 'pointer', fontWeight: 'bold', textDecoration: 'underline' }}
+                                            >
+                                                regístrate aquí
+                                            </span>
+                                        </>
+                                    ) : (
+                                        errorMensaje
+                                    )}
+                                </p>
+                            )}
 
                             <button type="submit" name="IniciarSesión" className="auth-btn-primary">Entrar al Sistema</button>
                             
@@ -162,7 +160,6 @@ const Login = () => {
                     </>
                 )}
 
-                {/* ── VISITOR: SOLICITAR RECUPERACIÓN ── */}
                 {vista === 'solicitar' && (
                     <>
                         <p style={{ textAlign: 'center', color: '#666' }}>Recuperar Contraseña</p>
@@ -182,7 +179,6 @@ const Login = () => {
                     </>
                 )}
 
-                {/* ── VISITOR: RESETEAR CON TOKEN ── */}
                 {vista === 'resetear' && (
                     <>
                         <p style={{ textAlign: 'center', color: '#666' }}>Restablecer Contraseña</p>

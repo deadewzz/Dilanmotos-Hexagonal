@@ -7,7 +7,7 @@ const Dashboard = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [user, setUser] = useState({ nombre: "Invitado", rol: "GUEST", id: null });
 
-    // ✅ Determinamos si hay alguien logueado
+    // Determinamos si hay un usuario logueado
     const isAuthenticated = !!localStorage.getItem('token');
 
     useEffect(() => {
@@ -29,44 +29,102 @@ const Dashboard = () => {
         <div className="dashboard-wrapper">
             <header className="dashboard-header">
                 <div className="header-container">
-                    <img 
-                        src="/LogoDilanMotos.png" 
-                        alt="Dilan Motos" 
-                        className="main-logo" 
-                        style={{cursor: 'pointer'}} 
-                        onClick={() => navigate('/dashboard')} 
-                    />
+                    
+                    {/* 🏍️ LOGO Y NOMBRE DE LA MARCA */}
+                    <div className="brand-logo-container" onClick={() => navigate('/dashboard')}>
+                        <img 
+                            src="/LogoDilanMotos.png" 
+                            alt="Logo Dilan Motos" 
+                            className="main-logo" 
+                        />
+                        <span className="brand-name">DilanMotos</span>
+                    </div>
                     
                     <div className="header-nav">
-                        <div className="user-trigger" onClick={() => setShowDropdown(!showDropdown)}>
+                        {/* 📱 BOTÓN DE DESCARGA APP MÓVIL */}
+                        <a 
+                            href={`${import.meta.env.BASE_URL}DilanMotos.apk`}
+                            download="DilanMotos.apk" 
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn-download-apk"
+                            title="Descargar Aplicación Móvil para Android"
+                        >
+                            <i className="fa-solid fa-mobile-screen-button"></i>
+                            <span>Descargar App</span>
+                        </a>
+
+                        {/* 👤 SECCIÓN DE USUARIO CON FLECHA ROTATIVA */}
+                        <div 
+                            className={`user-trigger ${showDropdown ? 'active' : ''}`}
+                            onClick={() => setShowDropdown(!showDropdown)}
+                        >
                             <img src="/iconoPerfil.png" alt="Perfil" className="nav-icon avatar" />
-                            <span>{user.nombre}</span>
+                            <span className="user-name">{user.nombre}</span>
+                            <i className="fa-solid fa-chevron-down dropdown-arrow"></i>
                         </div>
 
+                        {/* 📋 MENÚ DESPLEGABLE CON ICONOS */}
                         {showDropdown && (
-                            <ul className="dropdown-menu-custom shadow-lg">
+                            <ul className="dropdown-menu-custom">
                                 {isAuthenticated ? (
-                                    // 🔓 Opciones para usuarios LOGUEADOS
                                     <>
-                                        <li><Link to="/perfil">Mi Cuenta</Link></li>
-                                        <li><Link to="/asistente">Asistente IA</Link></li>
-                                        <li><Link to="/historial">Mi Historial</Link></li>
-                                        <li><Link to="/nueva-pqrs">Radicar PQRS</Link></li>
-                                        <li><Link to="/hacer-cotizacion">Hacer Cotización</Link></li>
+                                        <li>
+                                            <Link to="/perfil">
+                                                <i className="fa-regular fa-user"></i> Mi Cuenta
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link to="/asistente">
+                                                <i className="fa-solid fa-robot"></i> Asistente IA
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link to="/historial">
+                                                <i className="fa-solid fa-clock-rotate-left"></i> Mi Historial
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link to="/nueva-pqrs">
+                                                <i className="fa-regular fa-paper-plane"></i> Radicar PQRS
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link to="/hacer-cotizacion">
+                                                <i className="fa-solid fa-calculator"></i> Hacer Cotización
+                                            </Link>
+                                        </li>
+
                                         {user.rol === 'ADMIN' && (
                                             <>
                                                 <li className="divider"></li>
-                                                <li><Link to="/usuarios" className="admin-link">Gestión de Sistema</Link></li>
+                                                <li>
+                                                    <Link to="/usuarios" className="admin-link">
+                                                        <i className="fa-solid fa-shield-halved"></i> Panel de administración
+                                                    </Link>
+                                                </li>
                                             </>
                                         )}
+
                                         <li className="divider"></li>
-                                        <li><button onClick={handleLogout} className="logout-btn-custom">Cerrar Sesión</button></li>
+                                        <li>
+                                            <button onClick={handleLogout} className="logout-btn-custom">
+                                                <i className="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
+                                            </button>
+                                        </li>
                                     </>
                                 ) : (
-                                    // 🔒 Opciones para VISITANTES
                                     <>
-                                        <li><Link to="/login">Iniciar Sesión</Link></li>
-                                        <li><Link to="/register">Registrarse</Link></li>
+                                        <li>
+                                            <Link to="/login">
+                                                <i className="fa-solid fa-arrow-right-to-bracket"></i> Iniciar Sesión
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link to="/register">
+                                                <i className="fa-solid fa-user-plus"></i> Registrarse
+                                            </Link>
+                                        </li>
                                     </>
                                 )}
                             </ul>
@@ -77,15 +135,13 @@ const Dashboard = () => {
 
             <main className="dashboard-content">
                 <div className="hero-section text-center">
-                    <h1 style={{marginBottom: '20px', fontWeight: '800'}}>Mantenimiento Inteligente</h1>
-                    
-                    {/* El banner de IA puede ser público, pero el asistente real pedirá login */}
+                    <h1 style={{ marginBottom: '20px', fontWeight: '800' }}>Mantenimiento Inteligente</h1>
                     <Link to="/recomendaciones" className="promo-banner">
                         Ver Recomendaciones de la IA
                     </Link>
                 </div>
 
-                <h2 style={{margin: '40px 0 20px 0', fontWeight: '700'}}>Nuestros Productos</h2>
+                <h2 className="section-subtitle" style={{ margin: '40px 0 20px 0', fontWeight: '700' }}>Nuestros Productos</h2>
                 <div className="categories-grid">
                     <div className="category-item">
                         <div className="category-img"><img src="/KitDeArrastre.png" alt="Kits" /></div>
@@ -108,7 +164,7 @@ const Dashboard = () => {
             </main>
 
             <footer className="dashboard-footer">
-                <div className="btn-tech-support">Soporte Técnico: 300-XXX-XXXX</div>
+                <div className="btn-tech-support">Soporte Técnico: 301-353-6723</div>
             </footer>
         </div>
     );

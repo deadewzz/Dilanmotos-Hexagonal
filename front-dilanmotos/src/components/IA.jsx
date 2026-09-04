@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { useLocation } from 'react-router-dom'; 
+import { useLocation, useNavigate } from 'react-router-dom'; 
 import './AsistenteMotos.css';
+import './Dashboard.css';
 
 const AsistenteMotos = () => {
+    const navigate = useNavigate();
     const location = useLocation(); 
     const [pregunta, setPregunta] = useState('');
     const [cargando, setCargando] = useState(false);
@@ -38,12 +40,15 @@ const AsistenteMotos = () => {
                         if (location.state?.autoPrompt) {
                             dispararRecomendacionInicial(nombreMoto);
                         }
+                    } else {
+                        setModeloSeleccionado('Sin moto registrada');
                     }
                 } else if (res.status === 401) {
                     console.error("Sesión expirada");
                 }
             } catch (error) { 
-                console.error("Error cargando moto:", error); 
+                console.error("Error cargando moto:", error);
+                setModeloSeleccionado('No disponible');
             }
         };
         cargarMoto();
@@ -51,10 +56,10 @@ const AsistenteMotos = () => {
 
     const dispararRecomendacionInicial = (moto) => {
         const promoMsg = `✨ ¡Dame recomendaciones para mi ${moto}!`;
-        ejecutarConsulta(promoMsg, moto);
+        ejecutarConsulta(promoMsg);
     };
 
-    const ejecutarConsulta = async (texto, motoActual) => {
+    const ejecutarConsulta = async (texto) => {
         if (cargando || !texto.trim()) return;
 
         const nuevoMensaje = { rol: 'usuario', texto };
@@ -100,48 +105,74 @@ const AsistenteMotos = () => {
     }, [mensajes]);
 
     return (
-        <div className="chat-container">
-            <div className="chat-header">
-                <div className="avatar">CA</div>
-                <div className="header-info">
-                    <h2>Chanda AI</h2>
-                    <p><span className="status-dot"></span> Online - Dilan Motos</p>
+        <div className="dashboard-wrapper">
+            {/* HEADER UNIFICADO */}
+            <header className="dashboard-header">
+                <div className="header-container">
+                    <div className="brand-logo-container" onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>
+                        <img src="/LogoDilanMotos.png" alt="Logo Dilan Motos" className="main-logo" />
+                        <span className="brand-name">DilanMotos</span>
+                    </div>
+
+                    <div className="header-nav">
+                        <button 
+                            onClick={() => navigate('/dashboard')} 
+                            className="btn-download-apk" 
+                            style={{ background: 'rgba(255, 255, 255, 0.15)', boxShadow: 'none' }}
+                        >
+                            <i className="fa-solid fa-arrow-left"></i>
+                            <span>Volver al Inicio</span>
+                        </button>
+                    </div>
                 </div>
-            </div>
+            </header>
 
-            <div className="vehicle-selector">
-                <span>🏍️ Moto detectada:</span>
-                <strong style={{marginLeft: '10px', color: '#e74c3c'}}>{modeloSeleccionado}</strong>
-            </div>
-
-            <div className="chat-messages">
-                {mensajes.map((msg, index) => (
-                    <div key={index} className={`message-row ${msg.rol === 'usuario' ? 'user' : 'ia'}`}>
-                        <div className={`bubble ${msg.rol === 'usuario' ? 'user' : 'ia'}`}>
-                            <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.texto}</ReactMarkdown>
+            {/* CONTENEDOR DEL CHAT */}
+            <main className="dashboard-content" style={{ maxWidth: '900px', margin: '0 auto', width: '100%' }}>
+                <div className="chat-container">
+                    <div className="chat-header">
+                        <div className="avatar">CA</div>
+                        <div className="header-info">
+                            <h2>Chanda AI</h2>
+                            <p><span className="status-dot"></span> Online - Dilan Motos</p>
                         </div>
                     </div>
-                ))}
-                {cargando && (
-                    <div className="message-row ia">
-                        <div className="bubble ia pulse">Analizando los fierros...</div>
-                    </div>
-                )}
-                <div ref={mensajesFinRef} />
-            </div>
 
-            <div className="chat-input-area">
-                <form onSubmit={consultarIA}>
-                    <input 
-                        type="text" 
-                        value={pregunta} 
-                        onChange={e => setPregunta(e.target.value)} 
-                        placeholder="Ej: ¿Qué aceite me recomiendas?" 
-                        disabled={cargando}
-                    />
-                    <button type="submit" disabled={cargando || !pregunta.trim()}>Enviar</button>
-                </form>
-            </div>
+                    <div className="vehicle-selector">
+                        <span>🏍️ Moto detectada:</span>
+                        <strong style={{ marginLeft: '10px', color: '#e74c3c' }}>{modeloSeleccionado}</strong>
+                    </div>
+
+                    <div className="chat-messages">
+                        {mensajes.map((msg, index) => (
+                            <div key={index} className={`message-row ${msg.rol === 'usuario' ? 'user' : 'ia'}`}>
+                                <div className={`bubble ${msg.rol === 'usuario' ? 'user' : 'ia'}`}>
+                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.texto}</ReactMarkdown>
+                                </div>
+                            </div>
+                        ))}
+                        {cargando && (
+                            <div className="message-row ia">
+                                <div className="bubble ia pulse">Analizando los fierros...</div>
+                            </div>
+                        )}
+                        <div ref={mensajesFinRef} />
+                    </div>
+
+                    <div className="chat-input-area">
+                        <form onSubmit={consultarIA}>
+                            <input 
+                                type="text" 
+                                value={pregunta} 
+                                onChange={e => setPregunta(e.target.value)} 
+                                placeholder="Ej: ¿Qué aceite me recomiendas?" 
+                                disabled={cargando}
+                            />
+                            <button type="submit" disabled={cargando || !pregunta.trim()}>Enviar</button>
+                        </form>
+                    </div>
+                </div>
+            </main>
         </div>
     );
 };
